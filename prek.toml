@@ -1,0 +1,89 @@
+# Git hooks via prek: https://prek.j178.dev
+#:schema https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "https://github.com/pre-commit/pre-commit-hooks"
+rev = "v5.0.0"
+hooks = [
+  { id = "end-of-file-fixer" },
+  { id = "trailing-whitespace" },
+  { id = "check-merge-conflict" },
+  {
+    id = "check-added-large-files",
+    exclude = '^uv\.lock$'
+  },
+  { id = "check-yaml" },
+  { id = "check-toml" }
+]
+
+[[repos]]
+repo = "https://github.com/gitleaks/gitleaks"
+rev = "v8.21.0"
+hooks = [
+  { id = "gitleaks" }
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "fmt",
+    name = "fmt",
+    entry = "just fmt",
+    language = "system",
+    types = ["python"],
+    pass_filenames = false
+  },
+  {
+    id = "lint",
+    name = "lint",
+    entry = "just lint",
+    language = "system",
+    types = ["python"],
+    pass_filenames = false
+  },
+  {
+    id = "lint-style",
+    name = "lint-style",
+    entry = "just lint-style",
+    language = "system",
+    files = "^src/",
+    types = ["python"],
+    pass_filenames = false
+  },
+  {
+    id = "lint-slots",
+    name = "lint-slots",
+    entry = "just lint-slots",
+    language = "system",
+    files = "^src/",
+    types = ["python"],
+    pass_filenames = false
+  },
+  {
+    id = "lint-spelling",
+    name = "lint-spelling",
+    entry = "just lint-spelling",
+    language = "system",
+    files = "^src/",
+    types = ["python"],
+    pass_filenames = false
+  },
+  {
+    id = "fmt-pyproject",
+    name = "fmt-pyproject",
+    entry = "just fmt-pyproject",
+    language = "system",
+    files = '^pyproject\.toml$',
+    pass_filenames = false
+  },
+  {
+    id = "typecheck",
+    name = "typecheck",
+    entry = "just typecheck",
+    language = "system",
+    files = "^src/",
+    types = ["python"],
+    pass_filenames = false
+  }
+]

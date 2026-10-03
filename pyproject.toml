@@ -1,0 +1,240 @@
+[project]
+name = "observatory"
+version = "0.1.0"
+description = "FastAPI under a full observability stack: Loki, Tempo, VictoriaMetrics, Pyroscope, Alloy, Grafana, Faro"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+]
+dependencies = [
+    "fastapi>=0.142.0",
+    "granian>=2.8.4",
+    "gunicorn>=26.2.0",
+    "httpx>=0.28.1",
+    "hypercorn>=0.18.0",
+    "jinja2>=3.1.6",
+    "opentelemetry-api>=1.45.0",
+    "opentelemetry-exporter-otlp-proto-grpc>=1.45.0",
+    "opentelemetry-instrumentation-fastapi>=0.66b0",
+    "opentelemetry-instrumentation-httpx>=0.66b0",
+    "opentelemetry-instrumentation-sqlite3>=0.66b0",
+    "opentelemetry-instrumentation-system-metrics>=0.66b0",
+    "opentelemetry-resource-detector-containerid>=0.66b0",
+    "opentelemetry-sdk>=1.45.0",
+    "pydantic>=2.13.0",
+    "pydantic-settings>=2.15.0",
+    "pyroscope-io>=1.2.5",
+    "pyroscope-otel>=1.1.0",
+    "starlette>=1.7.0",
+    "uvicorn>=0.54.0",
+    "uvicorn-worker>=0.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "prek>=0.2",
+    { include-group = "fmt" },
+    { include-group = "lint" },
+    { include-group = "typing" },
+]
+fmt = [
+    "pyproject-fmt>=2.29.3",
+    "ruff>=0.16",
+]
+lint = [
+    "codespell>=2.4.3",
+    "flake8>=7.3",
+    "slotscheck>=0.20.1",
+    "typos>=1.50",
+    "wemake-python-styleguide>=1",
+]
+typing = [
+    "mypy>=1.11",
+    "types-gunicorn>=26.2.0.20260827",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+required-version = ">=0.16"
+target-version = "py312"
+line-length = 120
+src = [ "src" ]
+
+[tool.ruff.format]
+line-ending = "lf"
+docstring-code-format = true
+
+[tool.ruff.lint.per-file-ignores]
+"src/*.py" = [ "INP001" ]
+"src/dependencies.py" = [ "INP001", "TC001", "TC002", "TC003" ]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Cookie",
+    "fastapi.Depends",
+    "fastapi.File",
+    "fastapi.Form",
+    "fastapi.Header",
+    "fastapi.Path",
+    "fastapi.Query",
+    "fastapi.Security",
+]
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+runtime-evaluated-base-classes = [
+    "pydantic.BaseModel",
+    "pydantic_settings.BaseSettings",
+]
+runtime-evaluated-decorators = [
+    "fastapi.APIRouter.api_route",
+    "fastapi.APIRouter.delete",
+    "fastapi.APIRouter.get",
+    "fastapi.APIRouter.head",
+    "fastapi.APIRouter.options",
+    "fastapi.APIRouter.patch",
+    "fastapi.APIRouter.post",
+    "fastapi.APIRouter.put",
+    "fastapi.APIRouter.trace",
+    "fastapi.APIRouter.websocket",
+    "fastapi.FastAPI.api_route",
+    "fastapi.FastAPI.delete",
+    "fastapi.FastAPI.exception_handler",
+    "fastapi.FastAPI.get",
+    "fastapi.FastAPI.head",
+    "fastapi.FastAPI.middleware",
+    "fastapi.FastAPI.options",
+    "fastapi.FastAPI.patch",
+    "fastapi.FastAPI.post",
+    "fastapi.FastAPI.put",
+    "fastapi.FastAPI.trace",
+    "fastapi.FastAPI.websocket",
+    "pydantic.validate_call",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-args = 12
+max-positional-args = 5
+
+[tool.ruff.lint]
+select = [
+    "A",
+    "AIR",
+    "ARG",
+    "ASYNC",
+    "B",
+    "C4",
+    "C90",
+    "D",
+    "DTZ",
+    "E",
+    "EM",
+    "ERA",
+    "EXE",
+    "F",
+    "FA",
+    "FAST",
+    "FBT",
+    "FLY",
+    "FURB",
+    "G",
+    "I",
+    "ICN",
+    "INP",
+    "INT",
+    "ISC",
+    "LOG",
+    "N",
+    "PERF",
+    "PGH",
+    "PIE",
+    "PL",
+    "PT",
+    "PTH",
+    "PYI",
+    "RET",
+    "RSE",
+    "RUF",
+    "S",
+    "SIM",
+    "SLF",
+    "SLOT",
+    "T20",
+    "TC",
+    "TID",
+    "TRY",
+    "UP",
+    "W",
+]
+ignore = [
+    "D100",
+    "D104",
+    "D106",
+    "E501",
+    "EM101",
+    "EM102",
+    "TRY003",
+]
+extend-safe-fixes = [ "TC" ]
+external = [ "WPS" ]
+future-annotations = true
+typing-extensions = false
+
+[tool.codespell]
+skip = "./.venv,*.lock,__pycache__"
+
+[tool.pyproject-fmt]
+column_width = 120
+indent = 4
+keep_full_version = true
+table_format = "long"
+sub_table_spacing = "\n"
+
+[tool.typos.files]
+extend-exclude = [ ".venv", "*.lock", "__pycache__" ]
+
+[tool.mypy]
+mypy_path = [ "src" ]
+explicit_package_bases = true
+python_version = "3.12"
+disallow_any_unimported = true
+warn_unreachable = true
+enable_error_code = [
+    "deprecated",
+    "exhaustive-match",
+    "explicit-override",
+    "ignore-without-code",
+    "possibly-undefined",
+    "redundant-expr",
+    "redundant-self",
+    "truthy-bool",
+    "truthy-iterable",
+    "unimported-reveal",
+    "unused-awaitable",
+]
+extra_checks = true
+strict_equality_for_none = true
+strict = true
+pretty = true
+plugins = [ "pydantic.mypy" ]
+
+[[tool.mypy.overrides]]
+module = [ "pyroscope.*" ]
+ignore_missing_imports = true
+
+[tool.slotscheck]
+strict-imports = true
+
