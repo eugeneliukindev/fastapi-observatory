@@ -1,0 +1,68 @@
+# Loki as a single process with data on the container disk: for an example, not for load.
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+  log_level: info
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+schema_config:
+  configs:
+    - from: 2024-01-01
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+limits_config:
+  # Trace and request keys arrive as structured metadata, not labels.
+  allow_structured_metadata: true
+  volume_enabled: true
+  retention_period: 14d
+  # Logs Drilldown: levels from the `lvl` label and volume charts by line patterns.
+  discover_log_levels: true
+  metric_aggregation_enabled: true
+
+compactor:
+  working_directory: /loki/compactor
+  retention_enabled: true
+  delete_request_store: filesystem
+
+# Line patterns for Logs Drilldown.
+pattern_ingester:
+  enabled: true
+  metric_aggregation:
+    loki_address: localhost:3100
+
+query_range:
+  # Off by default: without it the cache below is never used.
+  cache_results: true
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+frontend:
+  encoding: protobuf
+
+# Loki's own spans would land among the application's traces and in its service graph.
+tracing:
+  enabled: false
+
+analytics:
+  reporting_enabled: false

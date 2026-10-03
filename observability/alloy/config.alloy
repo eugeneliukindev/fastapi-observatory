@@ -1,0 +1,319 @@
+logging {
+  level  = "info"
+  format = "logfmt"
+}
+
+// What flows through each component, live, in the UI at 127.0.0.1:12345.
+livedebugging {
+  enabled = true
+}
+
+// ─── OTLP from our processes ──────────────────────────────────────────────────────────
+
+otelcol.receiver.otlp "apps" {
+  grpc { endpoint = "0.0.0.0:4317" }
+  http { endpoint = "0.0.0.0:4318" }
+
+  output {
+    metrics = [otelcol.processor.memory_limiter.apps.input]
+    traces  = [otelcol.processor.memory_limiter.apps.input]
+  }
+}
+
+// First in line: under memory pressure the collector refuses data instead of being killed.
+otelcol.processor.memory_limiter "apps" {
+  check_interval = "1s"
+  limit          = "512MiB"
+
+  output {
+    metrics = [otelcol.exporter.prometheus.victoriametrics.input]
+    traces  = [otelcol.connector.servicegraph.edges.input, otelcol.exporter.otlp.tempo.input]
+  }
+}
+
+// Batching happens here, in the exporter's queue; metrics are batched by prometheus.remote_write.
+otelcol.exporter.otlp "tempo" {
+  client {
+    endpoint = "tempo:4317"
+    tls { insecure = true }
+  }
+
+  sending_queue {
+    enabled       = true
+    num_consumers = 10
+    queue_size    = 1000
+
+    batch {
+      flush_timeout = "200ms"
+      min_size      = 2000
+      max_size      = 4000
+    }
+  }
+
+  // Tempo down for up to five minutes loses nothing still in the queue.
+  retry_on_failure {
+    enabled          = true
+    initial_interval = "5s"
+    max_interval     = "30s"
+    max_elapsed_time = "5m"
+  }
+}
+
+// How an OTLP metric becomes a Prometheus series here:
+//   name             `.` → `_`, plus the unit and `_total` for counters:
+//                    http.server.request.duration (s) → http_server_request_duration_seconds
+//   job              resource service.name (service.namespace/service.name when a namespace is set)
+//   instance         resource service.instance.id
+//   other labels     the data point's attributes, `.` → `_`
+//   otel_scope_*     the instrumentation scope's name and version
+//   target_info      one series per resource, labelled with its other attributes, joined on job
+//                    and instance
+// https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.exporter.prometheus/
+// https://opentelemetry.io/docs/specs/otel/compatibility/prometheus_and_openmetrics/#otlp-metric-points-to-prometheus
+otelcol.exporter.prometheus "victoriametrics" {
+  add_metric_suffixes              = true
+  include_target_info              = true
+  // TODO: no scope labels until grafana/alloy#6787 is released — v1.20.1 ignores this option.
+  include_scope_labels             = true
+  include_scope_info               = false
+  resource_to_telemetry_conversion = false
+  forward_to                       = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+// Who calls whom, from pairs of client and server spans. A peer without server spans becomes a
+// virtual node, named by the client span's attributes below.
+otelcol.connector.servicegraph "edges" {
+  database_name_attributes     = ["db.system.name"]
+  virtual_node_peer_attributes = ["peer.service", "db.system.name", "server.address"]
+  virtual_node_extra_label     = true
+  latency_histogram_buckets    = ["5ms", "10ms", "25ms", "50ms", "100ms", "250ms", "500ms", "1s", "2.5s", "5s"]
+  metrics_flush_interval       = "15s"
+
+  store {
+    ttl       = "10s"
+    max_items = 10000
+  }
+
+  output {
+    metrics = [otelcol.exporter.prometheus.victoriametrics.input]
+  }
+}
+
+// ─── Faro from the browser ────────────────────────────────────────────────────────────
+
+faro.receiver "web" {
+  server {
+    listen_address       = "0.0.0.0"
+    listen_port          = 12347
+    // The page on port 8000 under any host name: localhost, 127.0.0.1 or an alias from /etc/hosts.
+    // A host missing here gets a preflight answer without Access-Control-Allow-Origin, the browser
+    // drops the telemetry, and the API span is left with a parent that never arrives.
+    cors_allowed_origins = ["http://*:8000"]
+
+    // The page is public: a runaway or hostile one is cut off with 429 and 413.
+    max_allowed_payload_size = "5MiB"
+
+    rate_limiting {
+      enabled    = true
+      strategy   = "global"
+      rate       = 50
+      burst_size = 100
+    }
+  }
+
+  // The page has no source maps: its scripts are not minified anyway.
+  sourcemaps { download = false }
+
+  // JSON, not logfmt: one parser for every line.
+  log_format = "json"
+  extra_log_labels = {
+    service_name = "web",
+    source       = "faro",
+  }
+
+  output {
+    logs   = [loki.process.faro_lines.receiver]
+    traces = [otelcol.processor.memory_limiter.apps.input]
+  }
+}
+
+// Only Faro logs carry a level, in their `level` field; events and measurements get `info`,
+// exceptions `error` — otherwise Loki shows them as `unknown`. The label is `lvl`, as on process lines.
+loki.process "faro_lines" {
+  // Only the page's own HTTP calls carry a trace; every line carries its session.
+  stage.json {
+    expressions = {
+      lvl        = "level",
+      kind       = "kind",
+      trace_id   = "traceID",
+      span_id    = "spanID",
+      session_id = "session_id",
+    }
+  }
+
+  stage.structured_metadata {
+    values = {
+      trace_id   = "",
+      span_id    = "",
+      session_id = "",
+    }
+  }
+
+  stage.template {
+    source   = "lvl"
+    template = `{{ if .lvl }}{{ .lvl }}{{ else if eq .kind "exception" }}error{{ else }}info{{ end }}`
+  }
+
+  stage.labels {
+    values = { lvl = "" }
+  }
+
+  forward_to = [loki.write.loki.receiver]
+}
+
+// ─── container output → Loki ──────────────────────────────────────────────────────────
+
+discovery.docker "containers" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "15s"
+
+  // Only this example's containers: other ones may live on the machine too.
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=observatory"]
+  }
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.relabel.containers.output
+  relabel_rules = discovery.relabel.containers.rules
+  forward_to    = [loki.process.json_lines.receiver]
+}
+
+// Trace and request keys go into structured metadata, not labels: a label per `trace_id` would
+// create a stream per request. A line that is not a JSON object passes through as is.
+loki.process "json_lines" {
+  stage.json {
+    expressions = {
+      ts         = "ts",
+      lvl        = "lvl",
+      trace_id   = "trace_id",
+      span_id    = "span_id",
+      request_id = "request_id",
+    }
+  }
+
+  // The time the process wrote the line, not the time Docker read it.
+  stage.timestamp {
+    source = "ts"
+    format = "RFC3339"
+  }
+
+  stage.structured_metadata {
+    values = {
+      trace_id   = "",
+      span_id    = "",
+      request_id = "",
+    }
+  }
+
+  // The level as a label: it has five values, and it is what lines are filtered by most often.
+  stage.labels {
+    values = { lvl = "" }
+  }
+
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.write "loki" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+}
+
+// ─── scraped metrics → VictoriaMetrics ────────────────────────────────────────────────
+
+// Scrape any container that asks with labels, like annotations in Kubernetes:
+//
+//   prometheus.io/scrape: "true"     whether to scrape
+//   prometheus.io/port:   "3100"     the port serving metrics
+//   prometheus.io/path:   "/metrics" the path; /metrics by default
+discovery.relabel "scraped" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_prometheus_io_scrape"]
+    regex         = "true"
+    action        = "keep"
+  }
+
+  // The address in the container network, not the port published to the host.
+  rule {
+    source_labels = ["__meta_docker_network_ip", "__meta_docker_container_label_prometheus_io_port"]
+    separator     = ":"
+    target_label  = "__address__"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_prometheus_io_path"]
+    regex         = "(.+)"
+    target_label  = "__metrics_path__"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "job"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "instance"
+  }
+}
+
+// A target per open container port collapses into one: after relabelling their labels match.
+prometheus.scrape "services" {
+  targets         = discovery.relabel.scraped.output
+  scrape_interval = "15s"
+  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
+}
+
+prometheus.remote_write "victoriametrics" {
+  endpoint {
+    url = "http://victoriametrics:8428/api/v1/write"
+  }
+}
+
+// ─── profiles → Pyroscope ─────────────────────────────────────────────────────────────
+
+// The native Pyroscope protocol, not OTLP.
+pyroscope.receive_http "apps" {
+  http {
+    listen_address = "0.0.0.0"
+    listen_port    = 4040
+  }
+  forward_to = [pyroscope.write.pyroscope.receiver]
+}
+
+pyroscope.write "pyroscope" {
+  endpoint {
+    url = "http://pyroscope:4040"
+  }
+}

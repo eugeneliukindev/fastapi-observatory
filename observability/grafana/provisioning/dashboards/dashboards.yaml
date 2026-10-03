@@ -1,0 +1,12 @@
+# Dashboards live in files: a Grafana started from scratch shows what is in the repository.
+apiVersion: 1
+
+providers:
+  - name: observatory
+    orgId: 1
+    type: file
+    disableDeletion: true
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /etc/grafana/dashboards

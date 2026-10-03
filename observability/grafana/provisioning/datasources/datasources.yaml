@@ -1,0 +1,98 @@
+# Data sources are provisioned from a file: a Grafana started from scratch can jump between logs,
+# traces, profiles and metrics right away.
+#
+# Dollars are doubled: Grafana substitutes environment variables into this file, and `${__span.traceId}`
+# without doubling would silently turn into nothing.
+apiVersion: 1
+
+datasources:
+  - uid: victoriametrics
+    name: VictoriaMetrics
+    type: prometheus
+    access: proxy
+    url: http://victoriametrics:8428
+    isDefault: true
+    jsonData:
+      timeInterval: 15s
+      prometheusType: Prometheus
+      manageAlerts: false
+
+  - uid: loki
+    name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      maxLines: 1000
+      # From a log line to its trace. A structured metadata field, not a text match.
+      derivedFields:
+        - name: trace_id
+          matcherType: label
+          matcherRegex: trace_id
+          datasourceUid: tempo
+          url: "$${__value.raw}"
+          urlDisplayLabel: Open trace
+        - name: request_id
+          matcherType: label
+          matcherRegex: request_id
+          datasourceUid: loki
+          url: '{service_name=~".+"} | request_id="$${__value.raw}"'
+          urlDisplayLabel: All lines of this request
+        - name: session_id
+          matcherType: label
+          matcherRegex: session_id
+          datasourceUid: tempo
+          url: '{span.session.id="$${__value.raw}"}'
+          urlDisplayLabel: Traces of this browser session
+
+  - uid: tempo
+    name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      # Streaming adds a "Streaming Progress" frame to every result: useful in Explore, but on a
+      # dashboard it turns each trace table into a frame switcher.
+      streamingEnabled:
+        search: false
+        metrics: false
+      # From a span to every log line of its trace, across all services at once.
+      tracesToLogsV2:
+        datasourceUid: loki
+        spanStartTimeShift: -5m
+        spanEndTimeShift: 5m
+        customQuery: true
+        query: '{service_name=~".+"} | trace_id="$${__span.traceId}"'
+      # From a span to its profile.
+      tracesToProfiles:
+        datasourceUid: pyroscope
+        profileTypeId: process_cpu:cpu:nanoseconds:cpu:nanoseconds
+        customQuery: false
+        tags:
+          - key: service.name
+            value: service_name
+      # From a span to the metrics of its operation.
+      tracesToMetrics:
+        datasourceUid: victoriametrics
+        spanStartTimeShift: -10m
+        spanEndTimeShift: 10m
+        tags:
+          - key: service.name
+            value: service
+        queries:
+          - name: Rate of this operation
+            query: 'sum(rate(traces_spanmetrics_calls_total{$$__tags, span_name="$${__span.name}"}[$$__rate_interval]))'
+          - name: P95 of this operation
+            query: 'histogram_quantile(0.95, sum by (le) (rate(traces_spanmetrics_latency_bucket{$$__tags, span_name="$${__span.name}"}[$$__rate_interval])))'
+      serviceMap:
+        datasourceUid: victoriametrics
+      nodeGraph:
+        enabled: true
+      search:
+        hide: false
+
+  - uid: pyroscope
+    name: Pyroscope
+    type: grafana-pyroscope-datasource
+    access: proxy
+    url: http://pyroscope:4040
