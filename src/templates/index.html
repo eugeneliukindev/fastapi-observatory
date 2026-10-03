@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>observatory</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="{{ url_for('static', path='app.css') }}">
+  <script src="https://unpkg.com/@grafana/faro-web-sdk@2.12.1/dist/bundle/faro-web-sdk.iife.js"></script>
+  <script src="https://unpkg.com/@grafana/faro-web-tracing@2.12.1/dist/bundle/faro-web-tracing.iife.js"></script>
+  <script>
+    window.FARO_URL = {{ faro_url | tojson }};
+    window.ENVIRONMENT = {{ environment | tojson }};
+  </script>
+  <script src="{{ url_for('static', path='app.js') }}" defer></script>
+</head>
+<body>
+  <h1>observatory</h1>
+  <p class="hint">
+    Every button is a request traced from the browser through the API to the cache, SQLite and
+    JSONPlaceholder. Look at it in Grafana: <a href="http://localhost:3000">localhost:3000</a>.
+  </p>
+  <section>
+    <button data-action="read post" data-path="/api/posts/1">Post 1: cache → JSONPlaceholder → SQLite</button>
+    <button data-action="build report" data-path="/api/report/3">Report on post 3: everything at once</button>
+    <button data-action="list posts" data-path="/api/posts">Recent posts from SQLite</button>
+    <button data-action="add post" data-path="/api/posts" data-method="POST">Add a post: a request with a body</button>
+    <button data-action="burn cpu" data-path="/api/cpu?below=400000">Burn the CPU</button>
+    <button data-action="read missing post" data-path="/api/posts/1000">Missing post: 404</button>
+    <button data-action="fail on server" data-path="/api/fail">Server failure: 500</button>
+    <button id="throw">Throw an error in the browser</button>
+  </section>
+  <pre id="output">…</pre>
+</body>
+</html>

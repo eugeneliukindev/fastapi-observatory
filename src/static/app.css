@@ -1,0 +1,44 @@
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 52rem;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  color: #222;
+}
+
+h1 {
+  font-size: 1.4rem;
+}
+
+p.hint {
+  color: #666;
+}
+
+section {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+}
+
+button {
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  text-align: left;
+  border: 1px solid #ccc;
+  border-radius: 0.4rem;
+  background: #fafafa;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #f0f0f0;
+}
+
+pre {
+  background: #111;
+  color: #ddd;
+  padding: 1rem;
+  border-radius: 0.4rem;
+  min-height: 8rem;
+  overflow: auto;
+}
