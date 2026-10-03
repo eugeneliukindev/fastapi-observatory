@@ -1,0 +1,458 @@
+<div align="center">
+
+# 🔭 otel-observatory
+
+**A FastAPI service under a full observability stack — metrics · logs · traces · profiles · browser — in one `docker compose up`.**
+
+![Python](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.142-009688?logo=fastapi&logoColor=white)
+![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-1.45-425CC7?logo=opentelemetry&logoColor=white)
+![Grafana](https://img.shields.io/badge/Grafana-13.2-F46800?logo=grafana&logoColor=white)
+![VictoriaMetrics](https://img.shields.io/badge/VictoriaMetrics-1.153-621773?logo=victoriametrics&logoColor=white)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
+[Quick start](#-quick-start) · [Architecture](#-architecture) · [Dashboard](#-dashboard) ·
+[Signal to signal](#-from-signal-to-signal) · [Servers](#-servers) · [Logging](#-logging) ·
+[Metrics](#-metrics) · [Configuration](#-configuration) · [Development](#-development)
+
+![The dashboard](docs/screenshots/01-dashboard-overview.png)
+
+</div>
+
+The handlers have no business logic: they only touch what shows up in Grafana — an in-memory
+cache, SQLite, an external API ([JSONPlaceholder](https://jsonplaceholder.typicode.com)) and the
+CPU. One application, four servers: **Gunicorn · Uvicorn · Hypercorn · Granian**.
+
+## 🚀 Quick start
+
+Needs Docker and [just](https://just.systems); [uv](https://docs.astral.sh/uv/) only to work on the
+code.
+
+```sh
+just up        # docker compose up --build -d
+just traffic   # RATE=10 DURATION=60 just traffic
+```
+
+| what | where |
+|---|---|
+| 🐍 the page, the API, `/docs` | http://localhost:8000 |
+| 📊 Grafana, no login | http://localhost:3000 |
+| 🔀 Alloy: components, live debugging | http://localhost:12345 |
+
+> [!TIP]
+> Every button on the page is a trace that starts in the browser. `just down -v` wipes the data;
+> `just run granian` runs the application outside Docker against the running stack.
+
+![The application's page](docs/screenshots/00-page.png)
+
+## 🧭 Architecture
+
+```mermaid
+flowchart LR
+    subgraph sources["Sources"]
+        direction TB
+        browser["🌐 Browser<br/>Faro SDK"]
+        api["🐍 api<br/>a server and its workers"]
+        docker[("🐳 Docker<br/>container stdout")]
+    end
+
+    alloy{{"Alloy<br/>the only collector"}}
+
+    subgraph storage["Storage"]
+        direction TB
+        vm[("VictoriaMetrics<br/>metrics")]
+        loki[("Loki<br/>logs")]
+        tempo[("Tempo<br/>traces")]
+        pyroscope[("Pyroscope<br/>profiles")]
+    end
+
+    grafana["📊 Grafana"]
+
+    api -- "OTLP: traces, metrics<br/>CPU profiles" --> alloy
+    api -- "JSON lines" --> docker
+    docker -- "logs" --> alloy
+    browser -- "Faro: logs, errors,<br/>Web Vitals, spans" --> alloy
+    alloy --> vm & loki & tempo & pyroscope
+    tempo -. "span metrics" .-> vm
+    storage --> grafana
+```
+
+| signal | from the process | through Alloy | stored in |
+|---|---|---|---|
+| 📈 metrics | OTLP gRPC every 15 s, each worker its own `service.instance.id` | `otelcol.receiver.otlp` → Prometheus model | VictoriaMetrics, 14 days |
+| 📜 logs | one JSON object per line on stdout; the browser's through Faro | `loki.source.docker` · `faro.receiver`: `lvl` a label, ids structured metadata | Loki |
+| 🧵 traces | OTLP gRPC; the browser's through Faro | `otelcol.receiver.otlp` · `faro.receiver` | Tempo, 3 days |
+| 🔥 profiles | Pyroscope SDK, samples tagged with the root span | `pyroscope.receive_http` | Pyroscope |
+
+> [!NOTE]
+> A memory limiter is first in Alloy's line: under pressure it refuses data instead of the
+> collector being killed. Tempo derives span metrics and Alloy the service graph, both written to
+> VictoriaMetrics.
+
+## 📊 Dashboard
+
+**FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
+service, routes, method and thresholds are variables. A series on the route, status code and
+exception panels links to its traces or log lines — click it.
+
+The order is the order of an investigation: is the service fine, which requests suffer, why, and
+the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
+
+| group | row | what |
+|---|---|---|
+| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · latency heatmap · routes with their trend, requests, 5xx, mean, P95 and P99 |
+| SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days · availability against the objective · budget left over time · burn rate over 5 m, 1 h, 6 h and 1 d |
+| Requests | Traffic | RPS total, against the same hour yesterday · by route |
+| | Status codes | every route and code on one graph, coloured by class, errors thicker · RPS by code · 5xx ratio by route over time |
+| | Exceptions | by type and route · each message with its type, route and count — from the log |
+| | Latency | P50 · P95 · P99, P95 against yesterday · P95 by route with exemplars, from the traces |
+| | Payload, collapsed | bytes per second · request and response size |
+| Runtime | Workers | request share against an even split · P95 · in flight, stacked · CPU against one core · involuntary context switches · lifetimes · workers replaced |
+| | Process, collapsed | memory · threads · open files · GC per worker |
+| | Profiling, collapsed | flame graph |
+| Traces & logs | Traces | recent, slow and failed traces |
+| | Logs | lines by level · the stream |
+
+Every number has one place: a route's mean and percentiles are columns of the routes table, in
+flight is one stack by worker, CPU over time is the workers' panel and not the profile's.
+
+Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
+target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn rate turns red at
+3.36× over 1 h and 1.4× over 6 h — the pace that spends 2% and 5% of a 7-day budget in that window.
+`just traffic` fails about 5% of requests on purpose, so the budget runs out.
+
+A worker is a process: with the GIL it gets about one core, so the CPU panel is in fractions of one
+core, not of the machine. One worker slower than the others, busier on CPU and preempted more often
+points at a request that hogs it, not at the service as a whole. Workers replaced counts the workers
+seen over the range that are gone now — a crash, a recycle, or one Gunicorn killed for missing its
+30-second heartbeat; on a calm service it stays at zero.
+
+<details open>
+<summary><b>SLO</b></summary>
+
+![SLO](docs/screenshots/15-dashboard-slo.png)
+</details>
+
+<details>
+<summary><b>Requests</b></summary>
+
+![Traffic](docs/screenshots/19-dashboard-traffic.png)
+![Status codes and exceptions](docs/screenshots/04-dashboard-errors.png)
+![Latency](docs/screenshots/02-dashboard-latency.png)
+![Payload](docs/screenshots/03-dashboard-payload.png)
+</details>
+
+<details open>
+<summary><b>Runtime</b></summary>
+
+![Workers](docs/screenshots/18-dashboard-workers.png)
+![Process](docs/screenshots/16-dashboard-process.png)
+![Profiling](docs/screenshots/07-dashboard-profiling.png)
+</details>
+
+<details>
+<summary><b>Traces & logs</b></summary>
+
+![Traces](docs/screenshots/05-dashboard-traces.png)
+![Logs](docs/screenshots/06-dashboard-logs.png)
+</details>
+
+## 🔗 From signal to signal
+
+```mermaid
+flowchart LR
+    L["📜 Logs<br/>Loki"]
+    T["🧵 Traces<br/>Tempo"]
+    P["🔥 Profiles<br/>Pyroscope"]
+    M["📈 Metrics<br/>VictoriaMetrics"]
+
+    L -- "trace_id · session_id" --> T
+    T -- "Logs for this span" --> L
+    T -- "Profiles for this span" --> P
+    T -- "span metrics: rate · P95" --> M
+    M -. "exemplars · panel links" .-> T
+    M -. "panel links" .-> L
+```
+
+| from | to | how |
+|---|---|---|
+| a log line, the browser's included | its trace · every line of its request | `trace_id` · `request_id` in structured metadata |
+| a browser line | every trace of that browser session | `session_id` → `{span.session.id="…"}` |
+| a request key from a header or a complaint | its trace | `{span.http.response.header.x_request_id="…"}` |
+| a route on a latency or traffic panel | its traces · its slow traces | panel link → TraceQL with the route and the `Slow trace` threshold |
+| a route on the 4xx / 5xx panels | its failed traces | panel link → TraceQL with the status |
+| an exception type | its log lines | panel link → LogQL with `error_type` |
+| a span | its logs · its CPU profile · the rate and P95 of its operation | Tempo data source links |
+
+**① A log line** links its trace and every line of its request.
+
+![A log line and its links](docs/screenshots/08-log-to-trace.png)
+
+**② The line and its trace**, side by side — this one started with a click in the page.
+
+![The log line and its trace](docs/screenshots/09-log-and-trace.png)
+
+**③ A span** links its logs, its profile and the metrics of its operation.
+**④ Its profile** is the CPU of exactly that request.
+
+> [!NOTE]
+> Span profiles label samples by thread. A request that holds the event loop, like `/api/cpu`,
+> gets a profile of its own; requests interleaving on the loop may share one.
+
+<p>
+<img src="docs/screenshots/10-span-links.png" width="54%" alt="The links of a span">
+<img src="docs/screenshots/11-span-profile.png" width="44%" alt="The CPU profile of one request">
+</p>
+
+**⑤ A dot on the latency panel** opens its trace. **⑥ The service graph** is drawn from client and
+server spans.
+
+<p>
+<img src="docs/screenshots/14-exemplar.png" width="62%" alt="An exemplar on the latency panel">
+<img src="docs/screenshots/13-service-graph.png" width="36%" alt="The service graph">
+</p>
+
+A click on **Report on post 3** is one trace — the browser, the API, the cache, JSONPlaceholder,
+SQLite and the CPU work:
+
+```mermaid
+sequenceDiagram
+    participant B as Browser (Faro)
+    participant M as AccessMiddleware
+    participant H as build_report
+    participant C as MemoryCache
+    participant J as JSONPlaceholder
+    participant S as SQLite
+
+    B->>M: GET /api/report/3 + traceparent
+    M->>H: handle, in the server span
+    par the post
+        H->>C: cache get (miss)
+        H->>J: GET /posts/3
+        H->>S: INSERT
+        H->>C: cache set
+    and its comments
+        H->>J: GET /posts/3/comments
+    end
+    H->>H: count primes (profiled)
+    H-->>M: 200
+    M->>M: log line with trace_id
+    M-->>B: 200 + x-request-id
+```
+
+![A trace of GET /api/report/{post_id}](docs/screenshots/12-trace.png)
+
+| handler | the trace shows |
+|---|---|
+| `GET /api/posts/{id}` | cache → on a miss JSONPlaceholder → `INSERT` → cache |
+| `GET /api/posts` | a `SELECT` |
+| `POST /api/posts` | an `INSERT` — the only request with a body |
+| `GET /api/cpu?below=N` | `count primes` and its profile |
+| `GET /api/report/{id}` | all of the above, the fetches in parallel |
+| `GET /api/posts/1000` | a 404 from the source |
+| `GET /api/fail` | a 500: the exception on the span, the stack in the log |
+
+## 💻 Servers
+
+`OBSERVATORY__SERVER__KIND` picks the server; every one implements `servers.Server` and loads the
+same factory, `app:create_app`, in each process that serves.
+
+| server | workers | process model | a worker killed with `SIGKILL` |
+|---|---|---|---|
+| **Gunicorn** + uvicorn-worker | forked by the master | inherits memory, not threads | replaced |
+| **Uvicorn** | spawned by a supervisor | a new interpreter | replaced |
+| **Hypercorn** | spawned by a master | a new interpreter | ⚠️ the server stops |
+| **Granian** | spawned by a master | a new interpreter | replaced |
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant M as master / supervisor
+    participant W as each serving process
+
+    M->>M: Settings() · configure_logging()
+    M->>M: prepare_database() — once
+    M->>W: fork or spawn
+    Note over W: forked: memory without threads<br/>spawned: nothing at all
+    W->>W: create_app(): logging · tracing · metrics · profiling
+    W->>W: open SQLite, serve
+```
+
+> [!IMPORTANT]
+> `create_app()` assumes nothing set up before it, so the same code works forked and spawned.
+> Telemetry starts threads, and a thread does not survive a fork — that is why Gunicorn's
+> `preload_app` stays off: with it, profiles are lost and Python warns about forking a
+> multi-threaded process.
+
+**Checked** — each server with two workers, the same traffic:
+
+| | Gunicorn | Uvicorn | Hypercorn | Granian |
+|---|:-:|:-:|:-:|:-:|
+| requests served | ✅ | ✅ | ✅ | ✅ |
+| every log line JSON | ✅ | ✅ | ✅ | ✅ |
+| access lines with `trace_id` | ✅ | ✅ | ✅ | ✅ |
+| workers sending telemetry | 2 | 2 | 2 | 2 |
+| process metrics | ✅ | ✅ | ✅ | ✅ |
+| traces and profiles | ✅ | ✅ | ✅ | ✅ |
+
+## 📜 Logging
+
+```mermaid
+flowchart LR
+    record["logger.info('post created',<br/>extra={'post_id': 8})"]
+    factory["record factory<br/>+ request_id · trace_id · span_id"]
+    fmt["JSON formatter<br/>on the root's handler"]
+    out["stdout"]
+    alloy["Alloy<br/>lvl → label<br/>ids → structured metadata"]
+    loki[("Loki")]
+    record --> factory --> fmt --> out --> alloy --> loki
+```
+
+```json
+{"ts":"2026-10-03T10:19:44.631+00:00","lvl":"INFO","msg":"HTTP request handled","logger":"observatory","caller":"middleware:_write:80","request_id":"7cefc9e7…","trace_id":"ef23e199…","span_id":"…","method":"GET","path":"/api/posts/3","route":"/api/posts/{post_id}","status":200,"duration_ms":297}
+```
+
+| who writes | logger | level |
+|---|---|---|
+| the application, the telemetry setup | `observatory` | `OBSERVATORY__LOG_LEVEL` |
+| Gunicorn · Uvicorn · Hypercorn · Granian | their own, formatted as JSON | `OBSERVATORY__LOG_LEVEL` |
+| libraries: httpx, OpenTelemetry, … | their own | the root's `WARNING` |
+
+An exception becomes `error_type`, `error_message`, `error_stack`. `route` is the matched template,
+the one the metrics carry as `http_route`, so a line and its metrics group alike. `AccessMiddleware`
+writes one line per response inside the request span and returns `x-request-id`, which the FastAPI
+instrumentation also records on the span; the servers' access logs are off.
+
+Browser lines arrive through Faro. Every one carries its `session_id`, and those of the page's own
+HTTP calls their `trace_id` and `span_id` — all three in structured metadata, like the
+application's keys.
+
+<details>
+<summary><b>How every line becomes JSON</b></summary>
+
+`configure_logging(level)` runs in every process that writes lines — `main()` and `create_app()`:
+it gives the root a stdout handler, puts the JSON formatter on it and sets `observatory`'s level.
+A repeat call stacks nothing.
+
+- Levels are checked on the logger called, not on its ancestors: the root stays at `WARNING`, yet
+  `observatory`'s `INFO` reaches the root's handler.
+- `observatory` keeps `propagate = True` — with `False` its lines would never reach that handler.
+- Servers with handlers of their own get them formatted too (`GunicornJsonLogger`); the others are
+  pointed at the root.
+
+</details>
+
+## 📈 Metrics
+
+The process ships only the server's and its own metrics: a view in `configure_metrics` keeps
+`http.server.*`, `process.*` and `cpython.*`. httpx and SQLite still give spans, not metrics.
+
+> [!NOTE]
+> VictoriaMetrics turns OpenTelemetry names into Prometheus ones: dots become `_`, the unit a
+> suffix — `http.server.request.duration` (s) → `http_server_request_duration_seconds`.
+
+Alloy's `otelcol.exporter.prometheus` turns OTLP into Prometheus series by the
+[OpenTelemetry → Prometheus mapping](https://opentelemetry.io/docs/specs/otel/compatibility/prometheus_and_openmetrics/#otlp-metric-points-to-prometheus);
+each of its options is written out in `observability/alloy/config.alloy`.
+
+| on the series | from |
+|---|---|
+| the name | the metric name, `.` → `_`, with the unit and `_total` for counters |
+| `job` | resource `service.name` |
+| `instance` | resource `service.instance.id` — `<host>-<pid>`, one per worker |
+| every other label | the data point's attributes, `.` → `_` |
+| `target_info{job, instance, …}` | one series per worker with the rest of the resource: `container_id`, `deployment_environment_name`, the SDK — joined on `job` and `instance` when needed |
+
+`otel_scope_name` and `otel_scope_version` are switched on but do not arrive yet: Alloy 1.20.1
+ignores `include_scope_labels` ([grafana/alloy#6787](https://github.com/grafana/alloy/pull/6787)).
+
+| metric | from | its own labels |
+|---|---|---|
+| `http_server_request_duration_seconds` | FastAPI | `http_route`, `http_request_method`, `http_response_status_code`, `error_type`, `url_scheme`, `network_protocol_version` |
+| `http_server_active_requests` | FastAPI | `http_request_method`, `url_scheme` |
+| `http_server_request_body_size_bytes`, `http_server_response_body_size_bytes` | FastAPI | as the duration |
+| `process_cpu_time_seconds_total`, `process_memory_usage_bytes`, `process_thread_count`, `process_open_file_descriptor_count`, … | each worker about itself | — |
+| `cpython_gc_collections_total`, `cpython_gc_collected_objects_total`, … | each worker's GC | `generation` and `cpython_gc_generation` — the instrumentation sends both |
+| `traces_spanmetrics_calls_total`, `traces_spanmetrics_latency` | Tempo, from spans of both services | `service`, `span_name`, `span_kind`, `status_code`, the `dimensions` of `tempo.yaml`, `source="tempo"`, Tempo's `__metrics_gen_instance` |
+| `traces_service_graph_request_*` | Alloy, from span pairs | `client`, `server`, `connection_type`, `failed`, `virtual_node` |
+
+Sources:
+[OpenTelemetry semantic conventions](https://opentelemetry.io/docs/specs/semconv/) ·
+[FastAPI instrumentation](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html) ·
+[system metrics](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/system_metrics/system_metrics.html) ·
+[span metrics](https://grafana.com/docs/tempo/latest/metrics-generator/span_metrics/).
+
+<details>
+<summary><b>Scraping another container</b></summary>
+
+Nothing is scraped by default. Alloy scrapes any container that asks with labels, like annotations
+in Kubernetes — no Alloy change needed:
+
+```yaml
+services:
+  tempo:
+    labels:
+      prometheus.io/scrape: "true"   # required
+      prometheus.io/port: "3200"     # required
+      prometheus.io/path: /metrics   # optional
+```
+
+</details>
+
+## 🔧 Configuration
+
+Environment variables with the `OBSERVATORY__` prefix; groups nest with `__`.
+
+| variable | default |
+|---|---|
+| `OBSERVATORY__SERVER__KIND` | **required**: `gunicorn` · `uvicorn` · `hypercorn` · `granian` |
+| `OBSERVATORY__SERVER__HOST` · `PORT` · `WORKERS` | `127.0.0.1` · `8000` · `2` |
+| `OBSERVATORY__LOG_LEVEL` | `info` |
+| `OBSERVATORY__DB__PATH` | `observatory.db` |
+| `OBSERVATORY__OBS__SERVICE_NAME` · `ENVIRONMENT` | `api` · `development` — or `production`, `staging`, `test` |
+| `OBSERVATORY__OBS__OTLP__ENDPOINT` | `http://localhost:4317` |
+| `OBSERVATORY__OBS__PYROSCOPE__URL` | `http://localhost:4040` |
+| `OBSERVATORY__OBS__FARO__COLLECTOR_URL` | `http://localhost:12347/collect` — as the browser sees it |
+
+<details>
+<summary><b>Each server's own options</b></summary>
+
+Under the same `OBSERVATORY__SERVER__` prefix; another server's option is refused at startup.
+
+| `KIND` | options |
+|---|---|
+| `gunicorn` | `TIMEOUT` · `GRACEFUL_TIMEOUT` · `KEEPALIVE` · `MAX_REQUESTS` · `MAX_REQUESTS_JITTER` · `BACKLOG` |
+| `uvicorn` | `TIMEOUT_KEEP_ALIVE` · `TIMEOUT_GRACEFUL_SHUTDOWN` · `LIMIT_CONCURRENCY` · `LIMIT_MAX_REQUESTS` · `BACKLOG` |
+| `hypercorn` | `KEEP_ALIVE_TIMEOUT` · `GRACEFUL_TIMEOUT` · `MAX_REQUESTS` · `MAX_REQUESTS_JITTER` · `BACKLOG` |
+| `granian` | `RUNTIME_THREADS` · `BLOCKING_THREADS` · `BACKPRESSURE` · `BACKLOG` · `WORKERS_LIFETIME` · `WORKERS_KILL_TIMEOUT` |
+
+`MAX_REQUESTS=1000 MAX_REQUESTS_JITTER=100` under Gunicorn restarts each worker after 1000–1100
+requests.
+
+</details>
+
+## 🧰 Development
+
+| recipe | does |
+|---|---|
+| `just install` · `just hooks` | the venv · git hooks via prek |
+| `just check` | every check — what CI would run |
+| `just fmt` · `lint` · `lint-style` · `typecheck` | ruff, wemake-python-styleguide, mypy |
+| `just lint-slots` · `lint-spelling` · `fmt-pyproject` | slotscheck · codespell and typos · pyproject-fmt |
+| `just run gunicorn` | the application outside Docker, against the running stack |
+| `just up` · `down` · `logs` · `ps` · `traffic` | the stack |
+
+## 🧱 Stack
+
+| | version | port | role |
+|---|---|---|---|
+| **Grafana** | 13.2.3 | `3000` | dashboards, Explore, Drilldown |
+| **Alloy** | 1.20.1 | `12345` · `12347` | the only collector · the Faro receiver |
+| **VictoriaMetrics** | 1.153.0 | `8428` | metrics |
+| **Loki** | 3.7.8 | `3100` | logs |
+| **Tempo** | 3.1.0 | `3200` | traces, span metrics |
+| **Pyroscope** | 2.3.1 | `4040` | CPU profiles |
+| **Faro Web SDK** | 2.12.1 | — | the browser's telemetry |
+| **Gunicorn** · **Uvicorn** · **Hypercorn** · **Granian** | 26.2 · 0.54 · 0.18 · 2.8.4 | `8000` | the servers; Gunicorn in Docker |
+
+Everything is published on `127.0.0.1` only.
