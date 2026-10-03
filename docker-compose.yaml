@@ -1,0 +1,120 @@
+name: observatory
+
+services:
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.153.0
+    restart: unless-stopped
+    command:
+      - -storageDataPath=/storage
+      - -httpListenAddr=:8428
+      - -retentionPeriod=14d
+      # One writer, no half-written intervals to hide: the newest seconds are queryable at once.
+      - -search.latencyOffset=5s
+    volumes:
+      - victoriametrics:/storage
+    ports:
+      - "127.0.0.1:8428:8428"
+
+  loki:
+    image: grafana/loki:3.7.8
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - loki:/loki
+    ports:
+      - "127.0.0.1:3100:3100"
+
+  pyroscope:
+    image: grafana/pyroscope:2.3.1
+    restart: unless-stopped
+    volumes:
+      - pyroscope:/data
+    ports:
+      - "127.0.0.1:4040:4040"
+
+  tempo:
+    image: grafana/tempo:3.1.0
+    restart: unless-stopped
+    command: ["-target=all", "-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - tempo:/var/tempo
+    ports:
+      - "127.0.0.1:3200:3200"
+    depends_on:
+      - victoriametrics
+
+  alloy:
+    image: grafana/alloy:v1.20.1
+    restart: unless-stopped
+    command:
+      - run
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      # Container output straight from the daemon, whatever the logging driver.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - alloy:/var/lib/alloy/data
+    ports:
+      - "127.0.0.1:12345:12345"
+      - "127.0.0.1:12347:12347"
+    depends_on:
+      - loki
+      - tempo
+      - victoriametrics
+      - pyroscope
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    restart: unless-stopped
+    environment:
+      # An example for your own machine: no login, admin rights straight away.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      - loki
+      - tempo
+      - victoriametrics
+      - pyroscope
+
+  api:
+    build: .
+    restart: unless-stopped
+    environment:
+      OBSERVATORY__SERVER__KIND: gunicorn
+      OBSERVATORY__SERVER__HOST: 0.0.0.0
+      OBSERVATORY__SERVER__WORKERS: 2
+      OBSERVATORY__LOG_LEVEL: info
+      OBSERVATORY__OBS__FARO__COLLECTOR_URL: http://localhost:12347/collect
+      OBSERVATORY__OBS__OTLP__ENDPOINT: http://alloy:4317
+      OBSERVATORY__OBS__PYROSCOPE__URL: http://alloy:4040
+      OBSERVATORY__OBS__ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - alloy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  victoriametrics:
+  loki:
+  pyroscope:
+  tempo:
+  alloy:
+  grafana:
