@@ -78,11 +78,19 @@ hooks = [
     pass_filenames = false
   },
   {
+    id = "dashboards",
+    name = "dashboards",
+    entry = "just dashboards",
+    language = "system",
+    files = '^(observability/grafana/source/|scripts/localize_dashboards\.py)',
+    pass_filenames = false
+  },
+  {
     id = "typecheck",
     name = "typecheck",
     entry = "just typecheck",
     language = "system",
-    files = "^src/",
+    files = "^(src|scripts)/",
     types = ["python"],
     pass_filenames = false
   }

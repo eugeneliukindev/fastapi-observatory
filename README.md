@@ -92,8 +92,8 @@ flowchart LR
 ## 📊 Dashboard
 
 **FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
-service, routes, method and thresholds are variables. A series on the route, status code and
-exception panels links to its traces or log lines — click it.
+service, routes, method, thresholds and the language are variables. A series on the route, status
+code and exception panels links to its traces or log lines — click it.
 
 The order is the order of an investigation: is the service fine, which requests suffer, why, and
 the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
@@ -115,6 +115,16 @@ the evidence. Groups nest — a dashboard in the v2 schema, the one with rows in
 
 Every number has one place: a route's mean and percentiles are columns of the routes table, in
 flight is one stack by worker, CPU over time is the workers' panel and not the profile's.
+
+**In three languages.** The `Language` variable switches between English, Русский and 中文.
+Grafana translates its own interface but never what a dashboard says, so the dashboard holds the
+rows once per language and shows the ones the variable names; the hidden ones query nothing. What
+Grafana loads, [`dashboards/api.json`](observability/grafana/dashboards/api.json), is built: edit
+the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary per
+language in [`source/i18n/`](observability/grafana/source/i18n), then `just dashboards`. It fails,
+naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or loses a
+`$variable` or `{{label}}`. The variables, the title and the links stay in English; Grafana's own
+interface follows the browser's language.
 
 Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
 target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn rate turns red at
@@ -439,6 +449,7 @@ requests.
 | `just check` | every check — what CI would run |
 | `just fmt` · `lint` · `lint-style` · `typecheck` | ruff, wemake-python-styleguide, mypy |
 | `just lint-slots` · `lint-spelling` · `fmt-pyproject` | slotscheck · codespell and typos · pyproject-fmt |
+| `just dashboards` | the dashboard Grafana loads, in every language, from `source/` |
 | `just run gunicorn` | the application outside Docker, against the running stack |
 | `just up` · `down` · `logs` · `ps` · `traffic` | the stack |
 

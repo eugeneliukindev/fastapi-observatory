@@ -26,7 +26,7 @@ lint *p=".":
 
 [group("lint")]
 [doc("Static type check")]
-typecheck *p="src":
+typecheck *p="src scripts":
     uv run mypy {{ p }}
 
 [group("lint")]
@@ -54,9 +54,16 @@ lint-spelling *p="src":
 fmt-pyproject:
     uv run pyproject-fmt pyproject.toml
 
+# Grafana has no translations for what a dashboard says: the dashboard holds its rows once per
+# language, built from observability/grafana/source/ — the English api.json and a dictionary each.
+[group("lint")]
+[doc("Build the dashboard in every language; fails on a string a dictionary lacks")]
+dashboards:
+    uv run python scripts/localize_dashboards.py
+
 [group("ci")]
 [doc("CI-equivalent aggregate gate")]
-check: fmt fmt-pyproject lint lint-style lint-slots lint-spelling typecheck
+check: fmt fmt-pyproject lint lint-style lint-slots lint-spelling typecheck dashboards
 
 # Outside Docker, against a stack already running.
 [group("infra")]

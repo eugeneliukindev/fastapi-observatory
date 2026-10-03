@@ -76,6 +76,8 @@ services:
       GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
       GF_AUTH_DISABLE_LOGIN_FORM: "true"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
+      # Grafana itself speaks the browser's language; the dashboards come in English, Russian and Chinese.
+      GF_USERS_DEFAULT_LANGUAGE: detect
     volumes:
       - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
       - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
