@@ -129,8 +129,8 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | group | row | what |
 |---|---|---|
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
-| Requests | Traffic | RPS total, against the same hour yesterday · by route |
-| | Status codes | RPS by code, coloured by class · errors by route and code |
+| Requests | Traffic | RPS by route, the total over them and the total yesterday |
+| | Status codes | RPS by code, coloured by class, and the 4xx and 5xx of each route |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
@@ -155,7 +155,7 @@ loses a `$variable` or `{{label}}`. A new language is a new dictionary.
 
 Colours mean the same on every panel: 2xx green, 3xx blue, 4xx orange, 5xx and exceptions red; a
 grey dashed line is yesterday, a white dashed one a reference — the objective, an even split — and a
-white solid one all workers together. A latency line takes the colour of its zone, and the zones
+white solid one the total — of the routes, of the workers. A latency line takes the colour of its zone, and the zones
 above 500 ms and 1 s are shaded; under the dashed objective, availability sits in a red zone.
 
 Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
