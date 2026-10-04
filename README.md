@@ -174,8 +174,6 @@ panels; pick one in the dashboard list or under All dashboards. Grafana translat
 interface, which follows the browser's language, but never what a dashboard says: a change to one
 is a change to all three.
 
-![The dashboard in Russian](docs/screenshots/28-dashboard-ru.png)
-
 Lines read the same on every panel. A total is thick, over a light fill, drawn above the rest and
 named `total` — white for the service, or the colour of its class: 2xx green, 3xx blue, 4xx orange,
 5xx and exceptions red; P50 blue, P95 white, P99 purple. A thin line without fill is one route or
