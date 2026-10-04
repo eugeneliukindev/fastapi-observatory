@@ -20,7 +20,7 @@ services:
     restart: unless-stopped
     command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
-      - ./observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
+      - ../../observability/loki/loki.yaml:/etc/loki/loki.yaml:ro
       - loki:/loki
     ports:
       - "127.0.0.1:3100:3100"
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
     command: ["-target=all", "-config.file=/etc/tempo/tempo.yaml"]
     volumes:
-      - ./observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
+      - ../../observability/tempo/tempo.yaml:/etc/tempo/tempo.yaml:ro
       - tempo:/var/tempo
     ports:
       - "127.0.0.1:3200:3200"
@@ -56,8 +56,8 @@ services:
       # A directory of its own: the image's example /etc/alloy/config.alloy would load too.
       - /etc/alloy/observatory/
     volumes:
-      - ./observability/alloy/receiver.alloy:/etc/alloy/observatory/receiver.alloy:ro
-      - ./observability/alloy/docker.alloy:/etc/alloy/observatory/docker.alloy:ro
+      - ../../observability/alloy/receiver.alloy:/etc/alloy/observatory/receiver.alloy:ro
+      - ../../observability/alloy/docker.alloy:/etc/alloy/observatory/docker.alloy:ro
       # Container output straight from the daemon, whatever the logging driver.
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - alloy:/var/lib/alloy/data
@@ -82,8 +82,8 @@ services:
       # Grafana itself speaks the browser's language; the dashboards come in English, Russian and Chinese.
       GF_USERS_DEFAULT_LANGUAGE: detect
     volumes:
-      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - ../../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../../observability/grafana/dashboards:/etc/grafana/dashboards:ro
       - grafana:/var/lib/grafana
     ports:
       - "127.0.0.1:3000:3000"
@@ -94,7 +94,9 @@ services:
       - pyroscope
 
   api:
-    build: .
+    build:
+      # The repository root: the Dockerfile and the sources live there.
+      context: ../..
     restart: unless-stopped
     environment:
       OBSERVATORY__SERVER__KIND: gunicorn

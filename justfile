@@ -1,5 +1,8 @@
 set shell := ["bash", "-uc"]
 
+# Compose lives beside the Kubernetes manifests, under deploy/.
+export COMPOSE_FILE := "deploy/compose/docker-compose.yaml"
+
 [doc("All command information")]
 default:
     @just --list --unsorted --list-heading $'Available commands…\n'

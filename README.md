@@ -35,7 +35,11 @@ just up        # docker compose up --build -d
 just traffic   # RATE=10 DURATION=60 just traffic
 ```
 
-The same stack runs in a local Kubernetes cluster with `just k8s-up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
+Both ways to run it live in [`deploy/`](deploy):
+[`compose/docker-compose.yaml`](deploy/compose/docker-compose.yaml) and the Kubernetes manifests in
+[`kubernetes/`](deploy/kubernetes). The `just` recipes point Compose at its file; by hand it is
+`docker compose -f deploy/compose/docker-compose.yaml …`. The same stack runs in a local Kubernetes
+cluster with `just k8s-up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
 
 | what | where |
 |---|---|
