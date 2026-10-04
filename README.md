@@ -174,6 +174,12 @@ panels; pick one in the dashboard list or under All dashboards. Grafana translat
 interface, which follows the browser's language, but never what a dashboard says: a change to one
 is a change to all three.
 
+**On grafana.com.** Its upload takes the classic dashboard JSON, not the v2 schema these are in:
+[`grafana-com/fastapi-observatory.json`](observability/grafana/grafana-com/fastapi-observatory.json)
+is the English one as Grafana itself converts it — `GET /apis/dashboard.grafana.app/v1beta1/…/dashboards/observatory-api`.
+The classic schema has no rows inside rows and no row variables, so the rows lie flat and their
+pickers join the variables on top; the data sources stay variables, picked on import.
+
 Lines read the same on every panel. A total is thick, over a light fill, drawn above the rest and
 named `total` — white for the service, or the colour of its class: 2xx green, 3xx blue, 4xx orange,
 5xx and exceptions red; P50 blue, P95 white, P99 purple. A thin line without fill is one route or
