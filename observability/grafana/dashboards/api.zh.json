@@ -796,6 +796,10 @@
                         "stat": "lastNotNull",
                         "timeField": "Time"
                       }
+                    },
+                    "filter": {
+                      "id": "byRefId",
+                      "options": "A"
                     }
                   }
                 },
