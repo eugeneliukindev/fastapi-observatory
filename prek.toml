@@ -12,7 +12,11 @@ hooks = [
     id = "check-added-large-files",
     exclude = '^uv\.lock$'
   },
-  { id = "check-yaml" },
+  # A Kubernetes manifest holds several documents.
+  {
+    id = "check-yaml",
+    args = ["--allow-multiple-documents"]
+  },
   { id = "check-toml" }
 ]
 
