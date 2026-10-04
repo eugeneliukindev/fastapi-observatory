@@ -679,7 +679,6 @@ dependencies = [
     { name = "opentelemetry-instrumentation-httpx" },
     { name = "opentelemetry-instrumentation-sqlite3" },
     { name = "opentelemetry-instrumentation-system-metrics" },
-    { name = "opentelemetry-resource-detector-containerid" },
     { name = "opentelemetry-sdk" },
     { name = "pydantic" },
     { name = "pydantic-settings" },
@@ -733,7 +732,6 @@ requires-dist = [
     { name = "opentelemetry-instrumentation-httpx", specifier = ">=0.66b0" },
     { name = "opentelemetry-instrumentation-sqlite3", specifier = ">=0.66b0" },
     { name = "opentelemetry-instrumentation-system-metrics", specifier = ">=0.66b0" },
-    { name = "opentelemetry-resource-detector-containerid", specifier = ">=0.66b0" },
     { name = "opentelemetry-sdk", specifier = ">=1.45.0" },
     { name = "pydantic", specifier = ">=2.13.0" },
     { name = "pydantic-settings", specifier = ">=2.15.0" },
@@ -945,18 +943,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/72/28/67c38cfb7e2bdfdd0cde7dcdd0424aed0291fbd64aa4ea3e7e913734711a/opentelemetry_proto-1.45.0.tar.gz", hash = "sha256:96ee414f24bc3f61ea8e17dc56b4348d4049d73db3eb17c6b3edf75b5b403300", size = 46489, upload-time = "2026-09-25T12:32:41.409Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6b/45/814d55714507c7ce9c9cd86a4f83ceb5a74ab0bffcc63ff493943f138de2/opentelemetry_proto-1.45.0-py3-none-any.whl", hash = "sha256:9731566359d7b8e1ee1e149d8e4ad6865bab965e657ad3387ec2784d16927666", size = 72486, upload-time = "2026-09-25T12:32:23.36Z" },
-]
-
-[[package]]
-name = "opentelemetry-resource-detector-containerid"
-version = "0.66b0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "opentelemetry-sdk" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f7/38/94ea3e754bbb47d729cb8a9ba4581febd4fc464b74fb53574b1af41c5966/opentelemetry_resource_detector_containerid-0.66b0.tar.gz", hash = "sha256:3cc47c4306da924d7cf5a73350474c735d5efdd39feb91be4be5dd73f2712d71", size = 8145, upload-time = "2026-09-25T12:36:23.099Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/7b/ef69f8b0e7ef26a32946d51c7348e2b68d29afb96bc7b5ccd8414a807c74/opentelemetry_resource_detector_containerid-0.66b0-py3-none-any.whl", hash = "sha256:f27b514556b0c51ef2ad6c45b9811b874756eba6ed25ce7fb0f9cdcea27bd41a", size = 7707, upload-time = "2026-09-25T12:35:41.479Z" },
 ]
 
 [[package]]

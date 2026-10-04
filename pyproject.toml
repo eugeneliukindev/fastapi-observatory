@@ -23,7 +23,6 @@ dependencies = [
     "opentelemetry-instrumentation-httpx>=0.66b0",
     "opentelemetry-instrumentation-sqlite3>=0.66b0",
     "opentelemetry-instrumentation-system-metrics>=0.66b0",
-    "opentelemetry-resource-detector-containerid>=0.66b0",
     "opentelemetry-sdk>=1.45.0",
     "pydantic>=2.13.0",
     "pydantic-settings>=2.15.0",

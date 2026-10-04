@@ -27,7 +27,7 @@
     "Apdex": "Apdex",
     "Application Performance Index over the selected range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor": "所选时间范围内的应用性能指数，0–1：低于 `Apdex：满意` 阈值为满意，不超过 `Apdex：可容忍` 为可容忍（按一半计），更慢则为失望。\n\n≥ 0.94 优秀 · ≥ 0.7 可接受 · < 0.7 差",
     "Instances": "实例",
-    "Containers serving the application: the `container_id` of `target_info`. A dip is a restart.": "运行应用的容器：`target_info` 中的 `container_id`。数值下降表示发生了重启。",
+    "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.": "运行应用的主机——在 Compose 中是容器，在 Kubernetes 中是 Pod：`target_info` 中的 `host_name`。数值下降表示发生了重启。",
     "instances": "实例",
     "Serving processes across all instances, each with its own `service.instance.id` — the `instance` label. A dip is a worker replaced.": "所有实例中的服务进程，每个都有自己的 `service.instance.id`，即 `instance` 标签。数值下降表示有工作进程被替换。",
     "workers": "工作进程",

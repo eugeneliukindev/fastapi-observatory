@@ -398,7 +398,7 @@
         "spec": {
           "id": 53,
           "title": "Instances",
-          "description": "Containers serving the application: the `container_id` of `target_info`. A dip is a restart.",
+          "description": "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -416,7 +416,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (container_id) (target_info{job=~\"$service\"}))",
+                        "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
                         "legendFormat": "instances",
                         "range": true
@@ -5284,7 +5284,7 @@
         "spec": {
           "id": 1053,
           "title": "Инстансы",
-          "description": "Контейнеры, в которых работает приложение: `container_id` из `target_info`. Провал — это перезапуск.",
+          "description": "Хосты, на которых работает приложение — контейнер в Compose, под в Kubernetes: `host_name` из `target_info`. Провал — это перезапуск.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5302,7 +5302,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (container_id) (target_info{job=~\"$service\"}))",
+                        "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
                         "legendFormat": "инстансы",
                         "range": true
@@ -10170,7 +10170,7 @@
         "spec": {
           "id": 2053,
           "title": "实例",
-          "description": "运行应用的容器：`target_info` 中的 `container_id`。数值下降表示发生了重启。",
+          "description": "运行应用的主机——在 Compose 中是容器，在 Kubernetes 中是 Pod：`target_info` 中的 `host_name`。数值下降表示发生了重启。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -10188,7 +10188,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (container_id) (target_info{job=~\"$service\"}))",
+                        "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
                         "legendFormat": "实例",
                         "range": true

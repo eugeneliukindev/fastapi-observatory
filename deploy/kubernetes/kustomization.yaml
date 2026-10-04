@@ -1,0 +1,43 @@
+# The stack for Kubernetes: `just k8s-up` runs it in k3d. Configuration comes from the same files
+# Compose mounts, so the two never drift apart; Kustomize reads them from outside this directory
+# only with `--load-restrictor LoadRestrictionsNone`.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: observatory
+
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: observatory
+
+resources:
+  - namespace.yaml
+  - victoriametrics.yaml
+  - loki.yaml
+  - tempo.yaml
+  - pyroscope.yaml
+  - alloy.yaml
+  - grafana.yaml
+  - api.yaml
+
+# A changed file is a new ConfigMap name, and the pods that mount it roll.
+configMapGenerator:
+  - name: loki
+    files:
+      - ../../observability/loki/loki.yaml
+  - name: tempo
+    files:
+      - ../../observability/tempo/tempo.yaml
+  - name: alloy
+    files:
+      - ../../observability/alloy/receiver.alloy
+      - ../../observability/alloy/kubernetes.alloy
+  - name: grafana-datasources
+    files:
+      - ../../observability/grafana/provisioning/datasources/datasources.yaml
+  - name: grafana-dashboard-providers
+    files:
+      - ../../observability/grafana/provisioning/dashboards/dashboards.yaml
+  - name: grafana-dashboards
+    files:
+      - ../../observability/grafana/dashboards/api.json

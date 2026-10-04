@@ -171,43 +171,11 @@ loki.process "faro_lines" {
   forward_to = [loki.write.loki.receiver]
 }
 
-// ─── container output → Loki ──────────────────────────────────────────────────────────
+// ─── process lines → Loki ─────────────────────────────────────────────────────────────
 
-discovery.docker "containers" {
-  host             = "unix:///var/run/docker.sock"
-  refresh_interval = "15s"
-
-  // Only this example's containers: other ones may live on the machine too.
-  filter {
-    name   = "label"
-    values = ["com.docker.compose.project=observatory"]
-  }
-}
-
-discovery.relabel "containers" {
-  targets = discovery.docker.containers.targets
-
-  rule {
-    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
-    target_label  = "service_name"
-  }
-
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "container"
-  }
-}
-
-loki.source.docker "containers" {
-  host          = "unix:///var/run/docker.sock"
-  targets       = discovery.relabel.containers.output
-  relabel_rules = discovery.relabel.containers.rules
-  forward_to    = [loki.process.json_lines.receiver]
-}
-
-// Trace and request keys go into structured metadata, not labels: a label per `trace_id` would
-// create a stream per request. A line that is not a JSON object passes through as is.
+// Container lines, from docker.alloy or kubernetes.alloy. Trace and request keys go into structured
+// metadata, not labels: a label per `trace_id` would create a stream per request. A line that is
+// not a JSON object passes through as is.
 loki.process "json_lines" {
   stage.json {
     expressions = {
@@ -219,7 +187,7 @@ loki.process "json_lines" {
     }
   }
 
-  // The time the process wrote the line, not the time Docker read it.
+  // The time the process wrote the line, not the time the container runtime read it.
   stage.timestamp {
     source = "ts"
     format = "RFC3339"
@@ -245,54 +213,6 @@ loki.write "loki" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }
-}
-
-// ─── scraped metrics → VictoriaMetrics ────────────────────────────────────────────────
-
-// Scrape any container that asks with labels, like annotations in Kubernetes:
-//
-//   prometheus.io/scrape: "true"     whether to scrape
-//   prometheus.io/port:   "3100"     the port serving metrics
-//   prometheus.io/path:   "/metrics" the path; /metrics by default
-discovery.relabel "scraped" {
-  targets = discovery.docker.containers.targets
-
-  rule {
-    source_labels = ["__meta_docker_container_label_prometheus_io_scrape"]
-    regex         = "true"
-    action        = "keep"
-  }
-
-  // The address in the container network, not the port published to the host.
-  rule {
-    source_labels = ["__meta_docker_network_ip", "__meta_docker_container_label_prometheus_io_port"]
-    separator     = ":"
-    target_label  = "__address__"
-  }
-
-  rule {
-    source_labels = ["__meta_docker_container_label_prometheus_io_path"]
-    regex         = "(.+)"
-    target_label  = "__metrics_path__"
-  }
-
-  rule {
-    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
-    target_label  = "job"
-  }
-
-  rule {
-    source_labels = ["__meta_docker_container_name"]
-    regex         = "/(.*)"
-    target_label  = "instance"
-  }
-}
-
-// A target per open container port collapses into one: after relabelling their labels match.
-prometheus.scrape "services" {
-  targets         = discovery.relabel.scraped.output
-  scrape_interval = "15s"
-  forward_to      = [prometheus.remote_write.victoriametrics.receiver]
 }
 
 prometheus.remote_write "victoriametrics" {

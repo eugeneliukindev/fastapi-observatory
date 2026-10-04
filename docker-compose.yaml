@@ -52,9 +52,12 @@ services:
       - run
       - --server.http.listen-addr=0.0.0.0:12345
       - --storage.path=/var/lib/alloy/data
-      - /etc/alloy/config.alloy
+      # Every *.alloy in the directory: what any platform receives, and how Compose collects logs.
+      # A directory of its own: the image's example /etc/alloy/config.alloy would load too.
+      - /etc/alloy/observatory/
     volumes:
-      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - ./observability/alloy/receiver.alloy:/etc/alloy/observatory/receiver.alloy:ro
+      - ./observability/alloy/docker.alloy:/etc/alloy/observatory/docker.alloy:ro
       # Container output straight from the daemon, whatever the logging driver.
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - alloy:/var/lib/alloy/data

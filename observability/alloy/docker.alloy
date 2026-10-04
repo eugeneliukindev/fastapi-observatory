@@ -1,0 +1,37 @@
+// ─── container output → Loki ──────────────────────────────────────────────────────────
+
+// Docker Compose: every container of the project, read from the daemon whatever the logging
+// driver. Loaded beside receiver.alloy.
+
+discovery.docker "containers" {
+  host             = "unix:///var/run/docker.sock"
+  refresh_interval = "15s"
+
+  // Only this example's containers: other ones may live on the machine too.
+  filter {
+    name   = "label"
+    values = ["com.docker.compose.project=observatory"]
+  }
+}
+
+discovery.relabel "containers" {
+  targets = discovery.docker.containers.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+    target_label  = "service_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex         = "/(.*)"
+    target_label  = "container"
+  }
+}
+
+loki.source.docker "containers" {
+  host          = "unix:///var/run/docker.sock"
+  targets       = discovery.relabel.containers.output
+  relabel_rules = discovery.relabel.containers.rules
+  forward_to    = [loki.process.json_lines.receiver]
+}

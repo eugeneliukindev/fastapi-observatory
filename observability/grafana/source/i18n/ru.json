@@ -27,7 +27,7 @@
     "Apdex": "Apdex",
     "Application Performance Index over the selected range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor": "Индекс производительности приложения за выбранный период, 0–1: довольные — быстрее порога `Apdex: норма`, терпящие — до `Apdex: терпимо` (считаются за половину), недовольные — дольше.\n\n≥ 0.94 отлично · ≥ 0.7 приемлемо · < 0.7 плохо",
     "Instances": "Инстансы",
-    "Containers serving the application: the `container_id` of `target_info`. A dip is a restart.": "Контейнеры, в которых работает приложение: `container_id` из `target_info`. Провал — это перезапуск.",
+    "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.": "Хосты, на которых работает приложение — контейнер в Compose, под в Kubernetes: `host_name` из `target_info`. Провал — это перезапуск.",
     "instances": "инстансы",
     "Serving processes across all instances, each with its own `service.instance.id` — the `instance` label. A dip is a worker replaced.": "Обслуживающие процессы во всех инстансах, у каждого свой `service.instance.id` — метка `instance`. Провал — это замена воркера.",
     "workers": "воркеры",

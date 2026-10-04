@@ -11,11 +11,10 @@ from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.system_metrics import SystemMetricsInstrumentor
-from opentelemetry.resource.detector.containerid import ContainerResourceDetector
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.metrics.view import DropAggregation, View
-from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.resources import HOST_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.semconv.attributes.deployment_attributes import DEPLOYMENT_ENVIRONMENT_NAME
@@ -127,11 +126,13 @@ def configure_profiling(service: ServiceIdentity, tracer_provider: TracerProvide
 
 
 def _resource(service: ServiceIdentity) -> Resource:
-    # One per process: the series of two processes must not merge.
-    instance_id = f"{socket.gethostname()}-{os.getpid()}"
+    # The container in Compose, the pod in Kubernetes: what an instance is, on either platform.
+    host_name = socket.gethostname()
     identity = {
         SERVICE_NAME: service.name,
-        SERVICE_INSTANCE_ID: instance_id,
+        # One per process: the series of two processes must not merge.
+        SERVICE_INSTANCE_ID: f"{host_name}-{os.getpid()}",
         DEPLOYMENT_ENVIRONMENT_NAME: service.environment.value,
+        HOST_NAME: host_name,
     }
-    return Resource.create(identity).merge(ContainerResourceDetector().detect())
+    return Resource.create(identity)

@@ -2,7 +2,7 @@
 
 # 🔭 otel-observatory
 
-**A FastAPI service under a full observability stack — metrics · logs · traces · profiles · browser — in one `docker compose up`.**
+**A FastAPI service under a full observability stack — metrics · logs · traces · profiles · browser — in one `docker compose up`, or in Kubernetes.**
 
 ![Python](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.142-009688?logo=fastapi&logoColor=white)
@@ -10,10 +10,12 @@
 ![Grafana](https://img.shields.io/badge/Grafana-13.2-F46800?logo=grafana&logoColor=white)
 ![VictoriaMetrics](https://img.shields.io/badge/VictoriaMetrics-1.153-621773?logo=victoriametrics&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-k3d-326CE5?logo=kubernetes&logoColor=white)
 
 [Quick start](#-quick-start) · [Architecture](#-architecture) · [Dashboard](#-dashboard) ·
 [Signal to signal](#-from-signal-to-signal) · [Servers](#-servers) · [Logging](#-logging) ·
-[Metrics](#-metrics) · [Configuration](#-configuration) · [Development](#-development)
+[Metrics](#-metrics) · [Configuration](#-configuration) · [Kubernetes](#%EF%B8%8F-kubernetes) ·
+[Development](#-development)
 
 ![The dashboard](docs/screenshots/01-dashboard-overview.png)
 
@@ -32,6 +34,8 @@ code.
 just up        # docker compose up --build -d
 just traffic   # RATE=10 DURATION=60 just traffic
 ```
+
+The same stack runs in a local Kubernetes cluster with `just k8s-up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
 
 | what | where |
 |---|---|
@@ -53,7 +57,7 @@ flowchart LR
         direction TB
         browser["🌐 Browser<br/>Faro SDK"]
         api["🐍 api<br/>a server and its workers"]
-        docker[("🐳 Docker<br/>container stdout")]
+        docker[("🐳 Docker · ☸️ Kubernetes<br/>container stdout")]
     end
 
     alloy{{"Alloy<br/>the only collector"}}
@@ -80,7 +84,7 @@ flowchart LR
 | signal | from the process | through Alloy | stored in |
 |---|---|---|---|
 | 📈 metrics | OTLP gRPC every 15 s, each worker its own `service.instance.id` | `otelcol.receiver.otlp` → Prometheus model | VictoriaMetrics, 14 days |
-| 📜 logs | one JSON object per line on stdout; the browser's through Faro | `loki.source.docker` · `faro.receiver`: `lvl` a label, ids structured metadata | Loki |
+| 📜 logs | one JSON object per line on stdout; the browser's through Faro | `loki.source.docker` or `loki.source.kubernetes` · `faro.receiver`: `lvl` a label, ids structured metadata | Loki |
 | 🧵 traces | OTLP gRPC; the browser's through Faro | `otelcol.receiver.otlp` · `faro.receiver` | Tempo, 3 days |
 | 🔥 profiles | Pyroscope SDK, samples tagged with the root span | `pyroscope.receive_http` | Pyroscope |
 
@@ -363,7 +367,7 @@ The process ships only the server's and its own metrics: a view in `configure_me
 
 Alloy's `otelcol.exporter.prometheus` turns OTLP into Prometheus series by the
 [OpenTelemetry → Prometheus mapping](https://opentelemetry.io/docs/specs/otel/compatibility/prometheus_and_openmetrics/#otlp-metric-points-to-prometheus);
-each of its options is written out in `observability/alloy/config.alloy`.
+each of its options is written out in `observability/alloy/receiver.alloy`.
 
 | on the series | from |
 |---|---|
@@ -371,7 +375,7 @@ each of its options is written out in `observability/alloy/config.alloy`.
 | `job` | resource `service.name` |
 | `instance` | resource `service.instance.id` — `<host>-<pid>`, one per worker |
 | every other label | the data point's attributes, `.` → `_` |
-| `target_info{job, instance, …}` | one series per worker with the rest of the resource: `container_id`, `deployment_environment_name`, the SDK — joined on `job` and `instance` when needed |
+| `target_info{job, instance, …}` | one series per worker with the rest of the resource: `host_name`, `deployment_environment_name`, the SDK — joined on `job` and `instance` when needed |
 
 `otel_scope_name` and `otel_scope_version` are switched on but do not arrive yet: Alloy 1.20.1
 ignores `include_scope_labels` ([grafana/alloy#6787](https://github.com/grafana/alloy/pull/6787)).
@@ -391,23 +395,6 @@ Sources:
 [FastAPI instrumentation](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/fastapi/fastapi.html) ·
 [system metrics](https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/system_metrics/system_metrics.html) ·
 [span metrics](https://grafana.com/docs/tempo/latest/metrics-generator/span_metrics/).
-
-<details>
-<summary><b>Scraping another container</b></summary>
-
-Nothing is scraped by default. Alloy scrapes any container that asks with labels, like annotations
-in Kubernetes — no Alloy change needed:
-
-```yaml
-services:
-  tempo:
-    labels:
-      prometheus.io/scrape: "true"   # required
-      prometheus.io/port: "3200"     # required
-      prometheus.io/path: /metrics   # optional
-```
-
-</details>
 
 ## 🔧 Configuration
 
@@ -441,6 +428,31 @@ requests.
 
 </details>
 
+## ☸️ Kubernetes
+
+`just k8s-up` runs the same stack in a local [k3d](https://k3d.io) cluster: it builds the image,
+imports it, applies [`deploy/kubernetes/`](deploy/kubernetes) and waits for the rollout; `just
+k8s-down` deletes the cluster. The ports are Compose's — 3000, 8000, 12345, 12347 — so stop one
+before starting the other.
+
+Nothing is copied. Kustomize builds the ConfigMaps from the files Compose mounts, and the Services
+carry the Compose service names, so `loki:3100` and `alloy:4317` mean the same on both. The
+dashboard does not know the platform either: it asks only for `service.name` and
+`service.instance.id`.
+
+| | Compose | Kubernetes |
+|---|---|---|
+| Alloy reads | `receiver.alloy` + `docker.alloy` | `receiver.alloy` + `kubernetes.alloy` |
+| container output | `loki.source.docker`, through `docker.sock` | `loki.source.kubernetes`, through the API; a Role reads the pods and their logs in one namespace |
+| a log line's `service_name` | the Compose service | the pod's `app.kubernetes.io/name` |
+| an instance — `host_name` | the container | the pod; the API runs two, of two workers each |
+| where a process runs | — | `k8s.pod.name`, `k8s.pod.uid`, `k8s.namespace.name`, `k8s.node.name` from the downward API, in `OTEL_RESOURCE_ATTRIBUTES` |
+
+> [!NOTE]
+> Alloy reads pod output through the API server, which is enough for one small cluster. A large one
+> reads the nodes' log files from a DaemonSet, as Grafana's k8s-monitoring chart does, and runs
+> `receiver.alloy` in a Deployment of its own.
+
 ## 🧰 Development
 
 | recipe | does |
@@ -452,6 +464,7 @@ requests.
 | `just dashboards` | the dashboard Grafana loads, in every language, from `source/` |
 | `just run gunicorn` | the application outside Docker, against the running stack |
 | `just up` · `down` · `logs` · `ps` · `traffic` | the stack |
+| `just k8s-up` · `k8s-down` | the stack in a k3d cluster |
 
 ## 🧱 Stack
 

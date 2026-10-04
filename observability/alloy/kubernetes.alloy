@@ -1,0 +1,38 @@
+// ─── pod output → Loki ────────────────────────────────────────────────────────────────
+
+// Kubernetes: every container of every pod in Alloy's own namespace, read through the API server —
+// enough for one small cluster; a large one reads the node's files from a DaemonSet instead.
+// Loaded beside receiver.alloy.
+
+discovery.kubernetes "pods" {
+  role = "pod"
+
+  namespaces {
+    own_namespace = true
+  }
+}
+
+discovery.relabel "pods" {
+  targets = discovery.kubernetes.pods.targets
+
+  // The same label Compose gives a service: the dashboard asks for `service_name` on both.
+  rule {
+    source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name"]
+    target_label  = "service_name"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_name"]
+    target_label  = "pod"
+  }
+
+  rule {
+    source_labels = ["__meta_kubernetes_pod_container_name"]
+    target_label  = "container"
+  }
+}
+
+loki.source.kubernetes "pods" {
+  targets    = discovery.relabel.pods.output
+  forward_to = [loki.process.json_lines.receiver]
+}

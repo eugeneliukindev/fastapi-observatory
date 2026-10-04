@@ -398,7 +398,7 @@
         "spec": {
           "id": 53,
           "title": "Instances",
-          "description": "Containers serving the application: the `container_id` of `target_info`. A dip is a restart.",
+          "description": "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -416,7 +416,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (container_id) (target_info{job=~\"$service\"}))",
+                        "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
                         "legendFormat": "instances",
                         "range": true

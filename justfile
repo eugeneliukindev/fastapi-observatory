@@ -95,3 +95,24 @@ ps:
 [doc("Drive traffic at the app: RATE=10 DURATION=60 just traffic")]
 traffic:
     ./scripts/traffic.sh
+
+# The same host ports as Compose — 3000, 8000, 12345, 12347: stop one before starting the other.
+[group("kubernetes")]
+[doc("Run the stack in a local k3d cluster, building and importing the application's image")]
+k8s-up:
+    k3d cluster list observatory >/dev/null 2>&1 || k3d cluster create observatory --wait \
+        --port 3000:3000@loadbalancer --port 8000:8000@loadbalancer \
+        --port 12345:12345@loadbalancer --port 12347:12347@loadbalancer
+    docker build --tag observatory-api:dev .
+    k3d image import observatory-api:dev --cluster observatory
+    kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/kubernetes \
+        | kubectl --context k3d-observatory apply --server-side --force-conflicts -f -
+    # The tag stays `dev`: without a restart the pods keep the image they started with.
+    kubectl --context k3d-observatory --namespace observatory rollout restart deployment/api
+    kubectl --context k3d-observatory --namespace observatory rollout status deployment/api --timeout=5m
+    kubectl --context k3d-observatory --namespace observatory rollout status statefulset --timeout=5m
+
+[group("kubernetes")]
+[doc("Delete the k3d cluster with everything in it")]
+k8s-down:
+    k3d cluster delete observatory
