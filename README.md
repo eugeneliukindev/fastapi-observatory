@@ -120,8 +120,7 @@ and exception panels links to its traces or log lines — click it.
 
 | where | variables |
 |---|---|
-| the top line — what you look at | Service · Routes matching · Route · Method · Host |
-| the controls menu, `+7` — wiring and thresholds | Metrics · Logs · Traces · Profiles · Apdex satisfied · Apdex tolerated · Slow trace |
+| the top of the dashboard | Metrics · Logs · Traces · Profiles · Service · Routes matching · Route · Method · Host · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Profiling row | Profile type |
 
 The order is the order of an investigation: is the service fine, which requests suffer, is the

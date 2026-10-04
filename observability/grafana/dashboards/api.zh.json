@@ -5748,6 +5748,86 @@
     "title": "FastAPI：流量、延迟、错误、追踪、日志、剖析",
     "variables": [
       {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "metrics",
+          "pluginId": "prometheus",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "victoriametrics",
+            "value": "victoriametrics"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "指标",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "logs",
+          "pluginId": "loki",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "loki",
+            "value": "loki"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "日志",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "traces",
+          "pluginId": "tempo",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "tempo",
+            "value": "tempo"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "追踪",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "profiles",
+          "pluginId": "grafana-pyroscope-datasource",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "pyroscope",
+            "value": "pyroscope"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "剖析",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
         "kind": "QueryVariable",
         "spec": {
           "name": "service",
@@ -5902,86 +5982,6 @@
         }
       },
       {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "metrics",
-          "pluginId": "prometheus",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "victoriametrics",
-            "value": "victoriametrics"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "指标",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "logs",
-          "pluginId": "loki",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "loki",
-            "value": "loki"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "日志",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "traces",
-          "pluginId": "tempo",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "tempo",
-            "value": "tempo"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "追踪",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "profiles",
-          "pluginId": "grafana-pyroscope-datasource",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "pyroscope",
-            "value": "pyroscope"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "剖析",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
         "kind": "CustomVariable",
         "spec": {
           "name": "satisfied",
@@ -6015,7 +6015,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex：满意",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "秒；耗时直方图的一个桶边界。",
           "allowCustomValue": true
@@ -6055,7 +6055,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex：可容忍",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "秒；耗时直方图的一个桶边界。",
           "allowCustomValue": true
@@ -6071,7 +6071,7 @@
           },
           "query": "500ms",
           "label": "慢追踪",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "TraceQL 时长：超过该值的追踪列为慢追踪。"
         }

@@ -5748,6 +5748,86 @@
     "title": "FastAPI: traffic, latency, errors, traces, logs, profile",
     "variables": [
       {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "metrics",
+          "pluginId": "prometheus",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "victoriametrics",
+            "value": "victoriametrics"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Metrics",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "logs",
+          "pluginId": "loki",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "loki",
+            "value": "loki"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Logs",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "traces",
+          "pluginId": "tempo",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "tempo",
+            "value": "tempo"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Traces",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "profiles",
+          "pluginId": "grafana-pyroscope-datasource",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "pyroscope",
+            "value": "pyroscope"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Profiles",
+          "hide": "dontHide",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
         "kind": "QueryVariable",
         "spec": {
           "name": "service",
@@ -5902,86 +5982,6 @@
         }
       },
       {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "metrics",
-          "pluginId": "prometheus",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "victoriametrics",
-            "value": "victoriametrics"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Metrics",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "logs",
-          "pluginId": "loki",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "loki",
-            "value": "loki"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Logs",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "traces",
-          "pluginId": "tempo",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "tempo",
-            "value": "tempo"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Traces",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "profiles",
-          "pluginId": "grafana-pyroscope-datasource",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "pyroscope",
-            "value": "pyroscope"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Profiles",
-          "hide": "inControlsMenu",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
         "kind": "CustomVariable",
         "spec": {
           "name": "satisfied",
@@ -6015,7 +6015,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex: satisfied",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "Seconds; a bound of the duration histogram.",
           "allowCustomValue": true
@@ -6055,7 +6055,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex: tolerated",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "Seconds; a bound of the duration histogram.",
           "allowCustomValue": true
@@ -6071,7 +6071,7 @@
           },
           "query": "500ms",
           "label": "Slow trace",
-          "hide": "inControlsMenu",
+          "hide": "dontHide",
           "skipUrlSync": false,
           "description": "A TraceQL duration: traces longer than this are listed as slow."
         }
