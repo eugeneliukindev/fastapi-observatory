@@ -167,7 +167,7 @@ draws them at middle width; a table legend lists every series that a panel break
 Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
 target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn rate turns red at
 3.36× over 1 h and 1.4× over 6 h — the pace that spends 2% and 5% of a 7-day budget in that window.
-`just traffic` fails about 5% of requests on purpose, so the budget runs out.
+`just traffic` fails about 5% of requests on purpose and sends 4% the API refuses (422, 405), so the budget runs out.
 
 A worker is a process: with the GIL it gets about one core, so the CPU panel is in fractions of one
 core, not of the machine. One worker slower than the others, busier on CPU and preempted more often
@@ -312,7 +312,7 @@ sequenceDiagram
 | `GET /api/cpu?below=N` | `count primes` and its profile |
 | `GET /api/report/{id}` | all of the above, the fetches in parallel |
 | `GET /api/posts/1000` | a 404 from the source |
-| `GET /api/fail` | a 500: the exception on the span, the stack in the log |
+| `GET /api/fail?kind=…` | a 500 of the kind asked for — `runtime`, `invalid`, `lookup`, `timeout`, `permission`, each its own exception type: the exception on the span, the stack in the log |
 
 ## 💻 Servers
 
@@ -526,7 +526,7 @@ that lists the ones it does; `just` alone lists the commands.
 | `just dc up` · `down` · `ps` · `logs` | the stack in Compose; `just docker-compose …` is the same |
 | `just k3d up` · `down` · `ps` · `logs` | the stack in a k3d cluster |
 | `just dc logs api grafana` · `just k3d logs api` | the logs of chosen services only |
-| `just traffic` | requests at the running stack, either one: `RATE`, `DURATION`, and the mix — `CPU_PERCENT`, `REPORT_PERCENT`, `CPU_BELOW_MAX`; `API_WORKERS=8 just dc up` for a heavier one |
+| `just traffic` | requests at the running stack, either one: `RATE`, `DURATION`, and the mix — `CPU_PERCENT`, `REPORT_PERCENT`, `CPU_BELOW_MAX`, `FAIL_PERCENT`, `INVALID_PERCENT`; `API_WORKERS=8 just dc up` for a heavier one |
 | `just run gunicorn` | the application outside Docker, against the running stack |
 
 ## 🧱 Stack

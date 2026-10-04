@@ -1,8 +1,19 @@
 from __future__ import annotations
 
 import logging
-from enum import IntEnum, unique
+from enum import IntEnum, StrEnum, unique
 from typing import override
+
+
+@unique
+class Failure(StrEnum):
+    """A failure `/api/fail` raises on request: each one an exception type of its own."""
+
+    RUNTIME = "runtime"
+    INVALID = "invalid"
+    LOOKUP = "lookup"
+    TIMEOUT = "timeout"
+    PERMISSION = "permission"
 
 
 @unique

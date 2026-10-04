@@ -5,10 +5,12 @@
 #   RATE=10 DURATION=60 ./scripts/traffic.sh
 #   BASE_URL=http://localhost:8000 ./scripts/traffic.sh
 #   RATE=200 CPU_PERCENT=3 REPORT_PERCENT=3 CPU_BELOW_MAX=100000 ./scripts/traffic.sh
+#   FAIL_PERCENT=30 INVALID_PERCENT=20 ./scripts/traffic.sh   # an incident
 #
 # Handlers are picked by weight: mostly post reads, some reports, CPU work and new posts, now and
-# then a missing post (404) and a deliberate failure (500). Reports and CPU work cost CPU time —
-# about 0.3 s a report, up to a second /api/cpu — so a high rate needs a lighter mix or more workers.
+# then a missing post (404), a request the API refuses (422, 405) and a deliberate failure (500)
+# with one of five exception types. Reports and CPU work cost CPU time — about 0.3 s a report, up
+# to a second /api/cpu — so a high rate needs a lighter mix or more workers.
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
@@ -17,6 +19,11 @@ DURATION="${DURATION:-0}"
 CPU_PERCENT="${CPU_PERCENT:-17}"
 REPORT_PERCENT="${REPORT_PERCENT:-18}"
 CPU_BELOW_MAX="${CPU_BELOW_MAX:-390000}"
+FAIL_PERCENT="${FAIL_PERCENT:-5}"
+INVALID_PERCENT="${INVALID_PERCENT:-4}"
+
+# A runtime error most often, the rest of the kinds /api/fail knows now and then.
+FAILURES=(runtime runtime runtime invalid invalid lookup timeout permission)
 
 pause=$(awk -v rate="$RATE" 'BEGIN { printf "%.3f", 1 / rate }')
 started=$SECONDS
@@ -29,20 +36,31 @@ pick_request() {
   fi
 
   # Post reads take whatever share the others leave.
-  local roll=$((RANDOM % 100)) fail=5 list=10 create=10
-  if ((roll < fail)); then
-    echo "GET /api/fail"
-  elif ((roll < fail + list)); then
+  local roll=$((RANDOM % 100)) refused=$((FAIL_PERCENT + INVALID_PERCENT)) list=10 create=10
+  if ((roll < FAIL_PERCENT)); then
+    echo "GET /api/fail?kind=${FAILURES[RANDOM % ${#FAILURES[@]}]}"
+  elif ((roll < refused)); then
+    pick_invalid "$post_id"
+  elif ((roll < refused + list)); then
     echo "GET /api/posts"
-  elif ((roll < fail + list + create)); then
+  elif ((roll < refused + list + create)); then
     echo "POST /api/posts"
-  elif ((roll < fail + list + create + REPORT_PERCENT)); then
+  elif ((roll < refused + list + create + REPORT_PERCENT)); then
     echo "GET /api/report/${post_id}"
-  elif ((roll < fail + list + create + REPORT_PERCENT + CPU_PERCENT)); then
+  elif ((roll < refused + list + create + REPORT_PERCENT + CPU_PERCENT)); then
     echo "GET /api/cpu?below=$(((RANDOM % (CPU_BELOW_MAX / 10000 - 4) + 5) * 10000))"
   else
     echo "GET /api/posts/${post_id}"
   fi
+}
+
+# A request the API refuses before any handler runs: a bad parameter (422), a wrong method (405).
+pick_invalid() {
+  case $((RANDOM % 3)) in
+    0) echo "GET /api/posts/latest" ;;
+    1) echo "GET /api/cpu?below=$((CPU_BELOW_MAX * 100))" ;;
+    *) echo "DELETE /api/posts/$1" ;;
+  esac
 }
 
 # A new post with a body of 100 to 5000 characters: request sizes get a spread to show.

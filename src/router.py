@@ -13,6 +13,7 @@ from opentelemetry import trace
 from pydantic import BaseModel, ConfigDict
 
 from dependencies import Cache, Database, Http, SettingsDep
+from enums import Failure
 from observability import logger
 
 _SAVE_POST: Final = """
@@ -111,9 +112,29 @@ async def build_report(post_id: int, http: Http, cache: Cache, database: Databas
 
 
 @router.get("/api/fail", response_model=None)
-async def fail() -> NoReturn:
-    """Raise an unhandled error."""
-    raise RuntimeError("failure requested on purpose")
+async def fail(kind: Failure = Failure.RUNTIME) -> NoReturn:
+    """Raise an unhandled error of the kind asked for."""
+    raise _failure(kind)
+
+
+def _failure(kind: Failure) -> Exception:
+    """Return the exception a failure of this kind raises.
+
+    Example:
+        >>> _failure(Failure.LOOKUP)
+        KeyError('user_id')
+    """
+    match kind:
+        case Failure.RUNTIME:
+            return RuntimeError("failure requested on purpose")
+        case Failure.INVALID:
+            return ValueError("a post title cannot be empty")
+        case Failure.LOOKUP:
+            return KeyError("user_id")
+        case Failure.TIMEOUT:
+            return TimeoutError("JSONPlaceholder kept quiet past the deadline")
+        case Failure.PERMISSION:
+            return PermissionError("the posts of user 7 are private")
 
 
 def _count_primes(below: int) -> int:
