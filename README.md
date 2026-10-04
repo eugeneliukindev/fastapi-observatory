@@ -132,6 +132,7 @@ narrows the whole dashboard to itself, as Grafana's own operations tables do.
 | the Workers row | Percentiles — the same, for the workers' latency |
 | the Profiling row | Profile type |
 | the Traces row | Show — slow or failed at first, slow, failed or all |
+| the Logs row | Levels — DEBUG, INFO, WARNING, ERROR, CRITICAL, all at first |
 
 A row's picker reshapes its panel and nothing else: every status class at once, every percentile
 of the service and of each route.

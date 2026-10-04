@@ -3509,7 +3509,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (lvl) (count_over_time({service_name=\"$service\"} [$__interval]))",
+                        "expr": "sum by (lvl) (count_over_time({service_name=\"$service\", lvl=~\"${levels:regex}\"} [$__interval]))",
                         "legendFormat": "{{lvl}}",
                         "queryType": "range"
                       }
@@ -3668,7 +3668,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{service_name=\"$service\"} | json | label_format request=`{{if .path}}{{.method}} {{.path}}{{if .query}}?{{.query}}{{end}}{{end}}`, took=`{{if .duration_ms}}{{.duration_ms}} ms{{end}}` | line_format \"{{.msg}}{{if .error_type}} — {{.error_type}}: {{.error_message}}{{end}}\"",
+                        "expr": "{service_name=\"$service\", lvl=~\"${levels:regex}\"} | json | label_format request=`{{if .path}}{{.method}} {{.path}}{{if .query}}?{{.query}}{{end}}{{end}}`, took=`{{if .duration_ms}}{{.duration_ms}} ms{{end}}` | line_format \"{{.msg}}{{if .error_type}} — {{.error_type}}: {{.error_message}}{{end}}\"",
                         "queryType": "range"
                       }
                     },
@@ -5483,7 +5483,66 @@
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "levels",
+                              "query": "DEBUG,INFO,WARNING,ERROR,CRITICAL",
+                              "current": {
+                                "text": [
+                                  "DEBUG",
+                                  "INFO",
+                                  "WARNING",
+                                  "ERROR",
+                                  "CRITICAL"
+                                ],
+                                "value": [
+                                  "DEBUG",
+                                  "INFO",
+                                  "WARNING",
+                                  "ERROR",
+                                  "CRITICAL"
+                                ]
+                              },
+                              "options": [
+                                {
+                                  "selected": true,
+                                  "text": "DEBUG",
+                                  "value": "DEBUG"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "INFO",
+                                  "value": "INFO"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "WARNING",
+                                  "value": "WARNING"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "ERROR",
+                                  "value": "ERROR"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "CRITICAL",
+                                  "value": "CRITICAL"
+                                }
+                              ],
+                              "multi": true,
+                              "includeAll": false,
+                              "label": "级别",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "下方两个面板显示的日志级别。",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
