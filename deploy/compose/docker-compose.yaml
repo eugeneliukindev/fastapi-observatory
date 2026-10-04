@@ -1,4 +1,4 @@
-name: observatory
+name: fastapi-observatory
 
 services:
   victoriametrics:

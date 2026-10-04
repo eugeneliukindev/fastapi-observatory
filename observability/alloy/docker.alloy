@@ -10,7 +10,7 @@ discovery.docker "containers" {
   // Only this example's containers: other ones may live on the machine too.
   filter {
     name   = "label"
-    values = ["com.docker.compose.project=observatory"]
+    values = ["com.docker.compose.project=fastapi-observatory"]
   }
 }
 

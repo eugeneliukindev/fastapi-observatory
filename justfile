@@ -103,19 +103,19 @@ traffic:
 [group("kubernetes")]
 [doc("Run the stack in a local k3d cluster, building and importing the application's image")]
 k8s-up:
-    k3d cluster list observatory >/dev/null 2>&1 || k3d cluster create observatory --wait \
+    k3d cluster list fastapi-observatory >/dev/null 2>&1 || k3d cluster create fastapi-observatory --wait \
         --port 3000:3000@loadbalancer --port 8000:8000@loadbalancer \
         --port 12345:12345@loadbalancer --port 12347:12347@loadbalancer
     docker build --tag observatory-api:dev .
-    k3d image import observatory-api:dev --cluster observatory
+    k3d image import observatory-api:dev --cluster fastapi-observatory
     kubectl kustomize --load-restrictor LoadRestrictionsNone deploy/kubernetes \
-        | kubectl --context k3d-observatory apply --server-side --force-conflicts -f -
+        | kubectl --context k3d-fastapi-observatory apply --server-side --force-conflicts -f -
     # The tag stays `dev`: without a restart the pods keep the image they started with.
-    kubectl --context k3d-observatory --namespace observatory rollout restart deployment/api
-    kubectl --context k3d-observatory --namespace observatory rollout status deployment/api --timeout=5m
-    kubectl --context k3d-observatory --namespace observatory rollout status statefulset --timeout=5m
+    kubectl --context k3d-fastapi-observatory --namespace fastapi-observatory rollout restart deployment/api
+    kubectl --context k3d-fastapi-observatory --namespace fastapi-observatory rollout status deployment/api --timeout=5m
+    kubectl --context k3d-fastapi-observatory --namespace fastapi-observatory rollout status statefulset --timeout=5m
 
 [group("kubernetes")]
 [doc("Delete the k3d cluster with everything in it")]
 k8s-down:
-    k3d cluster delete observatory
+    k3d cluster delete fastapi-observatory

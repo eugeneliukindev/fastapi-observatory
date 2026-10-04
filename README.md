@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🔭 otel-observatory
+# 🔭 fastapi-observatory
 
 **A FastAPI service under a full observability stack — metrics · logs · traces · profiles · browser — in one `docker compose up`, or in Kubernetes.**
 
