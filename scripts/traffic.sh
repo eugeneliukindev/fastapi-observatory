@@ -4,14 +4,19 @@
 #   ./scripts/traffic.sh                 # 2 requests per second until stopped
 #   RATE=10 DURATION=60 ./scripts/traffic.sh
 #   BASE_URL=http://localhost:8000 ./scripts/traffic.sh
+#   RATE=200 CPU_PERCENT=3 REPORT_PERCENT=3 CPU_BELOW_MAX=100000 ./scripts/traffic.sh
 #
 # Handlers are picked by weight: mostly post reads, some reports, CPU work and new posts, now and
-# then a missing post (404) and a deliberate failure (500).
+# then a missing post (404) and a deliberate failure (500). Reports and CPU work cost CPU time —
+# about 0.3 s a report, up to a second /api/cpu — so a high rate needs a lighter mix or more workers.
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000}"
 RATE="${RATE:-2}"
 DURATION="${DURATION:-0}"
+CPU_PERCENT="${CPU_PERCENT:-17}"
+REPORT_PERCENT="${REPORT_PERCENT:-18}"
+CPU_BELOW_MAX="${CPU_BELOW_MAX:-390000}"
 
 pause=$(awk -v rate="$RATE" 'BEGIN { printf "%.3f", 1 / rate }')
 started=$SECONDS
@@ -23,19 +28,20 @@ pick_request() {
     post_id=1000
   fi
 
-  local roll=$((RANDOM % 100))
-  if ((roll < 40)); then
-    echo "GET /api/posts/${post_id}"
-  elif ((roll < 58)); then
-    echo "GET /api/report/${post_id}"
-  elif ((roll < 68)); then
-    echo "GET /api/posts"
-  elif ((roll < 78)); then
-    echo "POST /api/posts"
-  elif ((roll < 95)); then
-    echo "GET /api/cpu?below=$(((RANDOM % 35 + 5) * 10000))"
-  else
+  # Post reads take whatever share the others leave.
+  local roll=$((RANDOM % 100)) fail=5 list=10 create=10
+  if ((roll < fail)); then
     echo "GET /api/fail"
+  elif ((roll < fail + list)); then
+    echo "GET /api/posts"
+  elif ((roll < fail + list + create)); then
+    echo "POST /api/posts"
+  elif ((roll < fail + list + create + REPORT_PERCENT)); then
+    echo "GET /api/report/${post_id}"
+  elif ((roll < fail + list + create + REPORT_PERCENT + CPU_PERCENT)); then
+    echo "GET /api/cpu?below=$(((RANDOM % (CPU_BELOW_MAX / 10000 - 4) + 5) * 10000))"
+  else
+    echo "GET /api/posts/${post_id}"
   fi
 }
 
