@@ -121,6 +121,7 @@ and exception panels links to its traces or log lines — click it.
 | where | variables |
 |---|---|
 | the top of the dashboard | Metrics · Logs · Traces · Profiles · Service · Routes matching · Route · Method · Host · Apdex satisfied · Apdex tolerated · Slow trace |
+| the Status codes row | Status codes — the classes its panel draws, 4xx and 5xx at first |
 | the Profiling row | Profile type |
 
 The order is the order of an investigation: is the service fine, which requests suffer, is the
@@ -130,7 +131,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 |---|---|---|
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | Requests | Traffic | RPS by route, the total over them and the total yesterday |
-| | Error responses | RPS of the 4xx and 5xx of each route, and their totals |
+| | Status codes | RPS of the classes picked, a total per class and a line per route and code |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
@@ -173,7 +174,7 @@ heartbeat.
 <summary><b>Requests</b></summary>
 
 ![Traffic](docs/screenshots/19-dashboard-traffic.png)
-![Error responses and exceptions](docs/screenshots/04-dashboard-errors.png)
+![Status codes and exceptions](docs/screenshots/04-dashboard-errors.png)
 ![Latency](docs/screenshots/02-dashboard-latency.png)
 ![Payload](docs/screenshots/03-dashboard-payload.png)
 </details>

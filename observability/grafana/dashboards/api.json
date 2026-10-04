@@ -4602,12 +4602,12 @@
           }
         }
       },
-      "rps-4xx-5xx-total-and-by-route": {
+      "rps-by-status-class-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS 4xx · 5xx — total · by route",
-          "description": "4xx and 5xx of every route, a thin line per code — 4xx dashed orange, 5xx red; the thick lines are their totals. Click a series for its traces.",
+          "title": "RPS ${codes:text} — total · by route",
+          "description": "The classes picked in `Status codes`: a thick line per class, its total — 2xx green · 3xx blue · 4xx dashed orange · 5xx red — and a thin one per route and code. With 2xx picked, 2xx sets the scale. Click a series for its traces.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4625,9 +4625,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..\"}[$__rate_interval]))",
+                        "expr": "sum by (class) (label_replace(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"${codes:pipe}\"}[$__rate_interval]), \"class\", \"$1\", \"http_response_status_code\", \"(.)..\"))",
                         "instant": false,
-                        "legendFormat": "4xx total",
+                        "legendFormat": "{{class}}xx total",
                         "range": true
                       }
                     },
@@ -4647,35 +4647,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "5xx total",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval]))",
+                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"${codes:pipe}\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_response_status_code}} {{http_route}}",
                         "range": true
                       }
                     },
-                    "refId": "C",
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4735,6 +4713,36 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
+                      "options": "2.. .*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "3.. .*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "blue"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
                       "options": "4.. .*"
                     },
                     "properties": [
@@ -4775,7 +4783,7 @@
                   {
                     "matcher": {
                       "id": "byFrameRefID",
-                      "options": "C"
+                      "options": "B"
                     },
                     "properties": [
                       {
@@ -4797,23 +4805,6 @@
                     },
                     "properties": [
                       {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "orange"
-                        }
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            10,
-                            6
-                          ]
-                        }
-                      },
-                      {
                         "id": "custom.lineWidth",
                         "value": 3
                       },
@@ -4822,41 +4813,8 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "Traces with a 4xx code",
-                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.response.status_code%20%3E%3D%20400%20%26%26%20span.http.response.status_code%20%3C%20500%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "B"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
-                      },
-                      {
-                        "id": "links",
-                        "value": [
-                          {
-                            "targetBlank": false,
-                            "title": "Traces with a 5xx code",
-                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.response.status_code%20%3E%3D%20500%20%26%26%20span.http.response.status_code%20%3C%20600%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                            "title": "Traces with a code of this class",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.response.status_code%20%3E%3D%20${__field.labels.class}00%20%26%26%20span.http.response.status_code%20%3C%3D%20${__field.labels.class}99%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
                       }
@@ -5018,7 +4976,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Error responses",
+                        "title": "Status codes",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5033,13 +4991,61 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "rps-4xx-5xx-total-and-by-route"
+                                    "name": "rps-by-status-class-total-and-by-route"
                                   }
                                 }
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "codes",
+                              "query": "2xx : 2..,3xx : 3..,4xx : 4..,5xx : 5..",
+                              "current": {
+                                "text": [
+                                  "4xx",
+                                  "5xx"
+                                ],
+                                "value": [
+                                  "4..",
+                                  "5.."
+                                ]
+                              },
+                              "options": [
+                                {
+                                  "selected": false,
+                                  "text": "2xx",
+                                  "value": "2.."
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "3xx",
+                                  "value": "3.."
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "4xx",
+                                  "value": "4.."
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "5xx",
+                                  "value": "5.."
+                                }
+                              ],
+                              "multi": true,
+                              "includeAll": false,
+                              "label": "Status codes",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "The classes the panel below draws.",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
                       }
                     },
                     {
