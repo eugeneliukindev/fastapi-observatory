@@ -131,7 +131,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | Requests | Traffic | RPS total, against the same hour yesterday · by route |
 | | Status codes | RPS by code, coloured by class · errors by route and code |
-| | Exceptions | by type · each message with its type, route and count — from the log |
+| | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |

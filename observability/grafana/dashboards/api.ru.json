@@ -1783,12 +1783,12 @@
           }
         }
       },
-      "exceptions-by-type": {
+      "exceptions-by-route-and-type": {
         "kind": "Panel",
         "spec": {
           "id": 25,
-          "title": "Исключения — по типам",
-          "description": "Необработанные исключения из журнала запросов, по серии на тип: новый тип после выкатки сразу заметен. Какие маршруты их бросают и с каким текстом — в таблице сообщений рядом.",
+          "title": "Исключения — по маршрутам и типам",
+          "description": "Необработанные исключения из журнала запросов, по серии на пару «маршрут · тип» — /api/fail · RuntimeError. В легенде первые 8; «глаз» отфильтрует остальные по маршруту или типу. Сообщения и количество — в таблице рядом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1806,8 +1806,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (error_type) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
-                        "legendFormat": "{{error_type}}",
+                        "expr": "sum by (route, error_type) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
+                        "legendFormat": "{{route}} · {{error_type}}",
                         "queryType": "range"
                       }
                     },
@@ -1852,13 +1852,13 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Строки лога с этим исключением",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Строки лога с этим исключением на этом маршруте",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%20%7C%20route%3D%5C%22${__field.labels.route:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Трейсы с этим исключением",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Трейсы с этим исключением на этом маршруте",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20span.http.route%3D%5C%22${__field.labels.route:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
                   "custom": {
@@ -5139,7 +5139,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "exceptions-by-type"
+                                    "name": "exceptions-by-route-and-type"
                                   }
                                 }
                               },
