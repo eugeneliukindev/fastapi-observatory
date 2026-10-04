@@ -37,7 +37,7 @@
         "kind": "Panel",
         "spec": {
           "id": 50,
-          "title": "Throughput",
+          "title": "RPS",
           "description": "Requests per second now, and how it moved over the range.",
           "links": [],
           "data": {
@@ -572,7 +572,7 @@
         "spec": {
           "id": 56,
           "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces.",
+          "description": "Every route over the selected range: its traffic trend, requests, share of 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces or its RPS, large and with values.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -814,7 +814,7 @@
             "version": "",
             "spec": {
               "options": {
-                "cellHeight": "sm",
+                "cellHeight": "md",
                 "footer": {
                   "show": false
                 },
@@ -844,6 +844,11 @@
                             "targetBlank": false,
                             "title": "Traces of this route",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                          },
+                          {
+                            "targetBlank": false,
+                            "title": "RPS of this route",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
                       },
@@ -1215,7 +1220,7 @@
         "kind": "Panel",
         "spec": {
           "id": 59,
-          "title": "Burn rate",
+          "title": "Burn rate — 1 h · 6 h",
           "description": "How fast the 7-day error budget burns: 1× spends it exactly in 7 days. Red at 3.36× over 1 h (2% of the budget in an hour) and 1.4× over 6 h (5% in six hours).",
           "links": [],
           "data": {
@@ -1474,7 +1479,7 @@
         "kind": "Panel",
         "spec": {
           "id": 66,
-          "title": "Availability vs objective",
+          "title": "Availability — vs objective",
           "description": "Share of requests not answered with 5xx, against the availability target `$slo`.",
           "links": [],
           "data": {
@@ -1612,7 +1617,7 @@
         "kind": "Panel",
         "spec": {
           "id": 67,
-          "title": "Error budget left over time",
+          "title": "Error budget left — over time",
           "description": "The 7-day error budget still unspent at each moment: falling means burning.",
           "links": [],
           "data": {
@@ -2002,8 +2007,8 @@
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — top 8 routes",
-          "description": "Requests per second of the 8 busiest routes over the range. Every route is in the Routes table.",
+          "title": "RPS — by route",
+          "description": "Requests per second per route.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2021,7 +2026,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -2244,8 +2249,8 @@
         "kind": "Panel",
         "spec": {
           "id": 23,
-          "title": "Errors by route and code — top 8 routes",
-          "description": "Client and server errors of the 8 routes that failed most over the range, one series per code: 4xx dashed orange, 5xx red. Click a series for the traces of that route with that code.",
+          "title": "RPS — errors by route and code",
+          "description": "Client and server errors of every route, one series per code: 4xx dashed orange, 5xx red. Click a series for the traces of that route with that code.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2263,7 +2268,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_response_status_code}} {{http_route}}",
                         "range": true
@@ -2388,8 +2393,8 @@
         "kind": "Panel",
         "spec": {
           "id": 65,
-          "title": "5xx ratio by route — routes with 5xx",
-          "description": "Share of server errors over time, for the 8 routes with the most 5xx over the range; a route without any is not drawn. Orange above 1% · red above 5%.",
+          "title": "5xx ratio — by route",
+          "description": "Share of server errors per route over time. Orange above 1% · red above 5%.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2407,7 +2412,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "((sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) (topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__range] @ end()))) > 0)",
+                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -2479,7 +2484,7 @@
         "kind": "Panel",
         "spec": {
           "id": 25,
-          "title": "Exceptions by type and route",
+          "title": "Exceptions — by type and route",
           "description": "Unhandled exceptions from the access log, one series per type and route — the `route` field is the template the metrics call `http_route`.",
           "links": [],
           "data": {
@@ -2574,7 +2579,7 @@
         "kind": "Panel",
         "spec": {
           "id": 78,
-          "title": "Exception messages",
+          "title": "Exceptions — messages",
           "description": "Every exception over the selected range: its type, route and message, most frequent first. Click a message for its log lines and their stacks.",
           "links": [],
           "data": {
@@ -2963,7 +2968,7 @@
         "kind": "Panel",
         "spec": {
           "id": 55,
-          "title": "Latency distribution",
+          "title": "Latency — distribution",
           "description": "How many requests finished in each duration bucket over time: the darker the cell, the more requests. The tail shows above the P95 line it summarises.",
           "links": [],
           "data": {
@@ -3059,8 +3064,8 @@
         "kind": "Panel",
         "spec": {
           "id": 27,
-          "title": "P95 by route — slowest 8, with exemplars",
-          "description": "TraceQL metrics from Tempo for the 8 slowest routes at each moment: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
+          "title": "P95 latency — by route, with exemplars",
+          "description": "TraceQL metrics from Tempo: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3079,7 +3084,7 @@
                       "spec": {
                         "exemplars": 20,
                         "metricsQueryType": "range",
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route) | topk(8)",
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route)",
                         "queryType": "traceql",
                         "step": "1m"
                       }
@@ -3151,7 +3156,7 @@
         "kind": "Panel",
         "spec": {
           "id": 19,
-          "title": "Throughput — bytes per second",
+          "title": "Bytes per second — received · sent",
           "description": "Request and response bodies. Received counts only requests with a body and a `Content-Length` header.",
           "links": [],
           "data": {
@@ -3254,8 +3259,8 @@
         "kind": "Panel",
         "spec": {
           "id": 20,
-          "title": "Request size — P95, top 8 routes",
-          "description": "Only requests with a body are measured: here, `POST /api/posts`. The 8 busiest such routes over the range.",
+          "title": "Request size P95 — by route",
+          "description": "Only requests with a body are measured: here, `POST /api/posts`.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3273,7 +3278,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -3335,8 +3340,8 @@
         "kind": "Panel",
         "spec": {
           "id": 21,
-          "title": "Response size — P95, top 8 routes",
-          "description": "The 8 busiest routes over the range.",
+          "title": "Response size P95 — by route",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3354,7 +3359,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_response_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -3416,8 +3421,8 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Request share — busiest and idlest worker",
-          "description": "The largest and the smallest share of the requests any one worker took. Both on the dashed even split means balance; far apart means one worker is starved or overloaded.",
+          "title": "Request share — by worker",
+          "description": "Each worker's share of the requests. The dashed line is an even split: a worker far from it is starved or overloaded.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3435,9 +3440,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
+                        "expr": "sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
-                        "legendFormat": "busiest worker",
+                        "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
@@ -3464,28 +3469,6 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "min(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
-                        "instant": false,
-                        "legendFormat": "idlest worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
                     "hidden": false
                   }
                 }
@@ -3583,8 +3566,8 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 — slowest 5 workers",
-          "description": "95th percentile of request duration of the 5 slowest workers over the range, and of all of them together: one worker slower than the rest is hidden in the total.",
+          "title": "P95 latency — by worker",
+          "description": "95th percentile of request duration per worker: one worker slower than the rest is hidden in the total.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3602,7 +3585,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (instance) topk(5, histogram_quantile(0.95, sum by (instance, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end()))))",
+                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
@@ -3693,8 +3676,8 @@
         "kind": "Panel",
         "spec": {
           "id": 72,
-          "title": "In flight — all workers and the busiest 5",
-          "description": "Requests being handled right now: all workers together, expected ≈ RPS × mean duration (Little's law), and the 5 workers with the highest peak. The OpenTelemetry gauge has no route label.",
+          "title": "In flight — by worker",
+          "description": "Requests being handled right now, stacked by worker: the top is the total, expected ≈ RPS × mean duration (Little's law). The OpenTelemetry gauge has no route label.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3712,35 +3695,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
-                        "instant": false,
-                        "legendFormat": "all workers",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, sum by (instance) (max_over_time(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
-                    "refId": "B",
+                    "refId": "A",
                     "hidden": false
                   }
                 }
@@ -3783,14 +3744,14 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 10,
+                    "fillOpacity": 40,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
-                      "mode": "none"
+                      "mode": "normal"
                     }
                   }
                 },
@@ -3804,8 +3765,8 @@
         "kind": "Panel",
         "spec": {
           "id": 73,
-          "title": "CPU — busiest 5 workers, one core is 100%",
-          "description": "CPU time per second of the 5 busiest workers over the range, and of the median one. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
+          "title": "CPU — by worker, one core is 100%",
+          "description": "CPU time per second of each worker. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3823,35 +3784,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "median worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -3935,8 +3874,8 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Involuntary context switches — top 5 workers",
-          "description": "How often the kernel takes the CPU away from a worker mid-work, for the 5 workers preempted most and the median one. A rise means workers compete for the CPU.",
+          "title": "Involuntary context switches — by worker",
+          "description": "How often the kernel takes the CPU away from a worker mid-work. A rise means workers compete for the CPU.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3954,35 +3893,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "median worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4045,7 +3962,7 @@
         "kind": "Panel",
         "spec": {
           "id": 75,
-          "title": "Worker starts",
+          "title": "Worker starts — per minute",
           "description": "Workers that appeared in each minute: a deploy, a crash or a recycle. A steady trickle with no deploy behind it is a worker dying.",
           "links": [],
           "data": {
@@ -4124,7 +4041,7 @@
         "kind": "Panel",
         "spec": {
           "id": 76,
-          "title": "Workers replaced",
+          "title": "Workers replaced — over the range",
           "description": "Workers seen over the range minus the ones that reported in the last minute: each is a crash, a recycle, or a container or pod replaced.",
           "links": [],
           "data": {
@@ -4212,8 +4129,8 @@
         "kind": "Panel",
         "spec": {
           "id": 40,
-          "title": "Memory — largest 5 workers",
-          "description": "Resident memory of the 5 largest workers over the range, and of the median one. A line that only climbs is a leak.",
+          "title": "Memory — by worker",
+          "description": "Resident memory of each worker process. A line that only climbs is a leak.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4231,35 +4148,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "median worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4315,8 +4210,8 @@
         "kind": "Panel",
         "spec": {
           "id": 41,
-          "title": "Threads — top 5 workers",
-          "description": "Threads of the 5 workers with the most, and of the median one: the event loop, the exporters, gRPC and the profiler.",
+          "title": "Threads — by worker",
+          "description": "Threads of each worker: the event loop, the exporters, gRPC and the profiler.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4334,35 +4229,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "median worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4419,8 +4292,8 @@
         "kind": "Panel",
         "spec": {
           "id": 42,
-          "title": "Open file descriptors — top 5 workers",
-          "description": "Sockets and files held open by the 5 workers with the most, and by the median one.",
+          "title": "Open file descriptors — by worker",
+          "description": "Sockets and files each worker holds open.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4438,35 +4311,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "median worker",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4604,7 +4455,7 @@
         "kind": "Panel",
         "spec": {
           "id": 35,
-          "title": "Flame graph",
+          "title": "CPU profile — flame graph",
           "description": "`count primes` from /api/cpu and /api/report is the widest frame here.",
           "links": [],
           "data": {
@@ -4655,7 +4506,7 @@
         "kind": "Panel",
         "spec": {
           "id": 28,
-          "title": "Recent traces",
+          "title": "Traces — recent",
           "description": "Open a trace: from a span to its log lines, its profile and the metrics of its operation.",
           "links": [],
           "data": {
@@ -4770,7 +4621,7 @@
         "kind": "Panel",
         "spec": {
           "id": 29,
-          "title": "Slow and failed",
+          "title": "Traces — slow and failed",
           "description": "Slower than the `Slow trace` threshold, or failed.",
           "links": [],
           "data": {
@@ -4883,7 +4734,7 @@
         "kind": "Panel",
         "spec": {
           "id": 31,
-          "title": "Lines by level",
+          "title": "Log lines — by level",
           "description": "",
           "links": [],
           "data": {
@@ -5042,7 +4893,7 @@
         "kind": "Panel",
         "spec": {
           "id": 32,
-          "title": "Log stream",
+          "title": "Log lines — stream",
           "description": "Expand a line: `trace_id` leads to the trace, `request_id` to every line of the request.",
           "links": [],
           "data": {
@@ -5099,7 +4950,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1050,
-          "title": "Поток запросов",
+          "title": "RPS",
           "description": "Запросов в секунду сейчас и как это менялось за выбранный период.",
           "links": [],
           "data": {
@@ -5634,7 +5485,7 @@
         "spec": {
           "id": 1056,
           "title": "Маршруты",
-          "description": "Каждый маршрут за выбранный период: динамика трафика, число запросов, доли 4xx и 5xx, средняя длительность, P95 и P99. Среднее сильно ниже P95 — значит, длинный хвост. Нажмите на маршрут, чтобы открыть его трейсы.",
+          "description": "Каждый маршрут за выбранный период: динамика трафика, число запросов, доли 4xx и 5xx, средняя длительность, P95 и P99. Среднее сильно ниже P95 — значит, длинный хвост. Нажмите на маршрут, чтобы открыть его трейсы или его RPS — крупно и со значениями.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5876,7 +5727,7 @@
             "version": "",
             "spec": {
               "options": {
-                "cellHeight": "sm",
+                "cellHeight": "md",
                 "footer": {
                   "show": false
                 },
@@ -5906,6 +5757,11 @@
                             "targetBlank": false,
                             "title": "Трейсы этого маршрута",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                          },
+                          {
+                            "targetBlank": false,
+                            "title": "RPS этого маршрута",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
                       },
@@ -6277,7 +6133,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1059,
-          "title": "Скорость сжигания",
+          "title": "Скорость сжигания — 1 ч · 6 ч",
           "description": "Как быстро сгорает семидневный бюджет ошибок: при 1× он уходит ровно за 7 дней. Красный при 3.36× за 1 ч (2% бюджета за час) и 1.4× за 6 ч (5% за шесть часов).",
           "links": [],
           "data": {
@@ -6536,7 +6392,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1066,
-          "title": "Доступность и цель",
+          "title": "Доступность — относительно цели",
           "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`.",
           "links": [],
           "data": {
@@ -6674,7 +6530,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1067,
-          "title": "Остаток бюджета ошибок во времени",
+          "title": "Остаток бюджета ошибок — во времени",
           "description": "Сколько семидневного бюджета ошибок не потрачено в каждый момент: снижение — значит, бюджет сгорает.",
           "links": [],
           "data": {
@@ -7064,8 +6920,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1007,
-          "title": "RPS — топ-8 маршрутов",
-          "description": "Запросов в секунду у 8 самых нагруженных маршрутов за период. Все маршруты — в таблице «Маршруты».",
+          "title": "RPS — по маршрутам",
+          "description": "Запросов в секунду на каждый маршрут.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -7083,7 +6939,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -7306,8 +7162,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1023,
-          "title": "Ошибки по маршрутам и кодам — топ-8 маршрутов",
-          "description": "Ошибки клиента и сервера у 8 маршрутов, которые чаще всего ошибались за период, по серии на код: 4xx — оранжевый пунктир, 5xx — красный. Нажмите на серию, чтобы открыть трейсы этого маршрута с этим кодом.",
+          "title": "RPS — ошибки по маршрутам и кодам",
+          "description": "Ошибки клиента и сервера на каждом маршруте, по серии на код: 4xx — оранжевый пунктир, 5xx — красный. Нажмите на серию, чтобы открыть трейсы этого маршрута с этим кодом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -7325,7 +7181,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_response_status_code}} {{http_route}}",
                         "range": true
@@ -7450,8 +7306,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1065,
-          "title": "Доля 5xx по маршрутам — маршруты с 5xx",
-          "description": "Доля серверных ошибок во времени у 8 маршрутов с наибольшим числом 5xx за период; маршрут без 5xx не рисуется. Оранжевый выше 1% · красный выше 5%.",
+          "title": "Доля 5xx — по маршрутам",
+          "description": "Доля серверных ошибок на каждом маршруте во времени. Оранжевый выше 1% · красный выше 5%.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -7469,7 +7325,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "((sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) (topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__range] @ end()))) > 0)",
+                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -7541,7 +7397,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1025,
-          "title": "Исключения по типам и маршрутам",
+          "title": "Исключения — по типам и маршрутам",
           "description": "Необработанные исключения из журнала запросов, по серии на пару «тип · маршрут»; поле `route` — тот же шаблон, что в метриках называется `http_route`.",
           "links": [],
           "data": {
@@ -7636,7 +7492,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1078,
-          "title": "Сообщения исключений",
+          "title": "Исключения — сообщения",
           "description": "Все исключения за выбранный период: тип, маршрут и сообщение, сначала самые частые. Нажмите на сообщение, чтобы открыть строки лога со стеком.",
           "links": [],
           "data": {
@@ -8025,7 +7881,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1055,
-          "title": "Распределение задержки",
+          "title": "Задержка — распределение",
           "description": "Сколько запросов завершилось в каждом интервале длительности во времени: чем темнее ячейка, тем больше запросов. Хвост виден выше линии P95, которая его обобщает.",
           "links": [],
           "data": {
@@ -8121,8 +7977,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1027,
-          "title": "P95 по маршрутам — 8 самых медленных, с экземплярами",
-          "description": "Метрики TraceQL из Tempo для 8 самых медленных маршрутов в каждый момент: каждая точка — экземпляр, то есть настоящий запрос; нажмите на неё, чтобы открыть его трейс. Считается по спанам, поэтому может немного расходиться с перцентилями гистограммы рядом.",
+          "title": "Задержка P95 — по маршрутам, с экземплярами",
+          "description": "Метрики TraceQL из Tempo: каждая точка — экземпляр, то есть настоящий запрос; нажмите на неё, чтобы открыть его трейс. Считается по спанам, поэтому может немного расходиться с перцентилями гистограммы рядом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8141,7 +7997,7 @@
                       "spec": {
                         "exemplars": 20,
                         "metricsQueryType": "range",
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route) | topk(8)",
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route)",
                         "queryType": "traceql",
                         "step": "1m"
                       }
@@ -8213,7 +8069,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1019,
-          "title": "Поток данных — байт в секунду",
+          "title": "Байт в секунду — получено · отправлено",
           "description": "Тела запросов и ответов. В «получено» считаются только запросы с телом и заголовком `Content-Length`.",
           "links": [],
           "data": {
@@ -8316,8 +8172,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1020,
-          "title": "Размер запроса — P95, топ-8 маршрутов",
-          "description": "Измеряются только запросы с телом: здесь это `POST /api/posts`. 8 самых нагруженных таких маршрутов за период.",
+          "title": "Размер запроса P95 — по маршрутам",
+          "description": "Измеряются только запросы с телом: здесь это `POST /api/posts`.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8335,7 +8191,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -8397,8 +8253,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1021,
-          "title": "Размер ответа — P95, топ-8 маршрутов",
-          "description": "8 самых нагруженных маршрутов за период.",
+          "title": "Размер ответа P95 — по маршрутам",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8416,7 +8272,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_response_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -8478,8 +8334,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1070,
-          "title": "Доля запросов — самый загруженный и самый свободный воркер",
-          "description": "Наибольшая и наименьшая доля запросов, доставшаяся одному воркеру. Обе на пунктире равного деления — нагрузка ровная; далеко друг от друга — какой-то воркер недогружен или перегружен.",
+          "title": "Доля запросов — по воркерам",
+          "description": "Доля запросов каждого воркера. Пунктир — равное деление: воркер далеко от него недогружен или перегружен.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8497,9 +8353,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
+                        "expr": "sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
-                        "legendFormat": "самый загруженный",
+                        "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
@@ -8526,28 +8382,6 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "min(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
-                        "instant": false,
-                        "legendFormat": "самый свободный",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
                     "hidden": false
                   }
                 }
@@ -8645,8 +8479,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1071,
-          "title": "P95 — 5 самых медленных воркеров",
-          "description": "95-й перцентиль длительности запроса у 5 самых медленных воркеров за период и у всех вместе: один воркер медленнее остальных не виден в общей цифре.",
+          "title": "Задержка P95 — по воркерам",
+          "description": "95-й перцентиль длительности запроса на каждом воркере: один воркер медленнее остальных не виден в общей цифре.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8664,7 +8498,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (instance) topk(5, histogram_quantile(0.95, sum by (instance, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end()))))",
+                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
@@ -8755,8 +8589,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1072,
-          "title": "В обработке — все воркеры и 5 самых загруженных",
-          "description": "Запросы, которые обрабатываются прямо сейчас: все воркеры вместе, ожидаемо ≈ RPS × средняя длительность (закон Литтла), и 5 воркеров с самым высоким пиком. У этого gauge в OpenTelemetry нет метки маршрута.",
+          "title": "В обработке — по воркерам",
+          "description": "Запросы, которые обрабатываются прямо сейчас, стопкой по воркерам: верх стопки — общее число, ожидаемо ≈ RPS × средняя длительность (закон Литтла). У этого gauge в OpenTelemetry нет метки маршрута.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8774,35 +8608,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
-                        "instant": false,
-                        "legendFormat": "все воркеры",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, sum by (instance) (max_over_time(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
-                    "refId": "B",
+                    "refId": "A",
                     "hidden": false
                   }
                 }
@@ -8845,14 +8657,14 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 10,
+                    "fillOpacity": 40,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
-                      "mode": "none"
+                      "mode": "normal"
                     }
                   }
                 },
@@ -8866,8 +8678,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1073,
-          "title": "CPU — 5 самых загруженных воркеров, одно ядро это 100%",
-          "description": "Время CPU за секунду у 5 самых загруженных воркеров за период и у медианного. GIL ограничивает воркер на Python примерно одним ядром: оранжевый от 80%, красный на 100% — воркер загружен полностью, как бы ни простаивал хост.",
+          "title": "CPU — по воркерам, одно ядро это 100%",
+          "description": "Время CPU за секунду у каждого воркера. GIL ограничивает воркер на Python примерно одним ядром: оранжевый от 80%, красный на 100% — воркер загружен полностью, как бы ни простаивал хост.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8885,35 +8697,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "медианный воркер",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -8997,8 +8787,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1074,
-          "title": "Принудительные переключения контекста — топ-5 воркеров",
-          "description": "Как часто ядро ОС отбирает CPU у воркера посреди работы — у 5 самых вытесняемых воркеров и у медианного. Рост означает, что воркеры борются за CPU.",
+          "title": "Принудительные переключения контекста — по воркерам",
+          "description": "Как часто ядро ОС отбирает CPU у воркера посреди работы. Рост означает, что воркеры борются за CPU.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -9016,35 +8806,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "медианный воркер",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -9107,7 +8875,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1075,
-          "title": "Старты воркеров",
+          "title": "Старты воркеров — в минуту",
           "description": "Воркеры, появившиеся за каждую минуту: выкатка, падение или плановая замена. Постоянный поток стартов без выкатки — значит, воркеры умирают.",
           "links": [],
           "data": {
@@ -9186,7 +8954,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1076,
-          "title": "Заменено воркеров",
+          "title": "Заменено воркеров — за период",
           "description": "Воркеры, замеченные за период, минус те, что присылали метрики за последнюю минуту: каждый — это падение, плановая замена или замена контейнера или пода.",
           "links": [],
           "data": {
@@ -9274,8 +9042,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1040,
-          "title": "Память — 5 самых больших воркеров",
-          "description": "Резидентная память 5 самых больших воркеров за период и медианного. Линия, которая только растёт, — это утечка.",
+          "title": "Память — по воркерам",
+          "description": "Резидентная память каждого процесса-воркера. Линия, которая только растёт, — это утечка.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -9293,35 +9061,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "медианный воркер",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -9377,8 +9123,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1041,
-          "title": "Потоки — топ-5 воркеров",
-          "description": "Потоки 5 воркеров, у которых их больше всего, и медианного: цикл событий, экспортёры, gRPC и профилировщик.",
+          "title": "Потоки — по воркерам",
+          "description": "Потоки каждого воркера: цикл событий, экспортёры, gRPC и профилировщик.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -9396,35 +9142,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "медианный воркер",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -9481,8 +9205,8 @@
         "kind": "Panel",
         "spec": {
           "id": 1042,
-          "title": "Открытые файловые дескрипторы — топ-5 воркеров",
-          "description": "Сокеты и файлы, открытые у 5 воркеров, у которых их больше всего, и у медианного.",
+          "title": "Открытые файловые дескрипторы — по воркерам",
+          "description": "Сокеты и файлы, которые держит открытыми каждый воркер.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -9500,35 +9224,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "медианный воркер",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -9666,7 +9368,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1035,
-          "title": "Флейм-граф",
+          "title": "Профиль CPU — флейм-граф",
           "description": "Самый широкий фрейм здесь — `count primes` из /api/cpu и /api/report.",
           "links": [],
           "data": {
@@ -9717,7 +9419,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1028,
-          "title": "Последние трейсы",
+          "title": "Трейсы — последние",
           "description": "Откройте трейс: от спана можно перейти к его строкам лога, профилю и метрикам его операции.",
           "links": [],
           "data": {
@@ -9832,7 +9534,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1029,
-          "title": "Медленные и с ошибкой",
+          "title": "Трейсы — медленные и с ошибкой",
           "description": "Медленнее порога `Медленный трейс` или завершились ошибкой.",
           "links": [],
           "data": {
@@ -9945,7 +9647,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1031,
-          "title": "Строки по уровням",
+          "title": "Строки лога — по уровням",
           "description": "",
           "links": [],
           "data": {
@@ -10104,7 +9806,7 @@
         "kind": "Panel",
         "spec": {
           "id": 1032,
-          "title": "Поток логов",
+          "title": "Строки лога — поток",
           "description": "Раскройте строку: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса.",
           "links": [],
           "data": {
@@ -10161,7 +9863,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2050,
-          "title": "吞吐量",
+          "title": "RPS",
           "description": "当前每秒请求数，以及它在所选时间范围内的变化。",
           "links": [],
           "data": {
@@ -10696,7 +10398,7 @@
         "spec": {
           "id": 2056,
           "title": "路由",
-          "description": "所选时间范围内的每条路由：流量趋势、请求数、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由查看其追踪。",
+          "description": "所选时间范围内的每条路由：流量趋势、请求数、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可查看其追踪，或放大查看其 RPS 及具体数值。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -10938,7 +10640,7 @@
             "version": "",
             "spec": {
               "options": {
-                "cellHeight": "sm",
+                "cellHeight": "md",
                 "footer": {
                   "show": false
                 },
@@ -10968,6 +10670,11 @@
                             "targetBlank": false,
                             "title": "该路由的追踪",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                          },
+                          {
+                            "targetBlank": false,
+                            "title": "该路由的 RPS",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
                       },
@@ -11339,7 +11046,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2059,
-          "title": "消耗速率",
+          "title": "消耗速率 — 1 小时 · 6 小时",
           "description": "7 天错误预算的消耗速度：1× 表示恰好 7 天耗尽。1 小时窗口达到 3.36×（一小时耗掉 2% 预算）或 6 小时窗口达到 1.4×（六小时耗掉 5%）时为红色。",
           "links": [],
           "data": {
@@ -11598,7 +11305,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2066,
-          "title": "可用性与目标",
+          "title": "可用性 — 对照目标",
           "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照。",
           "links": [],
           "data": {
@@ -11736,7 +11443,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2067,
-          "title": "剩余错误预算随时间变化",
+          "title": "剩余错误预算 — 随时间变化",
           "description": "每个时刻尚未用掉的 7 天错误预算：下降即表示正在消耗。",
           "links": [],
           "data": {
@@ -12126,8 +11833,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2007,
-          "title": "RPS — 前 8 条路由",
-          "description": "所选时间范围内最繁忙的 8 条路由的每秒请求数。全部路由见“路由”表。",
+          "title": "RPS — 按路由",
+          "description": "每条路由的每秒请求数。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -12145,7 +11852,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -12368,8 +12075,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2023,
-          "title": "按路由和状态码的错误 — 前 8 条路由",
-          "description": "所选时间范围内出错最多的 8 条路由的客户端和服务端错误，每个状态码一条序列：4xx 为橙色虚线，5xx 为红色。点击序列查看该路由在该状态码下的追踪。",
+          "title": "RPS — 按路由和状态码的错误",
+          "description": "每条路由的客户端和服务端错误，每个状态码一条序列：4xx 为橙色虚线，5xx 为红色。点击序列查看该路由在该状态码下的追踪。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -12387,7 +12094,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__range] @ end())))",
+                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_response_status_code}} {{http_route}}",
                         "range": true
@@ -12512,8 +12219,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2065,
-          "title": "按路由的 5xx 比例 — 出现 5xx 的路由",
-          "description": "所选时间范围内 5xx 最多的 8 条路由的服务端错误占比随时间变化；没有 5xx 的路由不显示。高于 1% 为橙色 · 高于 5% 为红色。",
+          "title": "5xx 比例 — 按路由",
+          "description": "每条路由的服务端错误占比随时间变化。高于 1% 为橙色 · 高于 5% 为红色。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -12531,7 +12238,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "((sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) (topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__range] @ end()))) > 0)",
+                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -12603,7 +12310,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2025,
-          "title": "按类型和路由统计的异常",
+          "title": "异常 — 按类型和路由",
           "description": "来自访问日志的未处理异常，每个“类型 · 路由”组合一条序列；`route` 字段即指标中称为 `http_route` 的路由模板。",
           "links": [],
           "data": {
@@ -12698,7 +12405,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2078,
-          "title": "异常消息",
+          "title": "异常 — 消息",
           "description": "所选时间范围内的全部异常：类型、路由和消息，最常见的排在前面。点击消息查看对应日志行及其堆栈。",
           "links": [],
           "data": {
@@ -13087,7 +12794,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2055,
-          "title": "延迟分布",
+          "title": "延迟 — 分布",
           "description": "随时间推移，每个耗时区间内完成了多少请求：格子颜色越深，请求越多。长尾出现在概括它的 P95 线之上。",
           "links": [],
           "data": {
@@ -13183,8 +12890,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2027,
-          "title": "按路由的 P95 — 最慢的 8 条，含示例",
-          "description": "来自 Tempo 的 TraceQL 指标，展示每个时刻最慢的 8 条路由：每个点都是一个示例，即一次真实请求；点击即可打开它的追踪。它由 span 计算得出，因此可能与旁边基于直方图的百分位略有差异。",
+          "title": "P95 延迟 — 按路由，含示例",
+          "description": "来自 Tempo 的 TraceQL 指标：每个点都是一个示例，即一次真实请求；点击即可打开它的追踪。它由 span 计算得出，因此可能与旁边基于直方图的百分位略有差异。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13203,7 +12910,7 @@
                       "spec": {
                         "exemplars": 20,
                         "metricsQueryType": "range",
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route) | topk(8)",
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route)",
                         "queryType": "traceql",
                         "step": "1m"
                       }
@@ -13275,7 +12982,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2019,
-          "title": "吞吐量 — 每秒字节数",
+          "title": "每秒字节数 — 已接收 · 已发送",
           "description": "请求体和响应体。“已接收”只统计带请求体且有 `Content-Length` 头的请求。",
           "links": [],
           "data": {
@@ -13378,8 +13085,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2020,
-          "title": "请求大小 — P95，前 8 条路由",
-          "description": "只统计带请求体的请求：这里是 `POST /api/posts`。所选时间范围内此类最繁忙的 8 条路由。",
+          "title": "请求大小 P95 — 按路由",
+          "description": "只统计带请求体的请求：这里是 `POST /api/posts`。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13397,7 +13104,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -13459,8 +13166,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2021,
-          "title": "响应大小 — P95，前 8 条路由",
-          "description": "所选时间范围内最繁忙的 8 条路由。",
+          "title": "响应大小 P95 — 按路由",
+          "description": "",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13478,7 +13185,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_response_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -13540,8 +13247,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2070,
-          "title": "请求占比 — 最忙与最闲的工作进程",
-          "description": "单个工作进程分到的最大和最小请求占比。两者都贴近表示平均分配的虚线说明负载均衡；相差很远说明有工作进程吃不饱或过载。",
+          "title": "请求占比 — 按工作进程",
+          "description": "每个工作进程分到的请求占比。虚线表示平均分配：远离它的工作进程要么吃不饱，要么过载。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13559,9 +13266,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
+                        "expr": "sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
-                        "legendFormat": "最忙的工作进程",
+                        "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
@@ -13588,28 +13295,6 @@
                       }
                     },
                     "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "min(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
-                        "instant": false,
-                        "legendFormat": "最闲的工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
                     "hidden": false
                   }
                 }
@@ -13707,8 +13392,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2071,
-          "title": "P95 — 最慢的 5 个工作进程",
-          "description": "所选时间范围内最慢的 5 个工作进程以及全部工作进程合计的请求耗时第 95 百分位：某个工作进程比其他的慢，在总体数值里是看不出来的。",
+          "title": "P95 延迟 — 按工作进程",
+          "description": "每个工作进程请求耗时的第 95 百分位：某个工作进程比其他的慢，在总体数值里是看不出来的。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13726,7 +13411,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (instance) topk(5, histogram_quantile(0.95, sum by (instance, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end()))))",
+                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
@@ -13817,8 +13502,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2072,
-          "title": "处理中 — 全部及最忙的 5 个工作进程",
-          "description": "当前正在处理的请求：全部工作进程合计，预期 ≈ RPS × 平均耗时（利特尔法则），以及峰值最高的 5 个工作进程。OpenTelemetry 的这个 gauge 没有路由标签。",
+          "title": "处理中 — 按工作进程",
+          "description": "当前正在处理的请求，按工作进程堆叠：顶部即总数，预期 ≈ RPS × 平均耗时（利特尔法则）。OpenTelemetry 的这个 gauge 没有路由标签。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13836,35 +13521,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
-                        "instant": false,
-                        "legendFormat": "全部工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, sum by (instance) (max_over_time(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
-                    "refId": "B",
+                    "refId": "A",
                     "hidden": false
                   }
                 }
@@ -13907,14 +13570,14 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 10,
+                    "fillOpacity": 40,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
-                      "mode": "none"
+                      "mode": "normal"
                     }
                   }
                 },
@@ -13928,8 +13591,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2073,
-          "title": "CPU — 最忙的 5 个工作进程，一个核为 100%",
-          "description": "所选时间范围内最忙的 5 个工作进程及中位工作进程每秒占用的 CPU 时间。受 GIL 限制，一个 Python 工作进程大约只能用满一个核：80% 起为橙色，100% 为红色 — 无论主机多空闲，此时它都已饱和。",
+          "title": "CPU — 按工作进程，一个核为 100%",
+          "description": "每个工作进程每秒占用的 CPU 时间。受 GIL 限制，一个 Python 工作进程大约只能用满一个核：80% 起为橙色，100% 为红色 — 无论主机多空闲，此时它都已饱和。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13947,35 +13610,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "中位工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -14059,8 +13700,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2074,
-          "title": "非自愿上下文切换 — 前 5 个工作进程",
-          "description": "内核在工作进程执行中途收回 CPU 的频率，展示被抢占最多的 5 个工作进程及中位工作进程。上升说明工作进程在争抢 CPU。",
+          "title": "非自愿上下文切换 — 按工作进程",
+          "description": "内核在工作进程执行中途收回 CPU 的频率。上升说明工作进程在争抢 CPU。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -14078,35 +13719,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__range] @ end())))",
+                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "中位工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -14169,7 +13788,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2075,
-          "title": "工作进程启动",
+          "title": "工作进程启动 — 每分钟",
           "description": "每分钟新出现的工作进程：一次发布、一次崩溃或一次回收。没有发布却持续出现启动，说明工作进程在不断死掉。",
           "links": [],
           "data": {
@@ -14248,7 +13867,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2076,
-          "title": "被替换的工作进程",
+          "title": "被替换的工作进程 — 所选时间范围内",
           "description": "所选时间范围内出现过的工作进程，减去最近一分钟内仍上报指标的：每一个都是一次崩溃、回收，或容器、Pod 被替换。",
           "links": [],
           "data": {
@@ -14336,8 +13955,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2040,
-          "title": "内存 — 最大的 5 个工作进程",
-          "description": "所选时间范围内最大的 5 个工作进程及中位工作进程的常驻内存。只升不降的曲线就是内存泄漏。",
+          "title": "内存 — 按工作进程",
+          "description": "每个工作进程的常驻内存。只升不降的曲线就是内存泄漏。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -14355,35 +13974,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "中位工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -14439,8 +14036,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2041,
-          "title": "线程 — 前 5 个工作进程",
-          "description": "线程最多的 5 个工作进程及中位工作进程的线程：事件循环、导出器、gRPC 和剖析器。",
+          "title": "线程 — 按工作进程",
+          "description": "每个工作进程的线程：事件循环、导出器、gRPC 和剖析器。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -14458,35 +14055,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "中位工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -14543,8 +14118,8 @@
         "kind": "Panel",
         "spec": {
           "id": 2042,
-          "title": "打开的文件描述符 — 前 5 个工作进程",
-          "description": "打开套接字和文件最多的 5 个工作进程及中位工作进程所持有的数量。",
+          "title": "打开的文件描述符 — 按工作进程",
+          "description": "每个工作进程保持打开的套接字和文件。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -14562,35 +14137,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
+                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "quantile(0.5, max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
-                        "instant": false,
-                        "legendFormat": "中位工作进程",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -14728,7 +14281,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2035,
-          "title": "火焰图",
+          "title": "CPU 剖析 — 火焰图",
           "description": "这里最宽的帧是来自 /api/cpu 和 /api/report 的 `count primes`。",
           "links": [],
           "data": {
@@ -14779,7 +14332,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2028,
-          "title": "最近的追踪",
+          "title": "追踪 — 最近",
           "description": "打开一条追踪：可以从 span 跳到它的日志行、剖析数据和所属操作的指标。",
           "links": [],
           "data": {
@@ -14894,7 +14447,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2029,
-          "title": "慢的和失败的",
+          "title": "追踪 — 慢的和失败的",
           "description": "比 `慢追踪` 阈值更慢，或已失败。",
           "links": [],
           "data": {
@@ -15007,7 +14560,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2031,
-          "title": "按级别的日志行",
+          "title": "日志行 — 按级别",
           "description": "",
           "links": [],
           "data": {
@@ -15166,7 +14719,7 @@
         "kind": "Panel",
         "spec": {
           "id": 2032,
-          "title": "日志流",
+          "title": "日志行 — 日志流",
           "description": "展开一行：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。",
           "links": [],
           "data": {

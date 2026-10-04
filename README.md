@@ -112,21 +112,20 @@ the evidence. Groups nest — a dashboard in the v2 schema, the one with rows in
 |---|---|---|
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 4xx, 5xx, mean, P95 and P99 |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days · availability against the objective · budget left over time · burn rate over 5 m, 1 h, 6 h and 1 d |
-| Requests | Traffic | RPS total, against the same hour yesterday · the 8 busiest routes |
-| | Status codes | RPS by code, coloured by class · errors of the 8 routes failing most, by code · 5xx ratio of the routes with 5xx |
+| Requests | Traffic | RPS total, against the same hour yesterday · by route |
+| | Status codes | RPS by code, coloured by class · errors by route and code · 5xx ratio by route over time |
 | | Exceptions | by type and route · each message with its type, route and count — from the log |
-| | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 of the 8 slowest routes with exemplars, from the traces |
-| | Payload, collapsed | bytes per second · request and response size of the 8 busiest routes |
-| Runtime | Workers | request share of the busiest and the idlest worker against an even split · P95, in flight, CPU against one core and involuntary context switches of the top 5 workers beside all or the median · worker starts · workers replaced |
-| | Process, collapsed | memory · threads · open files of the top 5 workers and the median · GC |
+| | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
+| | Payload, collapsed | bytes per second · request and response size by route |
+| Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts · workers replaced |
+| | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | recent, slow and failed traces |
 | | Logs | lines by level · the stream |
 
-A graph never draws every route or every worker: at fifty routes or forty workers it would be a
-tangle. It draws the few that matter over the whole range — picked with `topk(…) @ end()`, so the
-lines do not change from step to step — and the table and the variables reach the rest: every route
-is a row of the routes table, and `Host` narrows the workers to one container or pod.
+Every route and every worker is drawn; the variables narrow them — `Route` to some routes, `Host`
+to the workers of one container or pod. Each title says what is measured, then how it is cut:
+`RPS — by route`, `P95 latency — by worker`.
 
 **In three languages.** The `Language` variable switches between English, Русский and 中文.
 Grafana translates its own interface but never what a dashboard says, so the dashboard holds the
