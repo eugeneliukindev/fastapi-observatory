@@ -33,7 +33,7 @@
     "description": "基于 OpenTelemetry 指标，全方位观察 FastAPI 服务。",
     "editable": true,
     "elements": {
-      "throughput": {
+      "rps": {
         "kind": "Panel",
         "spec": {
           "id": 50,
@@ -1779,7 +1779,7 @@
         "spec": {
           "id": 55,
           "title": "延迟 — 分布",
-          "description": "随时间推移，每个耗时区间内完成了多少请求：格子颜色越深，请求越多。长尾出现在概括它的 P95 线之上。",
+          "description": "每个耗时区间内随时间完成的请求数：单元格颜色越深，请求越多。长尾是远高于主体的浅色单元格——上方的 P99 用一条线概括了它。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1870,7 +1870,7 @@
           }
         }
       },
-      "throughput-bytes-per-second": {
+      "bytes-per-second-received-sent": {
         "kind": "Panel",
         "spec": {
           "id": 19,
@@ -3511,7 +3511,7 @@
           }
         }
       },
-      "flame-graph": {
+      "cpu-profile-flame-graph": {
         "kind": "Panel",
         "spec": {
           "id": 35,
@@ -3562,7 +3562,7 @@
           }
         }
       },
-      "lines-by-level": {
+      "log-lines-by-level": {
         "kind": "Panel",
         "spec": {
           "id": 31,
@@ -4261,12 +4261,12 @@
           }
         }
       },
-      "latency-total-and-p95-by-route": {
+      "latency-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 61,
-          "title": "延迟 — P50 · P95 · P99 总计 · 按路由的 P95",
-          "description": "所有路由的请求耗时：P95 为白色粗线，P50 为蓝色，P99 为紫色，灰色虚线是昨天的 P95；高于 500 毫秒的区间为橙色，高于 1 秒为红色。细线是单条路由的 P95；点击可查看其追踪。",
+          "title": "延迟 ${quantiles:text} — 总计 · 按路由",
+          "description": "在 `百分位` 中选择的百分位：每个百分位一条所有路由的粗线——P50 蓝色，P95 白色，P99 紫色——一条灰色虚线表示它昨天的值，每条路由一条细线；高于 500 毫秒的区间为橙色，高于 1 秒为红色。点击路由的线可查看其追踪。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4284,9 +4284,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${quantiles:csv}, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "p50",
+                        "legendFormat": "{{phi}}",
                         "range": true
                       }
                     },
@@ -4306,9 +4306,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${quantiles:csv}, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "p95",
+                        "legendFormat": "{{phi}} 昨天",
                         "range": true
                       }
                     },
@@ -4328,57 +4328,13 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${quantiles:csv}, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "p99",
+                        "legendFormat": "{{phi}} {{http_route}}",
                         "range": true
                       }
                     },
                     "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d)))",
-                        "instant": false,
-                        "legendFormat": "昨天的 p95",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "p95 {{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "E",
                     "hidden": false
                   }
                 }
@@ -4458,7 +4414,68 @@
                   {
                     "matcher": {
                       "id": "byFrameRefID",
-                      "options": "D"
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "p50"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#5794F2"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "p95"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "text"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "p99"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#B877D9"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
                     },
                     "properties": [
                       {
@@ -4491,76 +4508,7 @@
                   {
                     "matcher": {
                       "id": "byFrameRefID",
-                      "options": "B"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "text"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "A"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "#5794F2"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 2
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
                       "options": "C"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "#B877D9"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 2
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "E"
                     },
                     "properties": [
                       {
@@ -4618,7 +4566,7 @@
                         "height": 6,
                         "element": {
                           "kind": "ElementReference",
-                          "name": "throughput"
+                          "name": "rps"
                         }
                       }
                     },
@@ -4819,6 +4767,87 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
+                        "title": "延迟",
+                        "collapse": false,
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 24,
+                                  "height": 10,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "latency-total-and-by-route"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 10,
+                                  "width": 24,
+                                  "height": 8,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "latency-distribution"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "quantiles",
+                              "query": "P50 : 0.5,P95 : 0.95,P99 : 0.99",
+                              "current": {
+                                "text": [
+                                  "P95"
+                                ],
+                                "value": [
+                                  "0.95"
+                                ]
+                              },
+                              "options": [
+                                {
+                                  "selected": false,
+                                  "text": "P50",
+                                  "value": "0.5"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "P95",
+                                  "value": "0.95"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "P99",
+                                  "value": "0.99"
+                                }
+                              ],
+                              "multi": true,
+                              "includeAll": false,
+                              "label": "百分位",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "下方面板绘制的百分位。",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "kind": "RowsLayoutRow",
+                      "spec": {
                         "title": "异常",
                         "collapse": false,
                         "layout": {
@@ -4859,46 +4888,6 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "延迟",
-                        "collapse": false,
-                        "layout": {
-                          "kind": "GridLayout",
-                          "spec": {
-                            "items": [
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 0,
-                                  "width": 24,
-                                  "height": 10,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "latency-total-and-p95-by-route"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 10,
-                                  "width": 24,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "latency-distribution"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "kind": "RowsLayoutRow",
-                      "spec": {
                         "title": "负载大小",
                         "collapse": true,
                         "layout": {
@@ -4914,7 +4903,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "throughput-bytes-per-second"
+                                    "name": "bytes-per-second-received-sent"
                                   }
                                 }
                               },
@@ -5192,7 +5181,7 @@
                                   "height": 16,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "flame-graph"
+                                    "name": "cpu-profile-flame-graph"
                                   }
                                 }
                               }
@@ -5337,7 +5326,7 @@
                                   "height": 6,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "lines-by-level"
+                                    "name": "log-lines-by-level"
                                   }
                                 }
                               },

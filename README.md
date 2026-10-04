@@ -123,6 +123,7 @@ narrows the whole dashboard to itself, as Grafana's own operations tables do.
 |---|---|
 | the top of the dashboard | Metrics · Logs · Traces · Profiles · Service · Routes matching · Route · Method · Host · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Status codes row | Status codes — the classes its panel draws, 4xx and 5xx at first |
+| the Latency row | Percentiles — P50, P95 and P99, P95 at first |
 | the Profiling row | Profile type |
 | the Traces row | Show — slow or failed at first, slow, failed or all |
 
@@ -131,11 +132,11 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 
 | group | row | what |
 |---|---|---|
-| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
+| top | | RPS · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | Requests | Traffic | RPS by route, the total over them and the total yesterday |
 | | Status codes | RPS of the classes picked, a total per class and a line per route and code |
+| | Latency | the percentiles picked, of the service, yesterday and of each route · the heatmap |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
-| | Latency | P50 · P95 · P99 of the service, P95 against yesterday and the P95 of each route · the heatmap |
 | | Payload, collapsed | bytes per second · body size P95 by route, requests dashed and responses solid |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |
 | Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
@@ -175,9 +176,9 @@ heartbeat.
 <details open>
 <summary><b>Requests</b></summary>
 
-![Traffic](docs/screenshots/19-dashboard-traffic.png)
-![Status codes and exceptions](docs/screenshots/04-dashboard-errors.png)
+![Traffic and status codes](docs/screenshots/19-dashboard-traffic.png)
 ![Latency](docs/screenshots/02-dashboard-latency.png)
+![Exceptions](docs/screenshots/04-dashboard-errors.png)
 ![Payload](docs/screenshots/03-dashboard-payload.png)
 </details>
 
