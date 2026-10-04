@@ -157,10 +157,13 @@ per language in [`source/i18n/`](observability/grafana/source/i18n), then `just 
 fails, naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or
 loses a `$variable` or `{{label}}`. A new language is a new dictionary.
 
-Colours mean the same on every panel: 2xx green, 3xx blue, 4xx orange, 5xx and exceptions red; a
-grey dashed line is yesterday, a white dashed one a reference — the objective, an even split — and a
-white solid one the total — of the routes, of the workers. A latency line takes the colour of its zone, and the zones
-above 500 ms and 1 s are shaded; under the dashed objective, availability sits in a red zone.
+Lines read the same on every panel. A total is thick, over a light fill, drawn above the rest and
+named `total` — white for the service, or the colour of its class: 2xx green, 3xx blue, 4xx orange,
+5xx and exceptions red; P50 blue, P95 white, P99 purple. A thin line without fill is one route or
+one worker. A dash is kept for two things: grey for yesterday, white for a reference — the
+objective, an even split. Latency zones above 500 ms and 1 s are shaded; under the objective,
+availability sits in a red zone. A panel of a few lines of their own — bytes, availability, GC —
+draws them at middle width; a table legend lists every series that a panel breaks down.
 
 Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
 target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn rate turns red at
