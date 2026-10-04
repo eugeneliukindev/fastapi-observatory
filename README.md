@@ -135,7 +135,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | Requests | Traffic | RPS by route, the total over them and the total yesterday |
 | | Status codes | RPS of the classes picked, a total per class and a line per route and code |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
-| | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
+| | Latency | P50 · P95 · P99 of the service, P95 against yesterday and the P95 of each route · the heatmap |
 | | Payload, collapsed | bytes per second · body size P95 by route, requests dashed and responses solid |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |
 | Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
@@ -215,7 +215,7 @@ flowchart LR
     T -- "Logs for this span" --> L
     T -- "Profiles for this span" --> P
     T -- "span metrics: rate · P95" --> M
-    M -. "exemplars · panel links" .-> T
+    M -. "panel links" .-> T
     M -. "panel links" .-> L
 
     classDef metrics fill:#B877D9,stroke:#8F3BB8,color:#111
@@ -261,11 +261,11 @@ flowchart LR
 <img src="docs/screenshots/11-span-profile.png" width="44%" alt="The CPU profile of one request">
 </p>
 
-**⑤ A dot on the latency panel** opens its trace. **⑥ The service graph** is drawn from client and
+**⑤ A route's line on the latency panel** opens its slow traces. **⑥ The service graph** is drawn from client and
 server spans.
 
 <p>
-<img src="docs/screenshots/14-exemplar.png" width="62%" alt="An exemplar on the latency panel">
+<img src="docs/screenshots/14-slow-traces.png" width="62%" alt="The slow traces of a route, from the latency panel">
 <img src="docs/screenshots/13-service-graph.png" width="36%" alt="The service graph">
 </p>
 

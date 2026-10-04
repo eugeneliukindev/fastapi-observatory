@@ -1774,302 +1774,6 @@
           }
         }
       },
-      "latency-p50-p95-p99": {
-        "kind": "Panel",
-        "spec": {
-          "id": 61,
-          "title": "延迟 — P50 · P95 · P99",
-          "description": "所有路由的请求耗时百分位。P95 高于 500 毫秒变为橙色，高于 1 秒变为红色，背景为相同的区间；P50 为蓝色，P99 为紫色，灰色虚线是昨天的 P95。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "p50",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "p95",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "p99",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d)))",
-                        "instant": false,
-                        "legendFormat": "昨天的 p95",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "s",
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth",
-                    "thresholdsStyle": {
-                      "mode": "dashed+area"
-                    }
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "transparent"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 1,
-                        "color": "red"
-                      }
-                    ]
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "D"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "#8e8e8e"
-                        }
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            6,
-                            6
-                          ]
-                        }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "B"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "thresholds"
-                        }
-                      },
-                      {
-                        "id": "custom.gradientMode",
-                        "value": "scheme"
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      },
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "value": null,
-                              "color": "green"
-                            },
-                            {
-                              "value": 0.5,
-                              "color": "orange"
-                            },
-                            {
-                              "value": 1,
-                              "color": "red"
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "id": "custom.thresholdsStyle",
-                        "value": {
-                          "mode": "off"
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "A"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "#5794F2"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byFrameRefID",
-                      "options": "C"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "#B877D9"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
       "latency-distribution": {
         "kind": "Panel",
         "spec": {
@@ -2158,121 +1862,6 @@
                     "scaleDistribution": {
                       "type": "linear"
                     }
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "p95-by-route-with-exemplars": {
-        "kind": "Panel",
-        "spec": {
-          "id": 27,
-          "title": "P95 延迟 — 按路由，含示例",
-          "description": "来自 Tempo 的 TraceQL 指标：每个点都是一个示例，即一次真实请求；点击即可打开它的追踪。它由 span 计算得出，因此可能与旁边基于直方图的百分位略有差异。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "tempo",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${traces}"
-                      },
-                      "spec": {
-                        "exemplars": 20,
-                        "metricsQueryType": "range",
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route)",
-                        "queryType": "traceql",
-                        "step": "1m"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "renameByRegex",
-                  "spec": {
-                    "options": {
-                      "regex": ".*route=\"([^\"]+)\".*",
-                      "renamePattern": "$1"
-                    }
-                  }
-                }
-              ],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true,
-                  "limit": 8,
-                  "enableFacetedFilter": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "s",
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 1,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth",
-                    "thresholdsStyle": {
-                      "mode": "dashed+area"
-                    }
-                  },
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "transparent"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 1,
-                        "color": "red"
-                      }
-                    ]
                   }
                 },
                 "overrides": []
@@ -4671,6 +4260,339 @@
             }
           }
         }
+      },
+      "latency-total-and-p95-by-route": {
+        "kind": "Panel",
+        "spec": {
+          "id": 61,
+          "title": "延迟 — P50 · P95 · P99 总计 · 按路由的 P95",
+          "description": "所有路由的请求耗时：P95 为白色粗线，P50 为蓝色，P99 为紫色，灰色虚线是昨天的 P95；高于 500 毫秒的区间为橙色，高于 1 秒为红色。细线是单条路由的 P95；点击可查看其追踪。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.50, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "p50",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "p95",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "p99",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d)))",
+                        "instant": false,
+                        "legendFormat": "昨天的 p95",
+                        "range": true
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "p95 {{http_route}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "E",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "mean",
+                    "max",
+                    "lastNotNull"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true,
+                  "sortBy": "Max",
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisSoftMin": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
+                    }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "D"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            6,
+                            6
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "text"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#5794F2"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "C"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#B877D9"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "E"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "links",
+                        "value": [
+                          {
+                            "targetBlank": false,
+                            "title": "该路由的慢追踪",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20duration%20%3E%20${slow:percentencode}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                          },
+                          {
+                            "targetBlank": false,
+                            "title": "该路由的追踪",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "layout": {
@@ -4948,24 +4870,11 @@
                                 "spec": {
                                   "x": 0,
                                   "y": 0,
-                                  "width": 12,
-                                  "height": 9,
+                                  "width": 24,
+                                  "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "latency-p50-p95-p99"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 12,
-                                  "y": 0,
-                                  "width": 12,
-                                  "height": 9,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "latency-distribution"
+                                    "name": "latency-total-and-p95-by-route"
                                   }
                                 }
                               },
@@ -4973,12 +4882,12 @@
                                 "kind": "GridLayoutItem",
                                 "spec": {
                                   "x": 0,
-                                  "y": 9,
+                                  "y": 10,
                                   "width": 24,
-                                  "height": 9,
+                                  "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-by-route-with-exemplars"
+                                    "name": "latency-distribution"
                                   }
                                 }
                               }
