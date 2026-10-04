@@ -4171,7 +4171,12 @@
   "refresh": "30s",
   "schemaVersion": 42,
   "tags": [
-    "observatory"
+    "observatory",
+    "fastapi",
+    "python",
+    "opentelemetry",
+    "red",
+    "slo"
   ],
   "templating": {
     "list": [

@@ -40,6 +40,6 @@ configMapGenerator:
       - ../../observability/grafana/provisioning/dashboards/dashboards.yaml
   - name: grafana-dashboards
     files:
-      - ../../observability/grafana/dashboards/api.json
-      - ../../observability/grafana/dashboards/api.ru.json
-      - ../../observability/grafana/dashboards/api.zh.json
+      - ../../observability/grafana/dashboards/fastapi-observatory.json
+      - ../../observability/grafana/dashboards/fastapi-observatory.ru.json
+      - ../../observability/grafana/dashboards/fastapi-observatory.zh.json

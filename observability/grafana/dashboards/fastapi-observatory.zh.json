@@ -5637,7 +5637,12 @@
     "liveNow": false,
     "preload": false,
     "tags": [
-      "observatory"
+      "observatory",
+      "fastapi",
+      "python",
+      "opentelemetry",
+      "red",
+      "slo"
     ],
     "timeSettings": {
       "timezone": "browser",
