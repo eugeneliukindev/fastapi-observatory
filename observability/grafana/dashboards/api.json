@@ -1783,12 +1783,12 @@
           }
         }
       },
-      "exceptions-by-type-and-route": {
+      "exceptions-by-type": {
         "kind": "Panel",
         "spec": {
           "id": 25,
-          "title": "Exceptions — by type and route",
-          "description": "Unhandled exceptions from the access log, one series per type and route — the `route` field is the template the metrics call `http_route`.",
+          "title": "Exceptions — by type",
+          "description": "Unhandled exceptions from the access log, one series per type: a new type after a deploy stands out. Which routes raise them and with what text is in the messages beside.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1806,8 +1806,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (error_type, route) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
-                        "legendFormat": "{{error_type}} · {{route}}",
+                        "expr": "sum by (error_type) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
+                        "legendFormat": "{{error_type}}",
                         "queryType": "range"
                       }
                     },
@@ -1852,13 +1852,13 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Lines with this exception on this route",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%20%7C%20route%3D%5C%22${__field.labels.route:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Lines with this exception",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Failed traces of this route",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.route:percentencode}%5C%22%20%26%26%20status%20%3D%20error%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Traces with this exception",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
                   "custom": {
@@ -3393,161 +3393,6 @@
           }
         }
       },
-      "burn-rate-5-m-1-h-6-h-1-d": {
-        "kind": "Panel",
-        "spec": {
-          "id": 68,
-          "title": "Burn rate — 5 m · 1 h · 6 h · 1 d",
-          "description": "How fast the budget burned over each window, through time: orange above 1×, red above 3.36×.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 m",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 h",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 h",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 d",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "request-share-by-worker": {
         "kind": "Panel",
         "spec": {
@@ -4220,94 +4065,6 @@
                     "showPoints": "never",
                     "barAlignment": 0,
                     "axisSoftMax": 4
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "workers-replaced": {
-        "kind": "Panel",
-        "spec": {
-          "id": 76,
-          "title": "Workers replaced — over the range",
-          "description": "Workers seen over the range minus the ones that reported in the last minute: each is a crash, a recycle, or a container or pod replaced.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range]))) - (count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[1m]))) or vector(0)), 0)",
-                        "instant": true,
-                        "legendFormat": "replaced",
-                        "range": false
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "textMode": "value",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "none",
-                  "decimals": 0,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 5,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
                   }
                 },
                 "overrides": []
@@ -6914,12 +6671,12 @@
           }
         }
       },
-      "exceptions-by-type-and-route-ru": {
+      "exceptions-by-type-ru": {
         "kind": "Panel",
         "spec": {
           "id": 1025,
-          "title": "Исключения — по типам и маршрутам",
-          "description": "Необработанные исключения из журнала запросов, по серии на пару «тип · маршрут»; поле `route` — тот же шаблон, что в метриках называется `http_route`.",
+          "title": "Исключения — по типам",
+          "description": "Необработанные исключения из журнала запросов, по серии на тип: новый тип после выкатки сразу заметен. Какие маршруты их бросают и с каким текстом — в таблице сообщений рядом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -6937,8 +6694,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (error_type, route) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
-                        "legendFormat": "{{error_type}} · {{route}}",
+                        "expr": "sum by (error_type) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
+                        "legendFormat": "{{error_type}}",
                         "queryType": "range"
                       }
                     },
@@ -6983,13 +6740,13 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Строки лога с этим исключением на этом маршруте",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%20%7C%20route%3D%5C%22${__field.labels.route:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Строки лога с этим исключением",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Трейсы с ошибкой этого маршрута",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.route:percentencode}%5C%22%20%26%26%20status%20%3D%20error%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "Трейсы с этим исключением",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
                   "custom": {
@@ -8524,161 +8281,6 @@
           }
         }
       },
-      "burn-rate-5-m-1-h-6-h-1-d-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1068,
-          "title": "Скорость сжигания — 5 мин · 1 ч · 6 ч · 1 д",
-          "description": "Как быстро сгорал бюджет в каждом окне, во времени: оранжевый выше 1×, красный выше 3.36×.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 мин",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 ч",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 ч",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 д",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "request-share-by-worker-ru": {
         "kind": "Panel",
         "spec": {
@@ -9351,94 +8953,6 @@
                     "showPoints": "never",
                     "barAlignment": 0,
                     "axisSoftMax": 4
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "workers-replaced-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1076,
-          "title": "Заменено воркеров — за период",
-          "description": "Воркеры, замеченные за период, минус те, что присылали метрики за последнюю минуту: каждый — это падение, плановая замена или замена контейнера или пода.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range]))) - (count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[1m]))) or vector(0)), 0)",
-                        "instant": true,
-                        "legendFormat": "заменено",
-                        "range": false
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "textMode": "value",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "none",
-                  "decimals": 0,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 5,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
                   }
                 },
                 "overrides": []
@@ -12045,12 +11559,12 @@
           }
         }
       },
-      "exceptions-by-type-and-route-zh": {
+      "exceptions-by-type-zh": {
         "kind": "Panel",
         "spec": {
           "id": 2025,
-          "title": "异常 — 按类型和路由",
-          "description": "来自访问日志的未处理异常，每个“类型 · 路由”组合一条序列；`route` 字段即指标中称为 `http_route` 的路由模板。",
+          "title": "异常 — 按类型",
+          "description": "来自访问日志的未处理异常，每种类型一条序列：发布后出现的新类型一目了然。由哪些路由抛出、消息内容是什么，见旁边的消息表。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -12068,8 +11582,8 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (error_type, route) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
-                        "legendFormat": "{{error_type}} · {{route}}",
+                        "expr": "sum by (error_type) (count_over_time({service_name=\"$service\"} | json | error_type!=\"\" | route=~\"$route\" [$__interval]))",
+                        "legendFormat": "{{error_type}}",
                         "queryType": "range"
                       }
                     },
@@ -12114,13 +11628,13 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "该路由上包含此异常的日志行",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%20%7C%20route%3D%5C%22${__field.labels.route:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "包含该异常的日志行",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "该路由的失败追踪",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.route:percentencode}%5C%22%20%26%26%20status%20%3D%20error%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                      "title": "包含此异常的追踪",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
                   "custom": {
@@ -13655,161 +13169,6 @@
           }
         }
       },
-      "burn-rate-5-m-1-h-6-h-1-d-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2068,
-          "title": "消耗速率 — 5 分钟 · 1 小时 · 6 小时 · 1 天",
-          "description": "各窗口内预算随时间的消耗速度：高于 1× 为橙色，高于 3.36× 为红色。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 分钟",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 天",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "request-share-by-worker-zh": {
         "kind": "Panel",
         "spec": {
@@ -14482,94 +13841,6 @@
                     "showPoints": "never",
                     "barAlignment": 0,
                     "axisSoftMax": 4
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "workers-replaced-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2076,
-          "title": "被替换的工作进程 — 所选时间范围内",
-          "description": "所选时间范围内出现过的工作进程，减去最近一分钟内仍上报指标的：每一个都是一次崩溃、回收，或容器、Pod 被替换。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range]))) - (count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[1m]))) or vector(0)), 0)",
-                        "instant": true,
-                        "legendFormat": "已替换",
-                        "range": false
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "textMode": "value",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "none",
-                  "decimals": 0,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 5,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
                   }
                 },
                 "overrides": []
@@ -15670,7 +14941,7 @@
                                             "height": 8,
                                             "element": {
                                               "kind": "ElementReference",
-                                              "name": "exceptions-by-type-and-route"
+                                              "name": "exceptions-by-type"
                                             }
                                           }
                                         },
@@ -15863,19 +15134,6 @@
                                     "name": "availability-vs-objective"
                                   }
                                 }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d"
-                                  }
-                                }
                               }
                             ]
                           }
@@ -15970,24 +15228,11 @@
                                           "spec": {
                                             "x": 0,
                                             "y": 16,
-                                            "width": 16,
+                                            "width": 24,
                                             "height": 6,
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "worker-starts"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 16,
-                                            "y": 16,
-                                            "width": 8,
-                                            "height": 6,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "workers-replaced"
                                             }
                                           }
                                         }
@@ -16467,7 +15712,7 @@
                                             "height": 8,
                                             "element": {
                                               "kind": "ElementReference",
-                                              "name": "exceptions-by-type-and-route-ru"
+                                              "name": "exceptions-by-type-ru"
                                             }
                                           }
                                         },
@@ -16660,19 +15905,6 @@
                                     "name": "availability-vs-objective-ru"
                                   }
                                 }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d-ru"
-                                  }
-                                }
                               }
                             ]
                           }
@@ -16767,24 +15999,11 @@
                                           "spec": {
                                             "x": 0,
                                             "y": 16,
-                                            "width": 16,
+                                            "width": 24,
                                             "height": 6,
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "worker-starts-ru"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 16,
-                                            "y": 16,
-                                            "width": 8,
-                                            "height": 6,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "workers-replaced-ru"
                                             }
                                           }
                                         }
@@ -17264,7 +16483,7 @@
                                             "height": 8,
                                             "element": {
                                               "kind": "ElementReference",
-                                              "name": "exceptions-by-type-and-route-zh"
+                                              "name": "exceptions-by-type-zh"
                                             }
                                           }
                                         },
@@ -17457,19 +16676,6 @@
                                     "name": "availability-vs-objective-zh"
                                   }
                                 }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d-zh"
-                                  }
-                                }
                               }
                             ]
                           }
@@ -17564,24 +16770,11 @@
                                           "spec": {
                                             "x": 0,
                                             "y": 16,
-                                            "width": 16,
+                                            "width": 24,
                                             "height": 6,
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "worker-starts-zh"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 16,
-                                            "y": 16,
-                                            "width": 8,
-                                            "height": 6,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "workers-replaced-zh"
                                             }
                                           }
                                         }

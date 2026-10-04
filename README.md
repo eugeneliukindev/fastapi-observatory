@@ -132,11 +132,11 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | Requests | Traffic | RPS total, against the same hour yesterday · by route |
 | | Status codes | RPS by code, coloured by class · errors by route and code |
-| | Exceptions | by type and route · each message with its type, route and count — from the log |
+| | Exceptions | by type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
-| SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective · burn rate over 5 m, 1 h, 6 h and 1 d |
-| Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts · workers replaced |
+| SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |
+| Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | recent, slow and failed traces |
@@ -168,9 +168,9 @@ target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn
 
 A worker is a process: with the GIL it gets about one core, so the CPU panel is in fractions of one
 core, not of the machine. One worker slower than the others, busier on CPU and preempted more often
-points at a request that hogs it, not at the service as a whole. Workers replaced counts the workers
-seen over the range that are gone now — a crash, a recycle, or one Gunicorn killed for missing its
-30-second heartbeat; on a calm service it stays at zero.
+points at a request that hogs it, not at the service as a whole. Worker starts shows when workers
+came and went: a deploy, a crash, a recycle, or one Gunicorn killed for missing its 30-second
+heartbeat.
 
 <details open>
 <summary><b>Requests</b></summary>
