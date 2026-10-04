@@ -120,18 +120,18 @@ status code and exception panels links to its traces or log lines — click it.
 | the controls menu, `+7` — wiring and thresholds | Metrics · Logs · Traces · Profiles · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Profiling row | Profile type |
 
-The order is the order of an investigation: is the service fine, which requests suffer, why, and
-the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
+The order is the order of an investigation: is the service fine, which requests suffer, is the
+promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
 
 | group | row | what |
 |---|---|---|
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
-| SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days · availability against the objective · budget left over time · burn rate over 5 m, 1 h, 6 h and 1 d |
 | Requests | Traffic | RPS total, against the same hour yesterday · by route |
-| | Status codes | RPS by code, coloured by class · errors by route and code · 5xx ratio by route over time |
+| | Status codes | RPS by code, coloured by class · errors by route and code |
 | | Exceptions | by type and route · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
+| SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective · burn rate over 5 m, 1 h, 6 h and 1 d |
 | Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts · workers replaced |
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
@@ -169,18 +169,18 @@ seen over the range that are gone now — a crash, a recycle, or one Gunicorn ki
 30-second heartbeat; on a calm service it stays at zero.
 
 <details open>
-<summary><b>SLO</b></summary>
-
-![SLO](docs/screenshots/15-dashboard-slo.png)
-</details>
-
-<details>
 <summary><b>Requests</b></summary>
 
 ![Traffic](docs/screenshots/19-dashboard-traffic.png)
 ![Status codes and exceptions](docs/screenshots/04-dashboard-errors.png)
 ![Latency](docs/screenshots/02-dashboard-latency.png)
 ![Payload](docs/screenshots/03-dashboard-payload.png)
+</details>
+
+<details>
+<summary><b>SLO</b></summary>
+
+![SLO](docs/screenshots/15-dashboard-slo.png)
 </details>
 
 <details open>

@@ -1252,785 +1252,6 @@
           }
         }
       },
-      "error-budget-left-7-days": {
-        "kind": "Panel",
-        "spec": {
-          "id": 58,
-          "title": "Error budget left — 7 days",
-          "description": "Share of the 7-day budget of 5xx still unspent, for an availability target of `$slo`. At zero the target is missed.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "budget",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate": {
-        "kind": "Panel",
-        "spec": {
-          "id": 59,
-          "title": "Burn rate — 1 h · 6 h",
-          "description": "How fast the 7-day error budget burns: 1× spends it exactly in 7 days. Red at 3.36× over 1 h (2% of the budget in an hour) and 1.4× over 6 h (5% in six hours).",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 hour",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 hours",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 14.4,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "1 hour"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 3.36
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "6 hours"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 1.4
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "fast-enough": {
-        "kind": "Panel",
-        "spec": {
-          "id": 60,
-          "title": "Fast enough — 7 days",
-          "description": "Share of requests over the last 7 days that finished within the `Apdex: satisfied` threshold — the latency objective beside the availability one, for the whole service like the budget.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": false,
-                        "legendFormat": "within $satisfied s",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true,
-                "textMode": "value_and_name"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.9,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.99,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "availability-vs-objective": {
-        "kind": "Panel",
-        "spec": {
-          "id": 66,
-          "title": "Availability — vs objective",
-          "description": "Share of requests not answered with 5xx, against the availability target `$slo`: the red zone under the dashed line is below the target.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "availability",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "vector($slo)",
-                        "instant": false,
-                        "legendFormat": "objective",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 2,
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0.9,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "objective"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            8,
-                            6
-                          ]
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
-                      },
-                      {
-                        "id": "custom.gradientMode",
-                        "value": "none"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "availability"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "green"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "error-budget-left-over-time": {
-        "kind": "Panel",
-        "spec": {
-          "id": 67,
-          "title": "Error budget left — over time",
-          "description": "The 7-day error budget still unspent at each moment: falling means burning.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "budget left",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 20,
-                    "gradientMode": "scheme",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "dashed"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate-5-m-1-h-6-h-1-d": {
-        "kind": "Panel",
-        "spec": {
-          "id": 68,
-          "title": "Burn rate — 5 m · 1 h · 6 h · 1 d",
-          "description": "How fast the budget burned over each window, through time: orange above 1×, red above 3.36×.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 m",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 h",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 h",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 d",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "rps-total": {
         "kind": "Panel",
         "spec": {
@@ -2557,97 +1778,6 @@
                     ]
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "5xx-ratio-by-route": {
-        "kind": "Panel",
-        "spec": {
-          "id": 65,
-          "title": "5xx ratio — by route",
-          "description": "Share of server errors per route over time. Orange above 1% · red above 5%.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "{{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {
-                "maxDataPoints": 60
-              }
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "status-history",
-            "version": "",
-            "spec": {
-              "options": {
-                "colWidth": 0.9,
-                "legend": {
-                  "showLegend": false
-                },
-                "rowHeight": 0.85,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 0.01,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.05,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 1
-                  }
-                },
-                "overrides": []
               }
             }
           }
@@ -3734,6 +2864,682 @@
                       "mode": "none"
                     },
                     "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "error-budget-left-7-days": {
+        "kind": "Panel",
+        "spec": {
+          "id": 58,
+          "title": "Error budget left — 7 days",
+          "description": "Share of the 7-day budget of 5xx still unspent, for an availability target of `$slo`. At zero the target is missed.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
+                        "instant": false,
+                        "legendFormat": "budget",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.25,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "burn-rate": {
+        "kind": "Panel",
+        "spec": {
+          "id": 59,
+          "title": "Burn rate — 1 h · 6 h",
+          "description": "How fast the 7-day error budget burns: 1× spends it exactly in 7 days. Red at 3.36× over 1 h (2% of the budget in an hour) and 1.4× over 6 h (5% in six hours).",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 hour",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 hours",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "value_and_name",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "decimals": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 14.4,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "1 hour"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 3.36
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "6 hours"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 1.4
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "fast-enough": {
+        "kind": "Panel",
+        "spec": {
+          "id": 60,
+          "title": "Fast enough — 7 days",
+          "description": "Share of requests over the last 7 days that finished within the `Apdex: satisfied` threshold — the latency objective beside the availability one, for the whole service like the budget.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
+                        "instant": false,
+                        "legendFormat": "within $satisfied s",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.9,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.99,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "availability-vs-objective": {
+        "kind": "Panel",
+        "spec": {
+          "id": 66,
+          "title": "Availability — vs objective",
+          "description": "Share of requests not answered with 5xx, against the availability target `$slo`: the red zone under the dashed line is below the target.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
+                        "instant": false,
+                        "legendFormat": "availability",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "vector($slo)",
+                        "instant": false,
+                        "legendFormat": "objective",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 2,
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisSoftMin": 0.9,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "objective"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "red"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            8,
+                            6
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "availability"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "burn-rate-5-m-1-h-6-h-1-d": {
+        "kind": "Panel",
+        "spec": {
+          "id": 68,
+          "title": "Burn rate — 5 m · 1 h · 6 h · 1 d",
+          "description": "How fast the budget burned over each window, through time: orange above 1×, red above 3.36×.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "5 m",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 h",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 h",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 d",
+                        "range": true
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "state-timeline",
+            "version": "",
+            "spec": {
+              "options": {
+                "alignValue": "left",
+                "legend": {
+                  "showLegend": false
+                },
+                "mergeValues": true,
+                "rowHeight": 0.8,
+                "showValue": "never",
+                "tooltip": {
+                  "mode": "single"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 3.36,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "fillOpacity": 80,
+                    "lineWidth": 0
                   }
                 },
                 "overrides": []
@@ -6560,785 +6366,6 @@
           }
         }
       },
-      "error-budget-left-7-days-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1058,
-          "title": "Остаток бюджета ошибок — 7 дней",
-          "description": "Доля семидневного бюджета на 5xx, которая ещё не потрачена, при цели доступности `$slo`. На нуле цель не выполнена.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "бюджет",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1059,
-          "title": "Скорость сжигания — 1 ч · 6 ч",
-          "description": "Как быстро сгорает семидневный бюджет ошибок: при 1× он уходит ровно за 7 дней. Красный при 3.36× за 1 ч (2% бюджета за час) и 1.4× за 6 ч (5% за шесть часов).",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 час",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 часов",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 14.4,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "1 час"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 3.36
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "6 часов"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 1.4
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "fast-enough-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1060,
-          "title": "Достаточно быстрые — 7 дней",
-          "description": "Доля запросов за последние 7 дней, уложившихся в порог `Apdex: норма`, — цель по задержке рядом с целью по доступности, для всего сервиса, как и бюджет.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": false,
-                        "legendFormat": "не дольше $satisfied с",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true,
-                "textMode": "value_and_name"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.9,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.99,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "availability-vs-objective-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1066,
-          "title": "Доступность — относительно цели",
-          "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`: красная зона под пунктиром — ниже цели.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "доступность",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "vector($slo)",
-                        "instant": false,
-                        "legendFormat": "цель",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 2,
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0.9,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "цель"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            8,
-                            6
-                          ]
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
-                      },
-                      {
-                        "id": "custom.gradientMode",
-                        "value": "none"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "доступность"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "green"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "error-budget-left-over-time-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1067,
-          "title": "Остаток бюджета ошибок — во времени",
-          "description": "Сколько семидневного бюджета ошибок не потрачено в каждый момент: снижение — значит, бюджет сгорает.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "остаток бюджета",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 20,
-                    "gradientMode": "scheme",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "dashed"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate-5-m-1-h-6-h-1-d-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1068,
-          "title": "Скорость сжигания — 5 мин · 1 ч · 6 ч · 1 д",
-          "description": "Как быстро сгорал бюджет в каждом окне, во времени: оранжевый выше 1×, красный выше 3.36×.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 мин",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 ч",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 ч",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 д",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "rps-total-ru": {
         "kind": "Panel",
         "spec": {
@@ -7865,97 +6892,6 @@
                     ]
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "5xx-ratio-by-route-ru": {
-        "kind": "Panel",
-        "spec": {
-          "id": 1065,
-          "title": "Доля 5xx — по маршрутам",
-          "description": "Доля серверных ошибок на каждом маршруте во времени. Оранжевый выше 1% · красный выше 5%.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "{{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {
-                "maxDataPoints": 60
-              }
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "status-history",
-            "version": "",
-            "spec": {
-              "options": {
-                "colWidth": 0.9,
-                "legend": {
-                  "showLegend": false
-                },
-                "rowHeight": 0.85,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 0.01,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.05,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 1
-                  }
-                },
-                "overrides": []
               }
             }
           }
@@ -9042,6 +7978,682 @@
                       "mode": "none"
                     },
                     "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "error-budget-left-7-days-ru": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1058,
+          "title": "Остаток бюджета ошибок — 7 дней",
+          "description": "Доля семидневного бюджета на 5xx, которая ещё не потрачена, при цели доступности `$slo`. На нуле цель не выполнена.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
+                        "instant": false,
+                        "legendFormat": "бюджет",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.25,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "burn-rate-ru": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1059,
+          "title": "Скорость сжигания — 1 ч · 6 ч",
+          "description": "Как быстро сгорает семидневный бюджет ошибок: при 1× он уходит ровно за 7 дней. Красный при 3.36× за 1 ч (2% бюджета за час) и 1.4× за 6 ч (5% за шесть часов).",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 час",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 часов",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "value_and_name",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "decimals": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 14.4,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "1 час"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 3.36
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "6 часов"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 1.4
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "fast-enough-ru": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1060,
+          "title": "Достаточно быстрые — 7 дней",
+          "description": "Доля запросов за последние 7 дней, уложившихся в порог `Apdex: норма`, — цель по задержке рядом с целью по доступности, для всего сервиса, как и бюджет.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
+                        "instant": false,
+                        "legendFormat": "не дольше $satisfied с",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.9,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.99,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "availability-vs-objective-ru": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1066,
+          "title": "Доступность — относительно цели",
+          "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`: красная зона под пунктиром — ниже цели.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
+                        "instant": false,
+                        "legendFormat": "доступность",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "vector($slo)",
+                        "instant": false,
+                        "legendFormat": "цель",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 2,
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisSoftMin": 0.9,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "цель"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "red"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            8,
+                            6
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "доступность"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "burn-rate-5-m-1-h-6-h-1-d-ru": {
+        "kind": "Panel",
+        "spec": {
+          "id": 1068,
+          "title": "Скорость сжигания — 5 мин · 1 ч · 6 ч · 1 д",
+          "description": "Как быстро сгорал бюджет в каждом окне, во времени: оранжевый выше 1×, красный выше 3.36×.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "5 мин",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 ч",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 ч",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 д",
+                        "range": true
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "state-timeline",
+            "version": "",
+            "spec": {
+              "options": {
+                "alignValue": "left",
+                "legend": {
+                  "showLegend": false
+                },
+                "mergeValues": true,
+                "rowHeight": 0.8,
+                "showValue": "never",
+                "tooltip": {
+                  "mode": "single"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 3.36,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "fillOpacity": 80,
+                    "lineWidth": 0
                   }
                 },
                 "overrides": []
@@ -11868,785 +11480,6 @@
           }
         }
       },
-      "error-budget-left-7-days-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2058,
-          "title": "剩余错误预算 — 7 天",
-          "description": "在可用性目标为 `$slo` 时，7 天 5xx 错误预算中尚未用掉的比例。降到零即未达成目标。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "预算",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2059,
-          "title": "消耗速率 — 1 小时 · 6 小时",
-          "description": "7 天错误预算的消耗速度：1× 表示恰好 7 天耗尽。1 小时窗口达到 3.36×（一小时耗掉 2% 预算）或 6 小时窗口达到 1.4×（六小时耗掉 5%）时为红色。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "stat",
-            "version": "",
-            "spec": {
-              "options": {
-                "colorMode": "background",
-                "graphMode": "area",
-                "justifyMode": "center",
-                "orientation": "auto",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 14.4,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "1 小时"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 3.36
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "6 小时"
-                    },
-                    "properties": [
-                      {
-                        "id": "thresholds",
-                        "value": {
-                          "mode": "absolute",
-                          "steps": [
-                            {
-                              "color": "green"
-                            },
-                            {
-                              "color": "orange",
-                              "value": 1
-                            },
-                            {
-                              "color": "red",
-                              "value": 1.4
-                            }
-                          ]
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "fast-enough-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2060,
-          "title": "足够快 — 7 天",
-          "description": "过去 7 天内在 `Apdex：满意` 阈值内完成的请求占比，即与可用性目标并列的延迟目标，和错误预算一样针对整个服务。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": false,
-                        "legendFormat": "$satisfied 秒内",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "gauge",
-            "version": "",
-            "spec": {
-              "options": {
-                "barShape": "rounded",
-                "effects": {
-                  "barGlow": true,
-                  "centerGlow": true,
-                  "gradient": true
-                },
-                "endpointMarker": "glow",
-                "reduceOptions": {
-                  "calcs": [
-                    "lastNotNull"
-                  ],
-                  "fields": "",
-                  "values": false
-                },
-                "shape": "circle",
-                "showThresholdLabels": false,
-                "showThresholdMarkers": true,
-                "sparkline": true,
-                "textMode": "value_and_name"
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.9,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.99,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "noValue": "–"
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "availability-vs-objective-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2066,
-          "title": "可用性 — 对照目标",
-          "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照：虚线下方的红色区域表示低于目标。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "可用性",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "vector($slo)",
-                        "instant": false,
-                        "legendFormat": "目标",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 2,
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0.9,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "目标"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            8,
-                            6
-                          ]
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
-                      },
-                      {
-                        "id": "custom.gradientMode",
-                        "value": "none"
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "可用性"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "green"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "error-budget-left-over-time-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2067,
-          "title": "剩余错误预算 — 随时间变化",
-          "description": "每个时刻尚未用掉的 7 天错误预算：下降即表示正在消耗。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": false,
-                        "legendFormat": "剩余预算",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "min": 0,
-                  "max": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "red"
-                      },
-                      {
-                        "value": 0.25,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.5,
-                        "color": "green"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 20,
-                    "gradientMode": "scheme",
-                    "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "thresholdsStyle": {
-                      "mode": "dashed"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "burn-rate-5-m-1-h-6-h-1-d-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2068,
-          "title": "消耗速率 — 5 分钟 · 1 小时 · 6 小时 · 1 天",
-          "description": "各窗口内预算随时间的消耗速度：高于 1× 为橙色，高于 3.36× 为红色。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "5 分钟",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "B",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "6 小时",
-                        "range": true
-                      }
-                    },
-                    "refId": "C",
-                    "hidden": false
-                  }
-                },
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
-                        "instant": false,
-                        "legendFormat": "1 天",
-                        "range": true
-                      }
-                    },
-                    "refId": "D",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "state-timeline",
-            "version": "",
-            "spec": {
-              "options": {
-                "alignValue": "left",
-                "legend": {
-                  "showLegend": false
-                },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "suffix:×",
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 1,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 3.36,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 0
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "rps-total-zh": {
         "kind": "Panel",
         "spec": {
@@ -13173,97 +12006,6 @@
                     ]
                   }
                 ]
-              }
-            }
-          }
-        }
-      },
-      "5xx-ratio-by-route-zh": {
-        "kind": "Panel",
-        "spec": {
-          "id": 2065,
-          "title": "5xx 比例 — 按路由",
-          "description": "每条路由的服务端错误占比随时间变化。高于 1% 为橙色 · 高于 5% 为红色。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "{{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {
-                "maxDataPoints": 60
-              }
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "status-history",
-            "version": "",
-            "spec": {
-              "options": {
-                "colWidth": 0.9,
-                "legend": {
-                  "showLegend": false
-                },
-                "rowHeight": 0.85,
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "percentunit",
-                  "decimals": 1,
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      },
-                      {
-                        "value": 0.01,
-                        "color": "orange"
-                      },
-                      {
-                        "value": 0.05,
-                        "color": "red"
-                      }
-                    ]
-                  },
-                  "color": {
-                    "mode": "thresholds"
-                  },
-                  "custom": {
-                    "fillOpacity": 80,
-                    "lineWidth": 1
-                  }
-                },
-                "overrides": []
               }
             }
           }
@@ -14350,6 +13092,682 @@
                       "mode": "none"
                     },
                     "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "error-budget-left-7-days-zh": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2058,
+          "title": "剩余错误预算 — 7 天",
+          "description": "在可用性目标为 `$slo` 时，7 天 5xx 错误预算中尚未用掉的比例。降到零即未达成目标。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
+                        "instant": false,
+                        "legendFormat": "预算",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.25,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "burn-rate-zh": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2059,
+          "title": "消耗速率 — 1 小时 · 6 小时",
+          "description": "7 天错误预算的消耗速度：1× 表示恰好 7 天耗尽。1 小时窗口达到 3.36×（一小时耗掉 2% 预算）或 6 小时窗口达到 1.4×（六小时耗掉 5%）时为红色。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 小时",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 小时",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "stat",
+            "version": "",
+            "spec": {
+              "options": {
+                "colorMode": "background",
+                "graphMode": "area",
+                "justifyMode": "center",
+                "orientation": "auto",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "showPercentChange": false,
+                "textMode": "value_and_name",
+                "wideLayout": true
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "decimals": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 14.4,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "1 小时"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 3.36
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "6 小时"
+                    },
+                    "properties": [
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 1
+                            },
+                            {
+                              "color": "red",
+                              "value": 1.4
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "fast-enough-zh": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2060,
+          "title": "足够快 — 7 天",
+          "description": "过去 7 天内在 `Apdex：满意` 阈值内完成的请求占比，即与可用性目标并列的延迟目标，和错误预算一样针对整个服务。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
+                        "instant": false,
+                        "legendFormat": "$satisfied 秒内",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "gauge",
+            "version": "",
+            "spec": {
+              "options": {
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
+                "reduceOptions": {
+                  "calcs": [
+                    "lastNotNull"
+                  ],
+                  "fields": "",
+                  "values": false
+                },
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 1,
+                  "min": 0,
+                  "max": 1,
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "red"
+                      },
+                      {
+                        "value": 0.9,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 0.99,
+                        "color": "green"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "noValue": "–"
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
+      "availability-vs-objective-zh": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2066,
+          "title": "可用性 — 对照目标",
+          "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照：虚线下方的红色区域表示低于目标。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
+                        "instant": false,
+                        "legendFormat": "可用性",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "vector($slo)",
+                        "instant": false,
+                        "legendFormat": "目标",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "decimals": 2,
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisSoftMin": 0.9,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "目标"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "red"
+                        }
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            8,
+                            6
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "可用性"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "burn-rate-5-m-1-h-6-h-1-d-zh": {
+        "kind": "Panel",
+        "spec": {
+          "id": 2068,
+          "title": "消耗速率 — 5 分钟 · 1 小时 · 6 小时 · 1 天",
+          "description": "各窗口内预算随时间的消耗速度：高于 1× 为橙色，高于 3.36× 为红色。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[5m])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "5 分钟",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 小时",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "6 小时",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1d])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1d])) / (1 - $slo)",
+                        "instant": false,
+                        "legendFormat": "1 天",
+                        "range": true
+                      }
+                    },
+                    "refId": "D",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "state-timeline",
+            "version": "",
+            "spec": {
+              "options": {
+                "alignValue": "left",
+                "legend": {
+                  "showLegend": false
+                },
+                "mergeValues": true,
+                "rowHeight": 0.8,
+                "showValue": "never",
+                "tooltip": {
+                  "mode": "single"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix:×",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "green"
+                      },
+                      {
+                        "value": 1,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 3.36,
+                        "color": "red"
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "thresholds"
+                  },
+                  "custom": {
+                    "fillOpacity": 80,
+                    "lineWidth": 0
                   }
                 },
                 "overrides": []
@@ -16097,98 +15515,6 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "SLO",
-                        "collapse": false,
-                        "layout": {
-                          "kind": "GridLayout",
-                          "spec": {
-                            "items": [
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-7-days"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 8,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 16,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "fast-enough"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "availability-vs-objective"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 12,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-over-time"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "kind": "RowsLayoutRow",
-                      "spec": {
                         "title": "Requests",
                         "collapse": false,
                         "layout": {
@@ -16267,19 +15593,6 @@
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "errors-by-route-and-code"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 0,
-                                            "y": 9,
-                                            "width": 24,
-                                            "height": 5,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "5xx-ratio-by-route"
                                             }
                                           }
                                         }
@@ -16431,6 +15744,85 @@
                                         }
                                       ]
                                     }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "RowsLayoutRow",
+                      "spec": {
+                        "title": "SLO",
+                        "collapse": false,
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "error-budget-left-7-days"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 8,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 16,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "fast-enough"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 7,
+                                  "width": 24,
+                                  "height": 8,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "availability-vs-objective"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 15,
+                                  "width": 24,
+                                  "height": 5,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate-5-m-1-h-6-h-1-d"
                                   }
                                 }
                               }
@@ -16920,98 +16312,6 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "SLO",
-                        "collapse": false,
-                        "layout": {
-                          "kind": "GridLayout",
-                          "spec": {
-                            "items": [
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-7-days-ru"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 8,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-ru"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 16,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "fast-enough-ru"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "availability-vs-objective-ru"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 12,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-over-time-ru"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d-ru"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "kind": "RowsLayoutRow",
-                      "spec": {
                         "title": "Запросы",
                         "collapse": false,
                         "layout": {
@@ -17090,19 +16390,6 @@
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "errors-by-route-and-code-ru"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 0,
-                                            "y": 9,
-                                            "width": 24,
-                                            "height": 5,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "5xx-ratio-by-route-ru"
                                             }
                                           }
                                         }
@@ -17254,6 +16541,85 @@
                                         }
                                       ]
                                     }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "RowsLayoutRow",
+                      "spec": {
+                        "title": "SLO",
+                        "collapse": false,
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "error-budget-left-7-days-ru"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 8,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate-ru"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 16,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "fast-enough-ru"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 7,
+                                  "width": 24,
+                                  "height": 8,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "availability-vs-objective-ru"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 15,
+                                  "width": 24,
+                                  "height": 5,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate-5-m-1-h-6-h-1-d-ru"
                                   }
                                 }
                               }
@@ -17743,98 +17109,6 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "SLO",
-                        "collapse": false,
-                        "layout": {
-                          "kind": "GridLayout",
-                          "spec": {
-                            "items": [
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-7-days-zh"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 8,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-zh"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 16,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 7,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "fast-enough-zh"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "availability-vs-objective-zh"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 12,
-                                  "y": 7,
-                                  "width": 12,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "error-budget-left-over-time-zh"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 15,
-                                  "width": 24,
-                                  "height": 5,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "burn-rate-5-m-1-h-6-h-1-d-zh"
-                                  }
-                                }
-                              }
-                            ]
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "kind": "RowsLayoutRow",
-                      "spec": {
                         "title": "请求",
                         "collapse": false,
                         "layout": {
@@ -17913,19 +17187,6 @@
                                             "element": {
                                               "kind": "ElementReference",
                                               "name": "errors-by-route-and-code-zh"
-                                            }
-                                          }
-                                        },
-                                        {
-                                          "kind": "GridLayoutItem",
-                                          "spec": {
-                                            "x": 0,
-                                            "y": 9,
-                                            "width": 24,
-                                            "height": 5,
-                                            "element": {
-                                              "kind": "ElementReference",
-                                              "name": "5xx-ratio-by-route-zh"
                                             }
                                           }
                                         }
@@ -18077,6 +17338,85 @@
                                         }
                                       ]
                                     }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "kind": "RowsLayoutRow",
+                      "spec": {
+                        "title": "SLO",
+                        "collapse": false,
+                        "layout": {
+                          "kind": "GridLayout",
+                          "spec": {
+                            "items": [
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "error-budget-left-7-days-zh"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 8,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate-zh"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 16,
+                                  "y": 0,
+                                  "width": 8,
+                                  "height": 7,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "fast-enough-zh"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 7,
+                                  "width": 24,
+                                  "height": 8,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "availability-vs-objective-zh"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 15,
+                                  "width": 24,
+                                  "height": 5,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "burn-rate-5-m-1-h-6-h-1-d-zh"
                                   }
                                 }
                               }
