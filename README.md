@@ -79,6 +79,21 @@ flowchart LR
     alloy --> vm & loki & tempo & pyroscope
     tempo -. "span metrics" .-> vm
     storage --> grafana
+
+    classDef metrics fill:#B877D9,stroke:#8F3BB8,color:#111
+    classDef logs fill:#73BF69,stroke:#56A64B,color:#111
+    classDef traces fill:#5794F2,stroke:#3274D9,color:#111
+    classDef profiles fill:#FF9830,stroke:#FA6400,color:#111
+    classDef collector fill:#F55F3E,stroke:#C4162A,color:#fff
+    classDef ui fill:#F46800,stroke:#C34F00,color:#fff
+    classDef source fill:#E8E8E8,stroke:#9E9E9E,color:#111
+    class vm metrics
+    class loki logs
+    class tempo traces
+    class pyroscope profiles
+    class alloy collector
+    class grafana ui
+    class browser,api,docker source
 ```
 
 | signal | from the process | through Alloy | stored in |
@@ -137,6 +152,11 @@ naming the string, when a dictionary lacks a text, keeps one the dashboard no lo
 `$variable` or `{{label}}`. The variables, the title and the links stay in English; Grafana's own
 interface follows the browser's language.
 
+Colours mean the same on every panel: 2xx green, 3xx blue, 4xx orange, 5xx and exceptions red; a
+grey dashed line is yesterday, a white dashed one a reference — the objective, an even split — and a
+white solid one all workers together. A latency line takes the colour of its zone, and the zones
+above 500 ms and 1 s are shaded; under the dashed objective, availability sits in a red zone.
+
 Thresholds: 5xx over 1% orange, over 5% red; P95 over 500 ms orange, over 1 s red. The availability
 target of the budget and the burn rate is the hidden variable `slo`, 0.995. Burn rate turns red at
 3.36× over 1 h and 1.4× over 6 h — the pace that spends 2% and 5% of a 7-day budget in that window.
@@ -193,6 +213,18 @@ flowchart LR
     T -- "span metrics: rate · P95" --> M
     M -. "exemplars · panel links" .-> T
     M -. "panel links" .-> L
+
+    classDef metrics fill:#B877D9,stroke:#8F3BB8,color:#111
+    classDef logs fill:#73BF69,stroke:#56A64B,color:#111
+    classDef traces fill:#5794F2,stroke:#3274D9,color:#111
+    classDef profiles fill:#FF9830,stroke:#FA6400,color:#111
+    classDef collector fill:#F55F3E,stroke:#C4162A,color:#fff
+    classDef ui fill:#F46800,stroke:#C34F00,color:#fff
+    classDef source fill:#E8E8E8,stroke:#9E9E9E,color:#111
+    class M metrics
+    class L logs
+    class T traces
+    class P profiles
 ```
 
 | from | to | how |
@@ -327,6 +359,17 @@ flowchart LR
     alloy["Alloy<br/>lvl → label<br/>ids → structured metadata"]
     loki[("Loki")]
     record --> factory --> fmt --> out --> alloy --> loki
+
+    classDef metrics fill:#B877D9,stroke:#8F3BB8,color:#111
+    classDef logs fill:#73BF69,stroke:#56A64B,color:#111
+    classDef traces fill:#5794F2,stroke:#3274D9,color:#111
+    classDef profiles fill:#FF9830,stroke:#FA6400,color:#111
+    classDef collector fill:#F55F3E,stroke:#C4162A,color:#fff
+    classDef ui fill:#F46800,stroke:#C34F00,color:#fff
+    classDef source fill:#E8E8E8,stroke:#9E9E9E,color:#111
+    class loki logs
+    class alloy collector
+    class record,factory,fmt,out source
 ```
 
 ```json

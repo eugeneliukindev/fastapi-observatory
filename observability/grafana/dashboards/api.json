@@ -302,7 +302,7 @@
         "spec": {
           "id": 1,
           "title": "Apdex",
-          "description": "Application Performance Index over the selected range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor",
+          "description": "Application Performance Index over the last 5 minutes, and how it moved over the range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -320,10 +320,10 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[$__range])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[$__range]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
-                        "instant": true,
+                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[5m])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[5m]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[5m]))",
+                        "instant": false,
                         "legendFormat": "__auto",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -357,7 +357,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -948,8 +949,26 @@
                         "value": 0
                       },
                       {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "gauge",
+                          "mode": "gradient",
+                          "valueDisplayMode": "text"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "continuous-BlPu"
+                        }
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
                         "id": "custom.width",
-                        "value": 90
+                        "value": 160
                       }
                     ]
                   },
@@ -1037,13 +1056,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -1056,6 +1068,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -1079,13 +1097,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -1102,6 +1113,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -1259,9 +1276,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "budget",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -1295,7 +1312,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -1523,9 +1541,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "within $satisfied s",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -1539,14 +1557,17 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "stat",
+            "group": "gauge",
             "version": "",
             "spec": {
               "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -1554,14 +1575,18 @@
                   "fields": "",
                   "values": false
                 },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
               },
               "fieldConfig": {
                 "defaults": {
                   "unit": "percentunit",
                   "decimals": 1,
+                  "min": 0,
+                  "max": 1,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -1595,7 +1620,7 @@
         "spec": {
           "id": 66,
           "title": "Availability — vs objective",
-          "description": "Share of requests not answered with 5xx, against the availability target `$slo`.",
+          "description": "Share of requests not answered with 5xx, against the availability target `$slo`: the red zone under the dashed line is below the target.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1677,15 +1702,16 @@
                   "custom": {
                     "axisSoftMin": 0.9,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -1698,27 +1724,46 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "orange",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "red"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "availability"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
                       }
                     ]
                   }
@@ -1810,9 +1855,9 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 20,
+                    "gradientMode": "scheme",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
@@ -1820,8 +1865,9 @@
                       "mode": "none"
                     },
                     "thresholdsStyle": {
-                      "mode": "line+area"
-                    }
+                      "mode": "dashed"
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -2071,15 +2117,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -2092,23 +2139,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
                       },
                       {
                         "id": "custom.fillOpacity",
                         "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       }
                     ]
                   }
@@ -2172,7 +2223,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -2201,7 +2254,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -2209,7 +2262,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -2282,15 +2336,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 35,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 30,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -2414,7 +2469,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -2438,15 +2495,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -2643,7 +2701,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -2656,7 +2716,8 @@
                   "decimals": 0,
                   "min": 0,
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "shades",
+                    "fixedColor": "red"
                   },
                   "links": [
                     {
@@ -2907,7 +2968,7 @@
         "spec": {
           "id": 61,
           "title": "Latency — P50 · P95 · P99",
-          "description": "Request duration percentiles across all routes; the grey dashed line is P95 yesterday.",
+          "description": "Request duration percentiles across all routes. P95 turns orange above 500 ms and red above 1 s, over the same zones; P50 is blue, P99 purple, and the grey dashed line is P95 yesterday.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3032,15 +3093,36 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -3053,19 +3135,117 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "scheme"
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "value": null,
+                              "color": "green"
+                            },
+                            {
+                              "value": 0.5,
+                              "color": "orange"
+                            },
+                            {
+                              "value": 1,
+                              "color": "red"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.thresholdsStyle",
+                        "value": {
+                          "mode": "off"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#5794F2"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "C"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#B877D9"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       },
                       {
                         "id": "custom.fillOpacity",
@@ -3233,7 +3413,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3250,7 +3432,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3258,7 +3440,28 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": []
@@ -3353,15 +3556,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -3417,7 +3621,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3434,7 +3640,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3442,7 +3648,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -3498,7 +3705,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3515,7 +3724,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3523,7 +3732,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -3608,7 +3818,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3626,7 +3838,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3634,7 +3846,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -3647,27 +3860,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "text",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "text"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
                       }
                     ]
                   }
@@ -3753,7 +3966,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3770,7 +3985,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3778,10 +3993,55 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "all workers"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "text"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -3841,7 +4101,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3859,7 +4121,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 40,
+                    "fillOpacity": 30,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3867,7 +4129,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -3930,7 +4193,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -3965,7 +4230,7 @@
                     "axisSoftMax": 1,
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -3976,7 +4241,8 @@
                     },
                     "thresholdsStyle": {
                       "mode": "dashed+area"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -4039,7 +4305,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -4056,7 +4324,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -4064,7 +4332,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -4096,7 +4365,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))",
+                        "expr": "(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))) or vector(0)",
                         "instant": false,
                         "legendFormat": "started",
                         "range": true
@@ -4143,7 +4412,8 @@
                     "fillOpacity": 80,
                     "lineWidth": 1,
                     "showPoints": "never",
-                    "barAlignment": 0
+                    "barAlignment": 0,
+                    "axisSoftMax": 4
                   }
                 },
                 "overrides": []
@@ -4287,7 +4557,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -4304,7 +4576,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -4312,7 +4584,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -4368,7 +4641,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -4386,7 +4661,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -4394,7 +4669,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -4450,7 +4726,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -4468,7 +4746,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -4476,7 +4754,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -4549,7 +4828,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -4557,7 +4836,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -5330,7 +5610,7 @@
         "spec": {
           "id": 1001,
           "title": "Apdex",
-          "description": "Индекс производительности приложения за выбранный период, 0–1: довольные — быстрее порога `Apdex: норма`, терпящие — до `Apdex: терпимо` (считаются за половину), недовольные — дольше.\n\n≥ 0.94 отлично · ≥ 0.7 приемлемо · < 0.7 плохо",
+          "description": "Индекс производительности приложения за последние 5 минут и его динамика за период, 0–1: довольные — быстрее порога `Apdex: норма`, терпящие — до `Apdex: терпимо` (считаются за половину), недовольные — дольше.\n\n≥ 0.94 отлично · ≥ 0.7 приемлемо · < 0.7 плохо",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5348,10 +5628,10 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[$__range])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[$__range]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
-                        "instant": true,
+                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[5m])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[5m]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[5m]))",
+                        "instant": false,
                         "legendFormat": "__auto",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -5385,7 +5665,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -5976,8 +6257,26 @@
                         "value": 0
                       },
                       {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "gauge",
+                          "mode": "gradient",
+                          "valueDisplayMode": "text"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "continuous-BlPu"
+                        }
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
                         "id": "custom.width",
-                        "value": 90
+                        "value": 160
                       }
                     ]
                   },
@@ -6065,13 +6364,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -6084,6 +6376,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -6107,13 +6405,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -6130,6 +6421,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -6287,9 +6584,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "бюджет",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -6323,7 +6620,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -6551,9 +6849,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "не дольше $satisfied с",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -6567,14 +6865,17 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "stat",
+            "group": "gauge",
             "version": "",
             "spec": {
               "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -6582,14 +6883,18 @@
                   "fields": "",
                   "values": false
                 },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
               },
               "fieldConfig": {
                 "defaults": {
                   "unit": "percentunit",
                   "decimals": 1,
+                  "min": 0,
+                  "max": 1,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -6623,7 +6928,7 @@
         "spec": {
           "id": 1066,
           "title": "Доступность — относительно цели",
-          "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`.",
+          "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`: красная зона под пунктиром — ниже цели.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -6705,15 +7010,16 @@
                   "custom": {
                     "axisSoftMin": 0.9,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -6726,27 +7032,46 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "orange",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "red"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "доступность"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
                       }
                     ]
                   }
@@ -6838,9 +7163,9 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 20,
+                    "gradientMode": "scheme",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
@@ -6848,8 +7173,9 @@
                       "mode": "none"
                     },
                     "thresholdsStyle": {
-                      "mode": "line+area"
-                    }
+                      "mode": "dashed"
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -7099,15 +7425,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -7120,23 +7447,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
                       },
                       {
                         "id": "custom.fillOpacity",
                         "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       }
                     ]
                   }
@@ -7200,7 +7531,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -7229,7 +7562,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -7237,7 +7570,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -7310,15 +7644,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 35,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 30,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -7442,7 +7777,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -7466,15 +7803,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -7671,7 +8009,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -7684,7 +8024,8 @@
                   "decimals": 0,
                   "min": 0,
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "shades",
+                    "fixedColor": "red"
                   },
                   "links": [
                     {
@@ -7935,7 +8276,7 @@
         "spec": {
           "id": 1061,
           "title": "Задержка — P50 · P95 · P99",
-          "description": "Перцентили длительности запросов по всем маршрутам; серый пунктир — P95 вчера.",
+          "description": "Перцентили длительности запросов по всем маршрутам. P95 становится оранжевым выше 500 мс и красным выше 1 с, на фоне тех же зон; P50 — синий, P99 — фиолетовый, серый пунктир — P95 вчера.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -8060,15 +8401,36 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -8081,19 +8443,117 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "scheme"
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "value": null,
+                              "color": "green"
+                            },
+                            {
+                              "value": 0.5,
+                              "color": "orange"
+                            },
+                            {
+                              "value": 1,
+                              "color": "red"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.thresholdsStyle",
+                        "value": {
+                          "mode": "off"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#5794F2"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "C"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#B877D9"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       },
                       {
                         "id": "custom.fillOpacity",
@@ -8261,7 +8721,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8278,7 +8740,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8286,7 +8748,28 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": []
@@ -8381,15 +8864,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -8445,7 +8929,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8462,7 +8948,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8470,7 +8956,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -8526,7 +9013,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8543,7 +9032,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8551,7 +9040,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -8636,7 +9126,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8654,7 +9146,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8662,7 +9154,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -8675,27 +9168,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "text",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "text"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
                       }
                     ]
                   }
@@ -8781,7 +9274,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8798,7 +9293,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8806,10 +9301,55 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "все воркеры"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "text"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -8869,7 +9409,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8887,7 +9429,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 40,
+                    "fillOpacity": 30,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -8895,7 +9437,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -8958,7 +9501,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -8993,7 +9538,7 @@
                     "axisSoftMax": 1,
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9004,7 +9549,8 @@
                     },
                     "thresholdsStyle": {
                       "mode": "dashed+area"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -9067,7 +9613,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -9084,7 +9632,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9092,7 +9640,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -9124,7 +9673,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))",
+                        "expr": "(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))) or vector(0)",
                         "instant": false,
                         "legendFormat": "запущено",
                         "range": true
@@ -9171,7 +9720,8 @@
                     "fillOpacity": 80,
                     "lineWidth": 1,
                     "showPoints": "never",
-                    "barAlignment": 0
+                    "barAlignment": 0,
+                    "axisSoftMax": 4
                   }
                 },
                 "overrides": []
@@ -9315,7 +9865,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -9332,7 +9884,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9340,7 +9892,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -9396,7 +9949,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -9414,7 +9969,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9422,7 +9977,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -9478,7 +10034,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -9496,7 +10054,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9504,7 +10062,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -9577,7 +10136,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -9585,7 +10144,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -10358,7 +10918,7 @@
         "spec": {
           "id": 2001,
           "title": "Apdex",
-          "description": "所选时间范围内的应用性能指数，0–1：低于 `Apdex：满意` 阈值为满意，不超过 `Apdex：可容忍` 为可容忍（按一半计），更慢则为失望。\n\n≥ 0.94 优秀 · ≥ 0.7 可接受 · < 0.7 差",
+          "description": "最近 5 分钟的应用性能指数及其在所选时间范围内的变化，0–1：低于 `Apdex：满意` 阈值为满意，不超过 `Apdex：可容忍` 为可容忍（按一半计），更慢则为失望。\n\n≥ 0.94 优秀 · ≥ 0.7 可接受 · < 0.7 差",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -10376,10 +10936,10 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[$__range])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[$__range]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
-                        "instant": true,
+                        "expr": "(sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$satisfied\"}[5m])) + sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", le=\"$tolerated\"}[5m]))) / 2 / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[5m]))",
+                        "instant": false,
                         "legendFormat": "__auto",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -10413,7 +10973,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -11004,8 +11565,26 @@
                         "value": 0
                       },
                       {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "gauge",
+                          "mode": "gradient",
+                          "valueDisplayMode": "text"
+                        }
+                      },
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "continuous-BlPu"
+                        }
+                      },
+                      {
+                        "id": "min",
+                        "value": 0
+                      },
+                      {
                         "id": "custom.width",
-                        "value": 90
+                        "value": 160
                       }
                     ]
                   },
@@ -11093,13 +11672,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -11112,6 +11684,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -11135,13 +11713,6 @@
                         "value": 80
                       },
                       {
-                        "id": "custom.cellOptions",
-                        "value": {
-                          "mode": "gradient",
-                          "type": "color-background"
-                        }
-                      },
-                      {
                         "id": "thresholds",
                         "value": {
                           "mode": "absolute",
@@ -11158,6 +11729,12 @@
                               "value": 0.05
                             }
                           ]
+                        }
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
                         }
                       }
                     ]
@@ -11315,9 +11892,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "预算",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -11351,7 +11928,8 @@
                 },
                 "shape": "circle",
                 "showThresholdLabels": false,
-                "showThresholdMarkers": true
+                "showThresholdMarkers": true,
+                "sparkline": true
               },
               "fieldConfig": {
                 "defaults": {
@@ -11579,9 +12157,9 @@
                       "spec": {
                         "editorMode": "code",
                         "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
-                        "instant": true,
+                        "instant": false,
                         "legendFormat": "$satisfied 秒内",
-                        "range": false
+                        "range": true
                       }
                     },
                     "refId": "A",
@@ -11595,14 +12173,17 @@
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "stat",
+            "group": "gauge",
             "version": "",
             "spec": {
               "options": {
-                "colorMode": "background",
-                "graphMode": "none",
-                "justifyMode": "center",
-                "orientation": "auto",
+                "barShape": "rounded",
+                "effects": {
+                  "barGlow": true,
+                  "centerGlow": true,
+                  "gradient": true
+                },
+                "endpointMarker": "glow",
                 "reduceOptions": {
                   "calcs": [
                     "lastNotNull"
@@ -11610,14 +12191,18 @@
                   "fields": "",
                   "values": false
                 },
-                "showPercentChange": false,
-                "textMode": "value_and_name",
-                "wideLayout": true
+                "shape": "circle",
+                "showThresholdLabels": false,
+                "showThresholdMarkers": true,
+                "sparkline": true,
+                "textMode": "value_and_name"
               },
               "fieldConfig": {
                 "defaults": {
                   "unit": "percentunit",
                   "decimals": 1,
+                  "min": 0,
+                  "max": 1,
                   "thresholds": {
                     "mode": "absolute",
                     "steps": [
@@ -11651,7 +12236,7 @@
         "spec": {
           "id": 2066,
           "title": "可用性 — 对照目标",
-          "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照。",
+          "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照：虚线下方的红色区域表示低于目标。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -11733,15 +12318,16 @@
                   "custom": {
                     "axisSoftMin": 0.9,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -11754,27 +12340,46 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "orange",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "red"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "none"
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "可用性"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "green"
+                        }
                       }
                     ]
                   }
@@ -11866,9 +12471,9 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 20,
+                    "gradientMode": "scheme",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
@@ -11876,8 +12481,9 @@
                       "mode": "none"
                     },
                     "thresholdsStyle": {
-                      "mode": "line+area"
-                    }
+                      "mode": "dashed"
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -12127,15 +12733,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -12148,23 +12755,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
                       },
                       {
                         "id": "custom.fillOpacity",
                         "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       }
                     ]
                   }
@@ -12228,7 +12839,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -12257,7 +12870,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -12265,7 +12878,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -12338,15 +12952,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 35,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
+                    "fillOpacity": 30,
+                    "gradientMode": "opacity",
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -12470,7 +13085,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -12494,15 +13111,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -12699,7 +13317,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -12712,7 +13332,8 @@
                   "decimals": 0,
                   "min": 0,
                   "color": {
-                    "mode": "palette-classic"
+                    "mode": "shades",
+                    "fixedColor": "red"
                   },
                   "links": [
                     {
@@ -12963,7 +13584,7 @@
         "spec": {
           "id": 2061,
           "title": "延迟 — P50 · P95 · P99",
-          "description": "所有路由的请求耗时百分位；灰色虚线是昨天的 P95。",
+          "description": "所有路由的请求耗时百分位。P95 高于 500 毫秒变为橙色，高于 1 秒变为红色，背景为相同的区间；P50 为蓝色，P99 为紫色，灰色虚线是昨天的 P95。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -13088,15 +13709,36 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": [
@@ -13109,19 +13751,117 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "#8e8e8e",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "#8e8e8e"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
                             6,
                             6
-                          ],
-                          "fill": "dash"
+                          ]
                         }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "thresholds"
+                        }
+                      },
+                      {
+                        "id": "custom.gradientMode",
+                        "value": "scheme"
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "value": null,
+                              "color": "green"
+                            },
+                            {
+                              "value": 0.5,
+                              "color": "orange"
+                            },
+                            {
+                              "value": 1,
+                              "color": "red"
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.thresholdsStyle",
+                        "value": {
+                          "mode": "off"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#5794F2"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "C"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "#B877D9"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 1
                       },
                       {
                         "id": "custom.fillOpacity",
@@ -13289,7 +14029,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13306,7 +14048,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13314,7 +14056,28 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
                 "overrides": []
@@ -13409,15 +14172,16 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
-                    "lineWidth": 1,
+                    "lineWidth": 2,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -13473,7 +14237,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13490,7 +14256,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13498,7 +14264,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -13554,7 +14321,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13571,7 +14340,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13579,7 +14348,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -13664,7 +14434,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13682,7 +14454,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13690,7 +14462,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": [
@@ -13703,27 +14476,27 @@
                       {
                         "id": "color",
                         "value": {
-                          "fixedColor": "text",
-                          "mode": "fixed"
+                          "mode": "fixed",
+                          "fixedColor": "text"
                         }
                       },
                       {
                         "id": "custom.lineStyle",
                         "value": {
+                          "fill": "dash",
                           "dash": [
-                            10,
-                            10
-                          ],
-                          "fill": "dash"
+                            8,
+                            6
+                          ]
                         }
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 0
                       },
                       {
                         "id": "custom.lineWidth",
                         "value": 1
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
                       }
                     ]
                   }
@@ -13809,7 +14582,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13826,7 +14601,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13834,10 +14609,55 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
+                    },
+                    "lineInterpolation": "smooth",
+                    "thresholdsStyle": {
+                      "mode": "dashed+area"
                     }
+                  },
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "value": null,
+                        "color": "transparent"
+                      },
+                      {
+                        "value": 0.5,
+                        "color": "orange"
+                      },
+                      {
+                        "value": 1,
+                        "color": "red"
+                      }
+                    ]
                   }
                 },
-                "overrides": []
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "全部工作进程"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "text"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
               }
             }
           }
@@ -13897,7 +14717,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -13915,7 +14737,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 40,
+                    "fillOpacity": 30,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -13923,7 +14745,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "normal"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -13986,7 +14809,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -14021,7 +14846,7 @@
                     "axisSoftMax": 1,
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14032,7 +14857,8 @@
                     },
                     "thresholdsStyle": {
                       "mode": "dashed+area"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -14095,7 +14921,9 @@
                   "placement": "bottom",
                   "showLegend": true,
                   "sortBy": "Max",
-                  "sortDesc": true
+                  "sortDesc": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -14112,7 +14940,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14120,7 +14948,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -14152,7 +14981,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))",
+                        "expr": "(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))) or vector(0)",
                         "instant": false,
                         "legendFormat": "已启动",
                         "range": true
@@ -14199,7 +15028,8 @@
                     "fillOpacity": 80,
                     "lineWidth": 1,
                     "showPoints": "never",
-                    "barAlignment": 0
+                    "barAlignment": 0,
+                    "axisSoftMax": 4
                   }
                 },
                 "overrides": []
@@ -14343,7 +15173,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -14360,7 +15192,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14368,7 +15200,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -14424,7 +15257,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -14442,7 +15277,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14450,7 +15285,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -14506,7 +15342,9 @@
                 "legend": {
                   "displayMode": "list",
                   "placement": "bottom",
-                  "showLegend": true
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
                 },
                 "tooltip": {
                   "mode": "multi",
@@ -14524,7 +15362,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14532,7 +15370,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
@@ -14605,7 +15444,7 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 12,
+                    "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
@@ -14613,7 +15452,8 @@
                     "stacking": {
                       "group": "A",
                       "mode": "none"
-                    }
+                    },
+                    "lineInterpolation": "smooth"
                   }
                 },
                 "overrides": []
