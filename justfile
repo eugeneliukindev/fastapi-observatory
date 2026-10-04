@@ -57,8 +57,8 @@ lint-spelling *p="src":
 fmt-pyproject:
     uv run pyproject-fmt pyproject.toml
 
-# Grafana has no translations for what a dashboard says: the dashboard holds its rows once per
-# language, built from observability/grafana/source/ — the English api.json and a dictionary each.
+# Grafana has no translations for what a dashboard says: each language is a dashboard of its own,
+# built from observability/grafana/source/ — the English api.json and a dictionary per language.
 [group("lint")]
 [doc("Build the dashboard in every language; fails on a string a dictionary lacks")]
 dashboards:

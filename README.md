@@ -115,12 +115,12 @@ flowchart LR
 ## 📊 Dashboard
 
 **FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
-service, routes, method, host, thresholds and the language are variables. A series on the route,
-status code and exception panels links to its traces or log lines — click it.
+service, routes, method, host and thresholds are variables. A series on the route, status code
+and exception panels links to its traces or log lines — click it.
 
 | where | variables |
 |---|---|
-| the top line — what you look at | Language · Service · Routes matching · Route · Method · Host |
+| the top line — what you look at | Service · Routes matching · Route · Method · Host |
 | the controls menu, `+7` — wiring and thresholds | Metrics · Logs · Traces · Profiles · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Profiling row | Profile type |
 
@@ -146,15 +146,14 @@ Every route and every worker is drawn; the variables narrow them — `Route` to 
 to the workers of one container or pod. Each title says what is measured, then how it is cut:
 `RPS — by route`, `P95 latency — by worker`.
 
-**In three languages.** The `Language` variable switches between English, Русский and 中文.
-Grafana translates its own interface but never what a dashboard says, so the dashboard holds the
-rows once per language and shows the ones the variable names; the hidden ones query nothing. What
-Grafana loads, [`dashboards/api.json`](observability/grafana/dashboards/api.json), is built: edit
-the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary per
-language in [`source/i18n/`](observability/grafana/source/i18n), then `just dashboards`. It fails,
-naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or loses a
-`$variable` or `{{label}}`. The variables, the title and the links stay in English; Grafana's own
-interface follows the browser's language.
+**In three languages.** English, Русский and 中文 are three dashboards, each translated whole —
+title, variables, rows, panels — and linked to one another at the top, keeping the time range and
+the variables. Grafana translates its own interface, which follows the browser's language, but never
+what a dashboard says. So what it loads from [`dashboards/`](observability/grafana/dashboards) is
+built: edit the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary
+per language in [`source/i18n/`](observability/grafana/source/i18n), then `just dashboards`. It
+fails, naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or
+loses a `$variable` or `{{label}}`. A new language is a new dictionary.
 
 Colours mean the same on every panel: 2xx green, 3xx blue, 4xx orange, 5xx and exceptions red; a
 grey dashed line is yesterday, a white dashed one a reference — the objective, an even split — and a

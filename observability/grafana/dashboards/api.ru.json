@@ -2,7 +2,7 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "observatory-api"
+    "name": "observatory-api-ru"
   },
   "spec": {
     "annotations": [
@@ -30,7 +30,7 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "The FastAPI service from every side, on OpenTelemetry metrics.",
+    "description": "Сервис на FastAPI со всех сторон, по метрикам OpenTelemetry.",
     "editable": true,
     "elements": {
       "throughput": {
@@ -38,7 +38,7 @@
         "spec": {
           "id": 50,
           "title": "RPS",
-          "description": "Requests per second now, and how it moved over the range.",
+          "description": "Запросов в секунду сейчас и как это менялось за выбранный период.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -58,7 +58,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "req/s",
+                        "legendFormat": "запросов/с",
                         "range": true
                       }
                     },
@@ -120,8 +120,8 @@
         "kind": "Panel",
         "spec": {
           "id": 51,
-          "title": "5xx ratio",
-          "description": "Share of server errors now. Orange above 1% · red above 5%.",
+          "title": "Доля 5xx",
+          "description": "Доля серверных ошибок сейчас. Оранжевый выше 1% · красный выше 5%.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -211,8 +211,8 @@
         "kind": "Panel",
         "spec": {
           "id": 52,
-          "title": "P95 latency",
-          "description": "95th percentile of request duration now. Orange above 500 ms · red above 1 s.",
+          "title": "Задержка P95",
+          "description": "95-й перцентиль длительности запроса сейчас. Оранжевый выше 500 мс · красный выше 1 с.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -302,7 +302,7 @@
         "spec": {
           "id": 1,
           "title": "Apdex",
-          "description": "Application Performance Index over the last 5 minutes, and how it moved over the range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor",
+          "description": "Индекс производительности приложения за последние 5 минут и его динамика за период, 0–1: довольные — быстрее порога `Apdex: норма`, терпящие — до `Apdex: терпимо` (считаются за половину), недовольные — дольше.\n\n≥ 0.94 отлично · ≥ 0.7 приемлемо · < 0.7 плохо",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -398,8 +398,8 @@
         "kind": "Panel",
         "spec": {
           "id": 53,
-          "title": "Instances",
-          "description": "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.",
+          "title": "Инстансы",
+          "description": "Хосты, на которых работает приложение — контейнер в Compose, под в Kubernetes: `host_name` из `target_info`. Провал — это перезапуск.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -419,7 +419,7 @@
                         "editorMode": "code",
                         "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
-                        "legendFormat": "instances",
+                        "legendFormat": "инстансы",
                         "range": true
                       }
                     },
@@ -485,8 +485,8 @@
         "kind": "Panel",
         "spec": {
           "id": 54,
-          "title": "Workers",
-          "description": "Serving processes across all instances, each with its own `service.instance.id` — the `instance` label. A dip is a worker replaced.",
+          "title": "Воркеры",
+          "description": "Обслуживающие процессы во всех инстансах, у каждого свой `service.instance.id` — метка `instance`. Провал — это замена воркера.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -506,7 +506,7 @@
                         "editorMode": "code",
                         "expr": "count(count by (instance) (process_thread_count{job=~\"$service\"}))",
                         "instant": false,
-                        "legendFormat": "workers",
+                        "legendFormat": "воркеры",
                         "range": true
                       }
                     },
@@ -572,8 +572,8 @@
         "kind": "Panel",
         "spec": {
           "id": 56,
-          "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces or its RPS, large and with values.",
+          "title": "Маршруты",
+          "description": "Каждый маршрут за выбранный период: динамика трафика, число запросов, доли 2xx, 3xx, 4xx и 5xx, средняя длительность, P95 и P99. Среднее сильно ниже P95 — значит, длинный хвост. Нажмите на маршрут, чтобы открыть его трейсы или его RPS — крупно и со значениями.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -827,12 +827,12 @@
                         "Value #F": 9
                       },
                       "renameByName": {
-                        "Trend #A": "Traffic",
-                        "Value #B": "Requests",
+                        "Trend #A": "Трафик",
+                        "Value #B": "Запросы",
                         "Value #C": "5xx",
                         "Value #D": "P95",
-                        "http_route": "Route",
-                        "Value #E": "Mean",
+                        "http_route": "Маршрут",
+                        "Value #E": "Среднее",
                         "Value #F": "P99",
                         "Value #G": "4xx",
                         "Value #H": "2xx",
@@ -849,7 +849,7 @@
                       "sort": [
                         {
                           "desc": true,
-                          "field": "Requests"
+                          "field": "Запросы"
                         }
                       ]
                     }
@@ -885,7 +885,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Route"
+                      "options": "Маршрут"
                     },
                     "properties": [
                       {
@@ -893,12 +893,12 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "Traces of this route",
+                            "title": "Трейсы этого маршрута",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           },
                           {
                             "targetBlank": false,
-                            "title": "RPS of this route",
+                            "title": "RPS этого маршрута",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
@@ -912,7 +912,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Traffic"
+                      "options": "Трафик"
                     },
                     "properties": [
                       {
@@ -937,7 +937,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Requests"
+                      "options": "Запросы"
                     },
                     "properties": [
                       {
@@ -1167,7 +1167,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Mean"
+                      "options": "Среднее"
                     },
                     "properties": [
                       {
@@ -1256,8 +1256,8 @@
         "kind": "Panel",
         "spec": {
           "id": 6,
-          "title": "RPS — total",
-          "description": "Requests per second across all routes; the grey dashed line is the same time yesterday.",
+          "title": "RPS — всего",
+          "description": "Запросов в секунду по всем маршрутам; серый пунктир — то же время вчера.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1299,7 +1299,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d))",
                         "instant": false,
-                        "legendFormat": "yesterday",
+                        "legendFormat": "вчера",
                         "range": true
                       }
                     },
@@ -1394,8 +1394,8 @@
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — by route",
-          "description": "Requests per second per route.",
+          "title": "RPS — по маршрутам",
+          "description": "Запросов в секунду на каждый маршрут.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1463,12 +1463,12 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Traces of this route",
+                      "title": "Трейсы этого маршрута",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Slow traces of this route",
+                      "title": "Медленные трейсы этого маршрута",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20duration%20%3E%20${slow:percentencode}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1497,8 +1497,8 @@
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS — by status code",
-          "description": "2xx green · 3xx blue · 4xx orange · 5xx red.",
+          "title": "RPS — по кодам ответа",
+          "description": "2xx зелёный · 3xx синий · 4xx оранжевый · 5xx красный.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1640,8 +1640,8 @@
         "kind": "Panel",
         "spec": {
           "id": 23,
-          "title": "RPS — errors by route and code",
-          "description": "Client and server errors of every route, one series per code: 4xx dashed orange, 5xx red. Click a series for the traces of that route with that code.",
+          "title": "RPS — ошибки по маршрутам и кодам",
+          "description": "Ошибки клиента и сервера на каждом маршруте, по серии на код: 4xx — оранжевый пунктир, 5xx — красный. Нажмите на серию, чтобы открыть трейсы этого маршрута с этим кодом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1709,7 +1709,7 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Traces of this route with this code",
+                      "title": "Трейсы этого маршрута с этим кодом",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20span.http.response.status_code%20%3D%20${__field.labels.http_response_status_code}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1787,8 +1787,8 @@
         "kind": "Panel",
         "spec": {
           "id": 25,
-          "title": "Exceptions — by type",
-          "description": "Unhandled exceptions from the access log, one series per type: a new type after a deploy stands out. Which routes raise them and with what text is in the messages beside.",
+          "title": "Исключения — по типам",
+          "description": "Необработанные исключения из журнала запросов, по серии на тип: новый тип после выкатки сразу заметен. Какие маршруты их бросают и с каким текстом — в таблице сообщений рядом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1852,12 +1852,12 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Lines with this exception",
+                      "title": "Строки лога с этим исключением",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Traces with this exception",
+                      "title": "Трейсы с этим исключением",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1885,8 +1885,8 @@
         "kind": "Panel",
         "spec": {
           "id": 78,
-          "title": "Exceptions — messages",
-          "description": "Every exception over the selected range: its type, route and message, most frequent first. Click a message for its log lines and their stacks.",
+          "title": "Исключения — сообщения",
+          "description": "Все исключения за выбранный период: тип, маршрут и сообщение, сначала самые частые. Нажмите на сообщение, чтобы открыть строки лога со стеком.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1946,10 +1946,10 @@
                         "Value #A": 3
                       },
                       "renameByName": {
-                        "error_type": "Type",
-                        "route": "Route",
-                        "error_message": "Message",
-                        "Value #A": "Count"
+                        "error_type": "Тип",
+                        "route": "Маршрут",
+                        "error_message": "Сообщение",
+                        "Value #A": "Сколько раз"
                       }
                     }
                   }
@@ -1962,7 +1962,7 @@
                       "sort": [
                         {
                           "desc": true,
-                          "field": "Count"
+                          "field": "Сколько раз"
                         }
                       ]
                     }
@@ -2015,7 +2015,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Type"
+                      "options": "Тип"
                     },
                     "properties": [
                       {
@@ -2027,7 +2027,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Route"
+                      "options": "Маршрут"
                     },
                     "properties": [
                       {
@@ -2039,7 +2039,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Message"
+                      "options": "Сообщение"
                     },
                     "properties": [
                       {
@@ -2047,7 +2047,7 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "Lines with this message",
+                            "title": "Строки лога с этим сообщением",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_message%3D%5C%22${__value.raw:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
@@ -2057,7 +2057,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Count"
+                      "options": "Сколько раз"
                     },
                     "properties": [
                       {
@@ -2097,8 +2097,8 @@
         "kind": "Panel",
         "spec": {
           "id": 61,
-          "title": "Latency — P50 · P95 · P99",
-          "description": "Request duration percentiles across all routes. P95 turns orange above 500 ms and red above 1 s, over the same zones; P50 is blue, P99 purple, and the grey dashed line is P95 yesterday.",
+          "title": "Задержка — P50 · P95 · P99",
+          "description": "Перцентили длительности запросов по всем маршрутам. P95 становится оранжевым выше 500 мс и красным выше 1 с, на фоне тех же зон; P50 — синий, P99 — фиолетовый, серый пунктир — P95 вчера.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2184,7 +2184,7 @@
                         "editorMode": "code",
                         "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d)))",
                         "instant": false,
-                        "legendFormat": "p95 yesterday",
+                        "legendFormat": "p95 вчера",
                         "range": true
                       }
                     },
@@ -2393,8 +2393,8 @@
         "kind": "Panel",
         "spec": {
           "id": 55,
-          "title": "Latency — distribution",
-          "description": "How many requests finished in each duration bucket over time: the darker the cell, the more requests. The tail shows above the P95 line it summarises.",
+          "title": "Задержка — распределение",
+          "description": "Сколько запросов завершилось в каждом интервале длительности во времени: чем темнее ячейка, тем больше запросов. Хвост виден выше линии P95, которая его обобщает.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2489,8 +2489,8 @@
         "kind": "Panel",
         "spec": {
           "id": 27,
-          "title": "P95 latency — by route, with exemplars",
-          "description": "TraceQL metrics from Tempo: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
+          "title": "Задержка P95 — по маршрутам, с экземплярами",
+          "description": "Метрики TraceQL из Tempo: каждая точка — экземпляр, то есть настоящий запрос; нажмите на неё, чтобы открыть его трейс. Считается по спанам, поэтому может немного расходиться с перцентилями гистограммы рядом.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2604,8 +2604,8 @@
         "kind": "Panel",
         "spec": {
           "id": 19,
-          "title": "Bytes per second — received · sent",
-          "description": "Request and response bodies. Received counts only requests with a body and a `Content-Length` header.",
+          "title": "Байт в секунду — получено · отправлено",
+          "description": "Тела запросов и ответов. В «получено» считаются только запросы с телом и заголовком `Content-Length`.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2625,7 +2625,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_body_size_bytes_sum{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "received",
+                        "legendFormat": "получено",
                         "range": true
                       }
                     },
@@ -2647,7 +2647,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_response_body_size_bytes_sum{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "sent",
+                        "legendFormat": "отправлено",
                         "range": true
                       }
                     },
@@ -2708,8 +2708,8 @@
         "kind": "Panel",
         "spec": {
           "id": 20,
-          "title": "Request size P95 — by route",
-          "description": "Only requests with a body are measured: here, `POST /api/posts`.",
+          "title": "Размер запроса P95 — по маршрутам",
+          "description": "Измеряются только запросы с телом: здесь это `POST /api/posts`.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2792,7 +2792,7 @@
         "kind": "Panel",
         "spec": {
           "id": 21,
-          "title": "Response size P95 — by route",
+          "title": "Размер ответа P95 — по маршрутам",
           "description": "",
           "links": [],
           "data": {
@@ -2876,8 +2876,8 @@
         "kind": "Panel",
         "spec": {
           "id": 58,
-          "title": "Error budget left — 7 days",
-          "description": "Share of the 7-day budget of 5xx still unspent, for an availability target of `$slo`. At zero the target is missed.",
+          "title": "Остаток бюджета ошибок — 7 дней",
+          "description": "Доля семидневного бюджета на 5xx, которая ещё не потрачена, при цели доступности `$slo`. На нуле цель не выполнена.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2897,7 +2897,7 @@
                         "editorMode": "code",
                         "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
                         "instant": false,
-                        "legendFormat": "budget",
+                        "legendFormat": "бюджет",
                         "range": true
                       }
                     },
@@ -2973,8 +2973,8 @@
         "kind": "Panel",
         "spec": {
           "id": 59,
-          "title": "Burn rate — 1 h · 6 h",
-          "description": "How fast the 7-day error budget burns: 1× spends it exactly in 7 days. Red at 3.36× over 1 h (2% of the budget in an hour) and 1.4× over 6 h (5% in six hours).",
+          "title": "Скорость сжигания — 1 ч · 6 ч",
+          "description": "Как быстро сгорает семидневный бюджет ошибок: при 1× он уходит ровно за 7 дней. Красный при 3.36× за 1 ч (2% бюджета за час) и 1.4× за 6 ч (5% за шесть часов).",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2994,7 +2994,7 @@
                         "editorMode": "code",
                         "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
                         "instant": false,
-                        "legendFormat": "1 hour",
+                        "legendFormat": "1 час",
                         "range": true
                       }
                     },
@@ -3016,7 +3016,7 @@
                         "editorMode": "code",
                         "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
                         "instant": false,
-                        "legendFormat": "6 hours",
+                        "legendFormat": "6 часов",
                         "range": true
                       }
                     },
@@ -3080,7 +3080,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "1 hour"
+                      "options": "1 час"
                     },
                     "properties": [
                       {
@@ -3107,7 +3107,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "6 hours"
+                      "options": "6 часов"
                     },
                     "properties": [
                       {
@@ -3141,8 +3141,8 @@
         "kind": "Panel",
         "spec": {
           "id": 60,
-          "title": "Fast enough — 7 days",
-          "description": "Share of requests over the last 7 days that finished within the `Apdex: satisfied` threshold — the latency objective beside the availability one, for the whole service like the budget.",
+          "title": "Достаточно быстрые — 7 дней",
+          "description": "Доля запросов за последние 7 дней, уложившихся в порог `Apdex: норма`, — цель по задержке рядом с целью по доступности, для всего сервиса, как и бюджет.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3162,7 +3162,7 @@
                         "editorMode": "code",
                         "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
                         "instant": false,
-                        "legendFormat": "within $satisfied s",
+                        "legendFormat": "не дольше $satisfied с",
                         "range": true
                       }
                     },
@@ -3239,8 +3239,8 @@
         "kind": "Panel",
         "spec": {
           "id": 66,
-          "title": "Availability — vs objective",
-          "description": "Share of requests not answered with 5xx, against the availability target `$slo`: the red zone under the dashed line is below the target.",
+          "title": "Доступность — относительно цели",
+          "description": "Доля запросов, на которые не ответили 5xx, в сравнении с целью доступности `$slo`: красная зона под пунктиром — ниже цели.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3260,7 +3260,7 @@
                         "editorMode": "code",
                         "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "availability",
+                        "legendFormat": "доступность",
                         "range": true
                       }
                     },
@@ -3282,7 +3282,7 @@
                         "editorMode": "code",
                         "expr": "vector($slo)",
                         "instant": false,
-                        "legendFormat": "objective",
+                        "legendFormat": "цель",
                         "range": true
                       }
                     },
@@ -3338,7 +3338,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "objective"
+                      "options": "цель"
                     },
                     "properties": [
                       {
@@ -3375,7 +3375,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "availability"
+                      "options": "доступность"
                     },
                     "properties": [
                       {
@@ -3397,8 +3397,8 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Request share — by worker",
-          "description": "Each worker's share of the requests. The dashed line is an even split: a worker far from it is starved or overloaded.",
+          "title": "Доля запросов — по воркерам",
+          "description": "Доля запросов каждого воркера. Пунктир — равное деление: воркер далеко от него недогружен или перегружен.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3440,7 +3440,7 @@
                         "editorMode": "code",
                         "expr": "1 / scalar(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})))",
                         "instant": false,
-                        "legendFormat": "even split",
+                        "legendFormat": "поровну",
                         "range": true
                       }
                     },
@@ -3505,7 +3505,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "even split"
+                      "options": "поровну"
                     },
                     "properties": [
                       {
@@ -3545,8 +3545,8 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 latency — by worker",
-          "description": "95th percentile of request duration per worker: one worker slower than the rest is hidden in the total.",
+          "title": "Задержка P95 — по воркерам",
+          "description": "95-й перцентиль длительности запроса на каждом воркере: один воркер медленнее остальных не виден в общей цифре.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3588,7 +3588,7 @@
                         "editorMode": "code",
                         "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
-                        "legendFormat": "all workers",
+                        "legendFormat": "все воркеры",
                         "range": true
                       }
                     },
@@ -3672,7 +3672,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "all workers"
+                      "options": "все воркеры"
                     },
                     "properties": [
                       {
@@ -3702,8 +3702,8 @@
         "kind": "Panel",
         "spec": {
           "id": 72,
-          "title": "In flight — by worker",
-          "description": "Requests being handled right now, stacked by worker: the top is the total, expected ≈ RPS × mean duration (Little's law). The OpenTelemetry gauge has no route label.",
+          "title": "В обработке — по воркерам",
+          "description": "Запросы, которые обрабатываются прямо сейчас, стопкой по воркерам: верх стопки — общее число, ожидаемо ≈ RPS × средняя длительность (закон Литтла). У этого gauge в OpenTelemetry нет метки маршрута.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3794,8 +3794,8 @@
         "kind": "Panel",
         "spec": {
           "id": 73,
-          "title": "CPU — by worker, one core is 100%",
-          "description": "CPU time per second of each worker. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
+          "title": "CPU — по воркерам, одно ядро это 100%",
+          "description": "Время CPU за секунду у каждого воркера. GIL ограничивает воркер на Python примерно одним ядром: оранжевый от 80%, красный на 100% — воркер загружен полностью, как бы ни простаивал хост.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3906,8 +3906,8 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Involuntary context switches — by worker",
-          "description": "How often the kernel takes the CPU away from a worker mid-work. A rise means workers compete for the CPU.",
+          "title": "Принудительные переключения контекста — по воркерам",
+          "description": "Как часто ядро ОС отбирает CPU у воркера посреди работы. Рост означает, что воркеры борются за CPU.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3997,8 +3997,8 @@
         "kind": "Panel",
         "spec": {
           "id": 75,
-          "title": "Worker starts — per minute",
-          "description": "Workers that appeared in each minute: a deploy, a crash or a recycle. A steady trickle with no deploy behind it is a worker dying.",
+          "title": "Старты воркеров — в минуту",
+          "description": "Воркеры, появившиеся за каждую минуту: выкатка, падение или плановая замена. Постоянный поток стартов без выкатки — значит, воркеры умирают.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4018,7 +4018,7 @@
                         "editorMode": "code",
                         "expr": "(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))) or vector(0)",
                         "instant": false,
-                        "legendFormat": "started",
+                        "legendFormat": "запущено",
                         "range": true
                       }
                     },
@@ -4077,8 +4077,8 @@
         "kind": "Panel",
         "spec": {
           "id": 40,
-          "title": "Memory — by worker",
-          "description": "Resident memory of each worker process. A line that only climbs is a leak.",
+          "title": "Память — по воркерам",
+          "description": "Резидентная память каждого процесса-воркера. Линия, которая только растёт, — это утечка.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4161,8 +4161,8 @@
         "kind": "Panel",
         "spec": {
           "id": 41,
-          "title": "Threads — by worker",
-          "description": "Threads of each worker: the event loop, the exporters, gRPC and the profiler.",
+          "title": "Потоки — по воркерам",
+          "description": "Потоки каждого воркера: цикл событий, экспортёры, gRPC и профилировщик.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4246,8 +4246,8 @@
         "kind": "Panel",
         "spec": {
           "id": 42,
-          "title": "Open file descriptors — by worker",
-          "description": "Sockets and files each worker holds open.",
+          "title": "Открытые файловые дескрипторы — по воркерам",
+          "description": "Сокеты и файлы, которые держит открытыми каждый воркер.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4331,8 +4331,8 @@
         "kind": "Panel",
         "spec": {
           "id": 43,
-          "title": "GC collections — by generation",
-          "description": "CPython's garbage collector runs per second, all workers together.",
+          "title": "Сборки мусора — по поколениям",
+          "description": "Запуски сборщика мусора CPython в секунду, по всем воркерам вместе.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4352,7 +4352,7 @@
                         "editorMode": "code",
                         "expr": "sum by (generation) (rate(cpython_gc_collections_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "generation {{generation}}",
+                        "legendFormat": "поколение {{generation}}",
                         "range": true
                       }
                     },
@@ -4413,8 +4413,8 @@
         "kind": "Panel",
         "spec": {
           "id": 35,
-          "title": "CPU profile — flame graph",
-          "description": "`count primes` from /api/cpu and /api/report is the widest frame here.",
+          "title": "Профиль CPU — флейм-граф",
+          "description": "Самый широкий фрейм здесь — `count primes` из /api/cpu и /api/report.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4464,8 +4464,8 @@
         "kind": "Panel",
         "spec": {
           "id": 28,
-          "title": "Traces — recent",
-          "description": "Open a trace: from a span to its log lines, its profile and the metrics of its operation.",
+          "title": "Трейсы — последние",
+          "description": "Откройте трейс: от спана можно перейти к его строкам лога, профилю и метрикам его операции.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4579,8 +4579,8 @@
         "kind": "Panel",
         "spec": {
           "id": 29,
-          "title": "Traces — slow and failed",
-          "description": "Slower than the `Slow trace` threshold, or failed.",
+          "title": "Трейсы — медленные и с ошибкой",
+          "description": "Медленнее порога `Медленный трейс` или завершились ошибкой.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4692,7 +4692,7 @@
         "kind": "Panel",
         "spec": {
           "id": 31,
-          "title": "Log lines — by level",
+          "title": "Строки лога — по уровням",
           "description": "",
           "links": [],
           "data": {
@@ -4851,8 +4851,8 @@
         "kind": "Panel",
         "spec": {
           "id": 32,
-          "title": "Log lines — stream",
-          "description": "Time, level, status, duration, request and message, each in its column. Open a line for all its fields: `trace_id` leads to the trace, `request_id` to every line of the request.",
+          "title": "Строки лога — поток",
+          "description": "Время, уровень, статус, длительность, запрос и сообщение — каждое в своей колонке. Откройте строку, чтобы увидеть все её поля: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5035,7 +5035,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Requests",
+              "title": "Запросы",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5044,7 +5044,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Traffic",
+                        "title": "Трафик",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5084,7 +5084,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Status codes",
+                        "title": "Коды ответа",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5124,7 +5124,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Exceptions",
+                        "title": "Исключения",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5164,7 +5164,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Latency",
+                        "title": "Задержка",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5217,7 +5217,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Payload",
+                        "title": "Объём данных",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5341,7 +5341,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Runtime",
+              "title": "Среда выполнения",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5350,7 +5350,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Workers",
+                        "title": "Воркеры",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5442,7 +5442,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Process — per worker",
+                        "title": "Процесс — по воркерам",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5508,7 +5508,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Profiling — Pyroscope",
+                        "title": "Профилирование — Pyroscope",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5539,7 +5539,7 @@
                                 "text": "process_cpu - cpu",
                                 "value": "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
                               },
-                              "label": "Profile type",
+                              "label": "Тип профиля",
                               "hide": "dontHide",
                               "refresh": "onTimeRangeChanged",
                               "skipUrlSync": false,
@@ -5575,7 +5575,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Traces & logs",
+              "title": "Трейсы и логи",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5584,7 +5584,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Traces — Tempo",
+                        "title": "Трейсы — Tempo",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5624,7 +5624,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Logs — Loki",
+                        "title": "Логи — Loki",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5671,7 +5671,7 @@
     },
     "links": [
       {
-        "title": "All dashboards",
+        "title": "Все дашборды",
         "type": "dashboards",
         "icon": "",
         "tooltip": "",
@@ -5745,7 +5745,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "FastAPI: traffic, latency, errors, traces, logs, profile",
+    "title": "FastAPI: трафик, задержка, ошибки, трейсы, логи, профили",
     "variables": [
       {
         "kind": "QueryVariable",
@@ -5755,7 +5755,7 @@
             "text": "",
             "value": ""
           },
-          "label": "Service",
+          "label": "Сервис",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5790,10 +5790,10 @@
             "value": "/api/.+"
           },
           "query": "/api/.+",
-          "label": "Routes matching",
+          "label": "Маршруты по шаблону",
           "hide": "dontHide",
           "skipUrlSync": false,
-          "description": "A regular expression: which routes the Route list offers. The page and static files are left out by default."
+          "description": "Регулярное выражение: какие маршруты предлагает список «Маршрут». Страница и статика по умолчанию исключены."
         }
       },
       {
@@ -5804,7 +5804,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Route",
+          "label": "Маршрут",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5838,7 +5838,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Method",
+          "label": "Метод",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5873,7 +5873,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Host",
+          "label": "Хост",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5898,7 +5898,7 @@
           "includeAll": true,
           "allValue": ".*",
           "allowCustomValue": true,
-          "description": "A container in Compose, a pod in Kubernetes: the workers panels show the hosts picked here."
+          "description": "Контейнер в Compose, под в Kubernetes: панели воркеров показывают выбранные здесь хосты."
         }
       },
       {
@@ -5915,7 +5915,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Metrics",
+          "label": "Метрики",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5935,7 +5935,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Logs",
+          "label": "Логи",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5955,7 +5955,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Traces",
+          "label": "Трейсы",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5975,7 +5975,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Profiles",
+          "label": "Профили",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -6014,10 +6014,10 @@
           ],
           "multi": false,
           "includeAll": false,
-          "label": "Apdex: satisfied",
+          "label": "Apdex: норма",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "Seconds; a bound of the duration histogram.",
+          "description": "Секунды; одна из границ гистограммы длительности.",
           "allowCustomValue": true
         }
       },
@@ -6054,10 +6054,10 @@
           ],
           "multi": false,
           "includeAll": false,
-          "label": "Apdex: tolerated",
+          "label": "Apdex: терпимо",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "Seconds; a bound of the duration histogram.",
+          "description": "Секунды; одна из границ гистограммы длительности.",
           "allowCustomValue": true
         }
       },
@@ -6070,10 +6070,10 @@
             "value": "500ms"
           },
           "query": "500ms",
-          "label": "Slow trace",
+          "label": "Медленный трейс",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "A TraceQL duration: traces longer than this are listed as slow."
+          "description": "Длительность в TraceQL: трейсы дольше неё считаются медленными."
         }
       },
       {
@@ -6085,7 +6085,7 @@
             "text": "0.995",
             "value": "0.995"
           },
-          "label": "Availability target",
+          "label": "Цель доступности",
           "hide": "hideVariable",
           "skipUrlSync": false
         }

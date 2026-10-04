@@ -2,7 +2,7 @@
   "apiVersion": "dashboard.grafana.app/v2",
   "kind": "Dashboard",
   "metadata": {
-    "name": "observatory-api"
+    "name": "observatory-api-zh"
   },
   "spec": {
     "annotations": [
@@ -30,7 +30,7 @@
       }
     ],
     "cursorSync": "Crosshair",
-    "description": "The FastAPI service from every side, on OpenTelemetry metrics.",
+    "description": "基于 OpenTelemetry 指标，全方位观察 FastAPI 服务。",
     "editable": true,
     "elements": {
       "throughput": {
@@ -38,7 +38,7 @@
         "spec": {
           "id": 50,
           "title": "RPS",
-          "description": "Requests per second now, and how it moved over the range.",
+          "description": "当前每秒请求数，以及它在所选时间范围内的变化。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -58,7 +58,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "req/s",
+                        "legendFormat": "请求/秒",
                         "range": true
                       }
                     },
@@ -120,8 +120,8 @@
         "kind": "Panel",
         "spec": {
           "id": 51,
-          "title": "5xx ratio",
-          "description": "Share of server errors now. Orange above 1% · red above 5%.",
+          "title": "5xx 比例",
+          "description": "当前服务端错误占比。高于 1% 为橙色 · 高于 5% 为红色。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -211,8 +211,8 @@
         "kind": "Panel",
         "spec": {
           "id": 52,
-          "title": "P95 latency",
-          "description": "95th percentile of request duration now. Orange above 500 ms · red above 1 s.",
+          "title": "P95 延迟",
+          "description": "当前请求耗时的第 95 百分位。高于 500 毫秒为橙色 · 高于 1 秒为红色。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -302,7 +302,7 @@
         "spec": {
           "id": 1,
           "title": "Apdex",
-          "description": "Application Performance Index over the last 5 minutes, and how it moved over the range, 0–1: satisfied below the `Apdex: satisfied` threshold, tolerating up to `Apdex: tolerated` (count as half), frustrated above.\n\n≥ 0.94 excellent · ≥ 0.7 acceptable · < 0.7 poor",
+          "description": "最近 5 分钟的应用性能指数及其在所选时间范围内的变化，0–1：低于 `Apdex：满意` 阈值为满意，不超过 `Apdex：可容忍` 为可容忍（按一半计），更慢则为失望。\n\n≥ 0.94 优秀 · ≥ 0.7 可接受 · < 0.7 差",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -398,8 +398,8 @@
         "kind": "Panel",
         "spec": {
           "id": 53,
-          "title": "Instances",
-          "description": "Hosts serving the application — a container in Compose, a pod in Kubernetes: the `host_name` of `target_info`. A dip is a restart.",
+          "title": "实例",
+          "description": "运行应用的主机——在 Compose 中是容器，在 Kubernetes 中是 Pod：`target_info` 中的 `host_name`。数值下降表示发生了重启。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -419,7 +419,7 @@
                         "editorMode": "code",
                         "expr": "count(count by (host_name) (target_info{job=~\"$service\"}))",
                         "instant": false,
-                        "legendFormat": "instances",
+                        "legendFormat": "实例",
                         "range": true
                       }
                     },
@@ -485,8 +485,8 @@
         "kind": "Panel",
         "spec": {
           "id": 54,
-          "title": "Workers",
-          "description": "Serving processes across all instances, each with its own `service.instance.id` — the `instance` label. A dip is a worker replaced.",
+          "title": "工作进程",
+          "description": "所有实例中的服务进程，每个都有自己的 `service.instance.id`，即 `instance` 标签。数值下降表示有工作进程被替换。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -506,7 +506,7 @@
                         "editorMode": "code",
                         "expr": "count(count by (instance) (process_thread_count{job=~\"$service\"}))",
                         "instant": false,
-                        "legendFormat": "workers",
+                        "legendFormat": "工作进程",
                         "range": true
                       }
                     },
@@ -572,8 +572,8 @@
         "kind": "Panel",
         "spec": {
           "id": 56,
-          "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces or its RPS, large and with values.",
+          "title": "路由",
+          "description": "所选时间范围内的每条路由：流量趋势、请求数、2xx、3xx、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可查看其追踪，或放大查看其 RPS 及具体数值。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -827,12 +827,12 @@
                         "Value #F": 9
                       },
                       "renameByName": {
-                        "Trend #A": "Traffic",
-                        "Value #B": "Requests",
+                        "Trend #A": "流量",
+                        "Value #B": "请求",
                         "Value #C": "5xx",
                         "Value #D": "P95",
-                        "http_route": "Route",
-                        "Value #E": "Mean",
+                        "http_route": "路由",
+                        "Value #E": "平均",
                         "Value #F": "P99",
                         "Value #G": "4xx",
                         "Value #H": "2xx",
@@ -849,7 +849,7 @@
                       "sort": [
                         {
                           "desc": true,
-                          "field": "Requests"
+                          "field": "请求"
                         }
                       ]
                     }
@@ -885,7 +885,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Route"
+                      "options": "路由"
                     },
                     "properties": [
                       {
@@ -893,12 +893,12 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "Traces of this route",
+                            "title": "该路由的追踪",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           },
                           {
                             "targetBlank": false,
-                            "title": "RPS of this route",
+                            "title": "该路由的 RPS",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
@@ -912,7 +912,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Traffic"
+                      "options": "流量"
                     },
                     "properties": [
                       {
@@ -937,7 +937,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Requests"
+                      "options": "请求"
                     },
                     "properties": [
                       {
@@ -1167,7 +1167,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Mean"
+                      "options": "平均"
                     },
                     "properties": [
                       {
@@ -1256,8 +1256,8 @@
         "kind": "Panel",
         "spec": {
           "id": 6,
-          "title": "RPS — total",
-          "description": "Requests per second across all routes; the grey dashed line is the same time yesterday.",
+          "title": "RPS — 总计",
+          "description": "所有路由的每秒请求数；灰色虚线是昨天同一时间。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1299,7 +1299,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d))",
                         "instant": false,
-                        "legendFormat": "yesterday",
+                        "legendFormat": "昨天",
                         "range": true
                       }
                     },
@@ -1394,8 +1394,8 @@
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — by route",
-          "description": "Requests per second per route.",
+          "title": "RPS — 按路由",
+          "description": "每条路由的每秒请求数。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1463,12 +1463,12 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Traces of this route",
+                      "title": "该路由的追踪",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Slow traces of this route",
+                      "title": "该路由的慢追踪",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20duration%20%3E%20${slow:percentencode}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1497,8 +1497,8 @@
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS — by status code",
-          "description": "2xx green · 3xx blue · 4xx orange · 5xx red.",
+          "title": "RPS — 按状态码",
+          "description": "2xx 绿色 · 3xx 蓝色 · 4xx 橙色 · 5xx 红色。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1640,8 +1640,8 @@
         "kind": "Panel",
         "spec": {
           "id": 23,
-          "title": "RPS — errors by route and code",
-          "description": "Client and server errors of every route, one series per code: 4xx dashed orange, 5xx red. Click a series for the traces of that route with that code.",
+          "title": "RPS — 按路由和状态码的错误",
+          "description": "每条路由的客户端和服务端错误，每个状态码一条序列：4xx 为橙色虚线，5xx 为红色。点击序列查看该路由在该状态码下的追踪。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1709,7 +1709,7 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Traces of this route with this code",
+                      "title": "该路由该状态码的追踪",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20span.http.response.status_code%20%3D%20${__field.labels.http_response_status_code}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1787,8 +1787,8 @@
         "kind": "Panel",
         "spec": {
           "id": 25,
-          "title": "Exceptions — by type",
-          "description": "Unhandled exceptions from the access log, one series per type: a new type after a deploy stands out. Which routes raise them and with what text is in the messages beside.",
+          "title": "异常 — 按类型",
+          "description": "来自访问日志的未处理异常，每种类型一条序列：发布后出现的新类型一目了然。由哪些路由抛出、消息内容是什么，见旁边的消息表。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1852,12 +1852,12 @@
                   "links": [
                     {
                       "targetBlank": false,
-                      "title": "Lines with this exception",
+                      "title": "包含该异常的日志行",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     },
                     {
                       "targetBlank": false,
-                      "title": "Traces with this exception",
+                      "title": "包含此异常的追踪",
                       "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20event.exception.type%3D%5C%22${__field.labels.error_type:percentencode}%5C%22%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                     }
                   ],
@@ -1885,8 +1885,8 @@
         "kind": "Panel",
         "spec": {
           "id": 78,
-          "title": "Exceptions — messages",
-          "description": "Every exception over the selected range: its type, route and message, most frequent first. Click a message for its log lines and their stacks.",
+          "title": "异常 — 消息",
+          "description": "所选时间范围内的全部异常：类型、路由和消息，最常见的排在前面。点击消息查看对应日志行及其堆栈。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -1946,10 +1946,10 @@
                         "Value #A": 3
                       },
                       "renameByName": {
-                        "error_type": "Type",
-                        "route": "Route",
-                        "error_message": "Message",
-                        "Value #A": "Count"
+                        "error_type": "类型",
+                        "route": "路由",
+                        "error_message": "消息",
+                        "Value #A": "次数"
                       }
                     }
                   }
@@ -1962,7 +1962,7 @@
                       "sort": [
                         {
                           "desc": true,
-                          "field": "Count"
+                          "field": "次数"
                         }
                       ]
                     }
@@ -2015,7 +2015,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Type"
+                      "options": "类型"
                     },
                     "properties": [
                       {
@@ -2027,7 +2027,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Route"
+                      "options": "路由"
                     },
                     "properties": [
                       {
@@ -2039,7 +2039,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Message"
+                      "options": "消息"
                     },
                     "properties": [
                       {
@@ -2047,7 +2047,7 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "Lines with this message",
+                            "title": "包含该消息的日志行",
                             "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${logs:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${logs:percentencode}%22%7D%2C%22expr%22%3A%22%7Bservice_name%3D%5C%22${service:percentencode}%5C%22%7D%20%7C%20json%20%7C%20error_message%3D%5C%22${__value.raw:percentencode}%5C%22%22%2C%22queryType%22%3A%22range%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
@@ -2057,7 +2057,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "Count"
+                      "options": "次数"
                     },
                     "properties": [
                       {
@@ -2097,8 +2097,8 @@
         "kind": "Panel",
         "spec": {
           "id": 61,
-          "title": "Latency — P50 · P95 · P99",
-          "description": "Request duration percentiles across all routes. P95 turns orange above 500 ms and red above 1 s, over the same zones; P50 is blue, P99 purple, and the grey dashed line is P95 yesterday.",
+          "title": "延迟 — P50 · P95 · P99",
+          "description": "所有路由的请求耗时百分位。P95 高于 500 毫秒变为橙色，高于 1 秒变为红色，背景为相同的区间；P50 为蓝色，P99 为紫色，灰色虚线是昨天的 P95。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2184,7 +2184,7 @@
                         "editorMode": "code",
                         "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval] offset 1d)))",
                         "instant": false,
-                        "legendFormat": "p95 yesterday",
+                        "legendFormat": "昨天的 p95",
                         "range": true
                       }
                     },
@@ -2393,8 +2393,8 @@
         "kind": "Panel",
         "spec": {
           "id": 55,
-          "title": "Latency — distribution",
-          "description": "How many requests finished in each duration bucket over time: the darker the cell, the more requests. The tail shows above the P95 line it summarises.",
+          "title": "延迟 — 分布",
+          "description": "随时间推移，每个耗时区间内完成了多少请求：格子颜色越深，请求越多。长尾出现在概括它的 P95 线之上。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2489,8 +2489,8 @@
         "kind": "Panel",
         "spec": {
           "id": 27,
-          "title": "P95 latency — by route, with exemplars",
-          "description": "TraceQL metrics from Tempo: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
+          "title": "P95 延迟 — 按路由，含示例",
+          "description": "来自 Tempo 的 TraceQL 指标：每个点都是一个示例，即一次真实请求；点击即可打开它的追踪。它由 span 计算得出，因此可能与旁边基于直方图的百分位略有差异。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2604,8 +2604,8 @@
         "kind": "Panel",
         "spec": {
           "id": 19,
-          "title": "Bytes per second — received · sent",
-          "description": "Request and response bodies. Received counts only requests with a body and a `Content-Length` header.",
+          "title": "每秒字节数 — 已接收 · 已发送",
+          "description": "请求体和响应体。“已接收”只统计带请求体且有 `Content-Length` 头的请求。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2625,7 +2625,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_request_body_size_bytes_sum{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "received",
+                        "legendFormat": "已接收",
                         "range": true
                       }
                     },
@@ -2647,7 +2647,7 @@
                         "editorMode": "code",
                         "expr": "sum(rate(http_server_response_body_size_bytes_sum{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "sent",
+                        "legendFormat": "已发送",
                         "range": true
                       }
                     },
@@ -2708,8 +2708,8 @@
         "kind": "Panel",
         "spec": {
           "id": 20,
-          "title": "Request size P95 — by route",
-          "description": "Only requests with a body are measured: here, `POST /api/posts`.",
+          "title": "请求大小 P95 — 按路由",
+          "description": "只统计带请求体的请求：这里是 `POST /api/posts`。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2792,7 +2792,7 @@
         "kind": "Panel",
         "spec": {
           "id": 21,
-          "title": "Response size P95 — by route",
+          "title": "响应大小 P95 — 按路由",
           "description": "",
           "links": [],
           "data": {
@@ -2876,8 +2876,8 @@
         "kind": "Panel",
         "spec": {
           "id": 58,
-          "title": "Error budget left — 7 days",
-          "description": "Share of the 7-day budget of 5xx still unspent, for an availability target of `$slo`. At zero the target is missed.",
+          "title": "剩余错误预算 — 7 天",
+          "description": "在可用性目标为 `$slo` 时，7 天 5xx 错误预算中尚未用掉的比例。降到零即未达成目标。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2897,7 +2897,7 @@
                         "editorMode": "code",
                         "expr": "clamp_min(1 - ((sum(increase(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[7d])) or vector(0)) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))) / (1 - $slo), 0)",
                         "instant": false,
-                        "legendFormat": "budget",
+                        "legendFormat": "预算",
                         "range": true
                       }
                     },
@@ -2973,8 +2973,8 @@
         "kind": "Panel",
         "spec": {
           "id": 59,
-          "title": "Burn rate — 1 h · 6 h",
-          "description": "How fast the 7-day error budget burns: 1× spends it exactly in 7 days. Red at 3.36× over 1 h (2% of the budget in an hour) and 1.4× over 6 h (5% in six hours).",
+          "title": "消耗速率 — 1 小时 · 6 小时",
+          "description": "7 天错误预算的消耗速度：1× 表示恰好 7 天耗尽。1 小时窗口达到 3.36×（一小时耗掉 2% 预算）或 6 小时窗口达到 1.4×（六小时耗掉 5%）时为红色。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2994,7 +2994,7 @@
                         "editorMode": "code",
                         "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[1h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[1h])) / (1 - $slo)",
                         "instant": false,
-                        "legendFormat": "1 hour",
+                        "legendFormat": "1 小时",
                         "range": true
                       }
                     },
@@ -3016,7 +3016,7 @@
                         "editorMode": "code",
                         "expr": "(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[6h])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[6h])) / (1 - $slo)",
                         "instant": false,
-                        "legendFormat": "6 hours",
+                        "legendFormat": "6 小时",
                         "range": true
                       }
                     },
@@ -3080,7 +3080,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "1 hour"
+                      "options": "1 小时"
                     },
                     "properties": [
                       {
@@ -3107,7 +3107,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "6 hours"
+                      "options": "6 小时"
                     },
                     "properties": [
                       {
@@ -3141,8 +3141,8 @@
         "kind": "Panel",
         "spec": {
           "id": 60,
-          "title": "Fast enough — 7 days",
-          "description": "Share of requests over the last 7 days that finished within the `Apdex: satisfied` threshold — the latency objective beside the availability one, for the whole service like the budget.",
+          "title": "足够快 — 7 天",
+          "description": "过去 7 天内在 `Apdex：满意` 阈值内完成的请求占比，即与可用性目标并列的延迟目标，和错误预算一样针对整个服务。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3162,7 +3162,7 @@
                         "editorMode": "code",
                         "expr": "sum(increase(http_server_request_duration_seconds_bucket{job=~\"$service\", le=\"$satisfied\"}[7d])) / sum(increase(http_server_request_duration_seconds_count{job=~\"$service\"}[7d]))",
                         "instant": false,
-                        "legendFormat": "within $satisfied s",
+                        "legendFormat": "$satisfied 秒内",
                         "range": true
                       }
                     },
@@ -3239,8 +3239,8 @@
         "kind": "Panel",
         "spec": {
           "id": 66,
-          "title": "Availability — vs objective",
-          "description": "Share of requests not answered with 5xx, against the availability target `$slo`: the red zone under the dashed line is below the target.",
+          "title": "可用性 — 对照目标",
+          "description": "未以 5xx 响应的请求占比，与可用性目标 `$slo` 对照：虚线下方的红色区域表示低于目标。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3260,7 +3260,7 @@
                         "editorMode": "code",
                         "expr": "1 - (sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_response_status_code=~\"5..\"}[$__rate_interval])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job=~\"$service\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "availability",
+                        "legendFormat": "可用性",
                         "range": true
                       }
                     },
@@ -3282,7 +3282,7 @@
                         "editorMode": "code",
                         "expr": "vector($slo)",
                         "instant": false,
-                        "legendFormat": "objective",
+                        "legendFormat": "目标",
                         "range": true
                       }
                     },
@@ -3338,7 +3338,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "objective"
+                      "options": "目标"
                     },
                     "properties": [
                       {
@@ -3375,7 +3375,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "availability"
+                      "options": "可用性"
                     },
                     "properties": [
                       {
@@ -3397,8 +3397,8 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Request share — by worker",
-          "description": "Each worker's share of the requests. The dashed line is an even split: a worker far from it is starved or overloaded.",
+          "title": "请求占比 — 按工作进程",
+          "description": "每个工作进程分到的请求占比。虚线表示平均分配：远离它的工作进程要么吃不饱，要么过载。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3440,7 +3440,7 @@
                         "editorMode": "code",
                         "expr": "1 / scalar(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})))",
                         "instant": false,
-                        "legendFormat": "even split",
+                        "legendFormat": "平均分配",
                         "range": true
                       }
                     },
@@ -3505,7 +3505,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "even split"
+                      "options": "平均分配"
                     },
                     "properties": [
                       {
@@ -3545,8 +3545,8 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 latency — by worker",
-          "description": "95th percentile of request duration per worker: one worker slower than the rest is hidden in the total.",
+          "title": "P95 延迟 — 按工作进程",
+          "description": "每个工作进程请求耗时的第 95 百分位：某个工作进程比其他的慢，在总体数值里是看不出来的。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3588,7 +3588,7 @@
                         "editorMode": "code",
                         "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
                         "instant": false,
-                        "legendFormat": "all workers",
+                        "legendFormat": "全部工作进程",
                         "range": true
                       }
                     },
@@ -3672,7 +3672,7 @@
                   {
                     "matcher": {
                       "id": "byName",
-                      "options": "all workers"
+                      "options": "全部工作进程"
                     },
                     "properties": [
                       {
@@ -3702,8 +3702,8 @@
         "kind": "Panel",
         "spec": {
           "id": 72,
-          "title": "In flight — by worker",
-          "description": "Requests being handled right now, stacked by worker: the top is the total, expected ≈ RPS × mean duration (Little's law). The OpenTelemetry gauge has no route label.",
+          "title": "处理中 — 按工作进程",
+          "description": "当前正在处理的请求，按工作进程堆叠：顶部即总数，预期 ≈ RPS × 平均耗时（利特尔法则）。OpenTelemetry 的这个 gauge 没有路由标签。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3794,8 +3794,8 @@
         "kind": "Panel",
         "spec": {
           "id": 73,
-          "title": "CPU — by worker, one core is 100%",
-          "description": "CPU time per second of each worker. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
+          "title": "CPU — 按工作进程，一个核为 100%",
+          "description": "每个工作进程每秒占用的 CPU 时间。受 GIL 限制，一个 Python 工作进程大约只能用满一个核：80% 起为橙色，100% 为红色 — 无论主机多空闲，此时它都已饱和。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3906,8 +3906,8 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Involuntary context switches — by worker",
-          "description": "How often the kernel takes the CPU away from a worker mid-work. A rise means workers compete for the CPU.",
+          "title": "非自愿上下文切换 — 按工作进程",
+          "description": "内核在工作进程执行中途收回 CPU 的频率。上升说明工作进程在争抢 CPU。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3997,8 +3997,8 @@
         "kind": "Panel",
         "spec": {
           "id": 75,
-          "title": "Worker starts — per minute",
-          "description": "Workers that appeared in each minute: a deploy, a crash or a recycle. A steady trickle with no deploy behind it is a worker dying.",
+          "title": "工作进程启动 — 每分钟",
+          "description": "每分钟新出现的工作进程：一次发布、一次崩溃或一次回收。没有发布却持续出现启动，说明工作进程在不断死掉。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4018,7 +4018,7 @@
                         "editorMode": "code",
                         "expr": "(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))) or vector(0)",
                         "instant": false,
-                        "legendFormat": "started",
+                        "legendFormat": "已启动",
                         "range": true
                       }
                     },
@@ -4077,8 +4077,8 @@
         "kind": "Panel",
         "spec": {
           "id": 40,
-          "title": "Memory — by worker",
-          "description": "Resident memory of each worker process. A line that only climbs is a leak.",
+          "title": "内存 — 按工作进程",
+          "description": "每个工作进程的常驻内存。只升不降的曲线就是内存泄漏。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4161,8 +4161,8 @@
         "kind": "Panel",
         "spec": {
           "id": 41,
-          "title": "Threads — by worker",
-          "description": "Threads of each worker: the event loop, the exporters, gRPC and the profiler.",
+          "title": "线程 — 按工作进程",
+          "description": "每个工作进程的线程：事件循环、导出器、gRPC 和剖析器。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4246,8 +4246,8 @@
         "kind": "Panel",
         "spec": {
           "id": 42,
-          "title": "Open file descriptors — by worker",
-          "description": "Sockets and files each worker holds open.",
+          "title": "打开的文件描述符 — 按工作进程",
+          "description": "每个工作进程保持打开的套接字和文件。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4331,8 +4331,8 @@
         "kind": "Panel",
         "spec": {
           "id": 43,
-          "title": "GC collections — by generation",
-          "description": "CPython's garbage collector runs per second, all workers together.",
+          "title": "垃圾回收次数 — 按代",
+          "description": "CPython 垃圾回收器每秒运行次数，所有工作进程合计。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4352,7 +4352,7 @@
                         "editorMode": "code",
                         "expr": "sum by (generation) (rate(cpython_gc_collections_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
-                        "legendFormat": "generation {{generation}}",
+                        "legendFormat": "第 {{generation}} 代",
                         "range": true
                       }
                     },
@@ -4413,8 +4413,8 @@
         "kind": "Panel",
         "spec": {
           "id": 35,
-          "title": "CPU profile — flame graph",
-          "description": "`count primes` from /api/cpu and /api/report is the widest frame here.",
+          "title": "CPU 剖析 — 火焰图",
+          "description": "这里最宽的帧是来自 /api/cpu 和 /api/report 的 `count primes`。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4464,8 +4464,8 @@
         "kind": "Panel",
         "spec": {
           "id": 28,
-          "title": "Traces — recent",
-          "description": "Open a trace: from a span to its log lines, its profile and the metrics of its operation.",
+          "title": "追踪 — 最近",
+          "description": "打开一条追踪：可以从 span 跳到它的日志行、剖析数据和所属操作的指标。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4579,8 +4579,8 @@
         "kind": "Panel",
         "spec": {
           "id": 29,
-          "title": "Traces — slow and failed",
-          "description": "Slower than the `Slow trace` threshold, or failed.",
+          "title": "追踪 — 慢的和失败的",
+          "description": "比 `慢追踪` 阈值更慢，或已失败。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4692,7 +4692,7 @@
         "kind": "Panel",
         "spec": {
           "id": 31,
-          "title": "Log lines — by level",
+          "title": "日志行 — 按级别",
           "description": "",
           "links": [],
           "data": {
@@ -4851,8 +4851,8 @@
         "kind": "Panel",
         "spec": {
           "id": 32,
-          "title": "Log lines — stream",
-          "description": "Time, level, status, duration, request and message, each in its column. Open a line for all its fields: `trace_id` leads to the trace, `request_id` to every line of the request.",
+          "title": "日志行 — 日志流",
+          "description": "时间、级别、状态码、耗时、请求和消息各占一列。打开一行可查看其全部字段：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5035,7 +5035,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Requests",
+              "title": "请求",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5044,7 +5044,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Traffic",
+                        "title": "流量",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5084,7 +5084,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Status codes",
+                        "title": "状态码",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5124,7 +5124,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Exceptions",
+                        "title": "异常",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5164,7 +5164,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Latency",
+                        "title": "延迟",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5217,7 +5217,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Payload",
+                        "title": "负载大小",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5341,7 +5341,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Runtime",
+              "title": "运行时",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5350,7 +5350,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Workers",
+                        "title": "工作进程",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5442,7 +5442,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Process — per worker",
+                        "title": "进程 — 按工作进程",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5508,7 +5508,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Profiling — Pyroscope",
+                        "title": "持续剖析 — Pyroscope",
                         "collapse": true,
                         "layout": {
                           "kind": "GridLayout",
@@ -5539,7 +5539,7 @@
                                 "text": "process_cpu - cpu",
                                 "value": "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
                               },
-                              "label": "Profile type",
+                              "label": "剖析类型",
                               "hide": "dontHide",
                               "refresh": "onTimeRangeChanged",
                               "skipUrlSync": false,
@@ -5575,7 +5575,7 @@
           {
             "kind": "RowsLayoutRow",
             "spec": {
-              "title": "Traces & logs",
+              "title": "追踪与日志",
               "collapse": false,
               "layout": {
                 "kind": "RowsLayout",
@@ -5584,7 +5584,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Traces — Tempo",
+                        "title": "追踪 — Tempo",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5624,7 +5624,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Logs — Loki",
+                        "title": "日志 — Loki",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5671,7 +5671,7 @@
     },
     "links": [
       {
-        "title": "All dashboards",
+        "title": "全部仪表板",
         "type": "dashboards",
         "icon": "",
         "tooltip": "",
@@ -5745,7 +5745,7 @@
       "hideTimepicker": false,
       "fiscalYearStartMonth": 0
     },
-    "title": "FastAPI: traffic, latency, errors, traces, logs, profile",
+    "title": "FastAPI：流量、延迟、错误、追踪、日志、剖析",
     "variables": [
       {
         "kind": "QueryVariable",
@@ -5755,7 +5755,7 @@
             "text": "",
             "value": ""
           },
-          "label": "Service",
+          "label": "服务",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5790,10 +5790,10 @@
             "value": "/api/.+"
           },
           "query": "/api/.+",
-          "label": "Routes matching",
+          "label": "路由匹配",
           "hide": "dontHide",
           "skipUrlSync": false,
-          "description": "A regular expression: which routes the Route list offers. The page and static files are left out by default."
+          "description": "正则表达式：决定“路由”列表提供哪些路由。页面和静态文件默认排除。"
         }
       },
       {
@@ -5804,7 +5804,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Route",
+          "label": "路由",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5838,7 +5838,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Method",
+          "label": "方法",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5873,7 +5873,7 @@
             "text": "All",
             "value": "$__all"
           },
-          "label": "Host",
+          "label": "主机",
           "hide": "dontHide",
           "refresh": "onTimeRangeChanged",
           "skipUrlSync": false,
@@ -5898,7 +5898,7 @@
           "includeAll": true,
           "allValue": ".*",
           "allowCustomValue": true,
-          "description": "A container in Compose, a pod in Kubernetes: the workers panels show the hosts picked here."
+          "description": "Compose 中的容器，Kubernetes 中的 Pod：工作进程面板只显示这里选中的主机。"
         }
       },
       {
@@ -5915,7 +5915,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Metrics",
+          "label": "指标",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5935,7 +5935,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Logs",
+          "label": "日志",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5955,7 +5955,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Traces",
+          "label": "追踪",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -5975,7 +5975,7 @@
           "options": [],
           "multi": false,
           "includeAll": false,
-          "label": "Profiles",
+          "label": "剖析",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
           "allowCustomValue": true
@@ -6014,10 +6014,10 @@
           ],
           "multi": false,
           "includeAll": false,
-          "label": "Apdex: satisfied",
+          "label": "Apdex：满意",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "Seconds; a bound of the duration histogram.",
+          "description": "秒；耗时直方图的一个桶边界。",
           "allowCustomValue": true
         }
       },
@@ -6054,10 +6054,10 @@
           ],
           "multi": false,
           "includeAll": false,
-          "label": "Apdex: tolerated",
+          "label": "Apdex：可容忍",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "Seconds; a bound of the duration histogram.",
+          "description": "秒；耗时直方图的一个桶边界。",
           "allowCustomValue": true
         }
       },
@@ -6070,10 +6070,10 @@
             "value": "500ms"
           },
           "query": "500ms",
-          "label": "Slow trace",
+          "label": "慢追踪",
           "hide": "inControlsMenu",
           "skipUrlSync": false,
-          "description": "A TraceQL duration: traces longer than this are listed as slow."
+          "description": "TraceQL 时长：超过该值的追踪列为慢追踪。"
         }
       },
       {
@@ -6085,7 +6085,7 @@
             "text": "0.995",
             "value": "0.995"
           },
-          "label": "Availability target",
+          "label": "可用性目标",
           "hide": "hideVariable",
           "skipUrlSync": false
         }

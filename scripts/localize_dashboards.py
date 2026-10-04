@@ -1,4 +1,4 @@
-"""Build the dashboard Grafana loads: the English source once per language, switched by a variable."""
+"""Build the dashboards Grafana loads: the English source, and one translation per dictionary."""
 
 from __future__ import annotations
 
@@ -15,12 +15,10 @@ if TYPE_CHECKING:
 _GRAFANA: Final = Path(__file__).resolve().parent.parent / "observability" / "grafana"
 _SOURCE: Final = _GRAFANA / "source" / "api.json"
 _DICTIONARIES: Final = _GRAFANA / "source" / "i18n"
-_TARGET: Final = _GRAFANA / "dashboards" / "api.json"
+_DASHBOARDS: Final = _GRAFANA / "dashboards"
 
 _SOURCE_LANGUAGE_CODE: Final = "en"
 _SOURCE_LANGUAGE_NAME: Final = "English"
-_LANGUAGE_VARIABLE: Final = "language"
-_PANEL_IDS_PER_LANGUAGE: Final = 1000
 
 # A variable or a label stays as it is in every language: Grafana substitutes it.
 _PLACEHOLDER: Final = re.compile(r"\{\{[^}]*\}\}|\$\{[^}]*\}|\$\w+")
@@ -39,7 +37,7 @@ class _Text(NamedTuple):
 
 
 class _Language(NamedTuple):
-    """A language the dashboard speaks: its code, its own name for itself and its translation."""
+    """A language a dashboard speaks: its code, its own name for itself and its translation."""
 
     code: str
     name: str
@@ -47,9 +45,9 @@ class _Language(NamedTuple):
 
 
 def main() -> None:
-    """Write the dashboard, or list what is wrong with the dictionaries."""
+    """Write a dashboard per language, or list what is wrong with the dictionaries."""
     source = _load(_SOURCE)
-    sources = list(dict.fromkeys(text.source for text in _texts_in_content(source)))
+    sources = list(dict.fromkeys(text.source for text in _texts_in_dashboard(source)))
     languages = [_Language(_SOURCE_LANGUAGE_CODE, _SOURCE_LANGUAGE_NAME, str)]
     problems: list[str] = []
     for path in sorted(_DICTIONARIES.glob("*.json")):
@@ -59,8 +57,11 @@ def main() -> None:
     if problems:
         sys.exit("\n".join(problems))
 
-    dashboard = _combine(source, languages)
-    _TARGET.write_text(json.dumps(dashboard, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    for language in languages:
+        dashboard = _localize(source, language, languages)
+        suffix = "" if language.code == _SOURCE_LANGUAGE_CODE else f".{language.code}"
+        target = _DASHBOARDS / f"{_SOURCE.stem}{suffix}.json"
+        target.write_text(json.dumps(dashboard, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
 def _load(path: Path) -> _Object:
@@ -92,99 +93,55 @@ def _find_problems(language: str, texts: dict[str, str], sources: list[str]) -> 
     yield from (f"{language}: {source!r} is not on the dashboard" for source in texts.keys() - set(sources))
 
 
-def _combine(source: _Object, languages: list[_Language]) -> _Object:
+def _localize(source: _Object, language: _Language, languages: list[_Language]) -> _Object:
     dashboard = copy.deepcopy(source)
+    # Collected before anything changes: whether a field reference is translated depends on the
+    # English names the panel gives its fields.
+    for text in list(_texts_in_dashboard(dashboard)):
+        text.holder[text.key] = language.translate(text.source)
+
+    metadata = _object(dashboard, "metadata")
+    base_name = str(metadata["name"])
+    metadata["name"] = _dashboard_name(base_name, language)
     spec = _object(dashboard, "spec")
-    elements: _Object = {}
-    sections: list[_Json] = []
-    for index, language in enumerate(languages):
-        content = _localize(source, language, index)
-        elements.update(_object(content, "elements"))
-        sections.append(
-            {
-                "kind": "RowsLayoutRow",
-                "spec": {
-                    "title": language.name,
-                    "hideHeader": True,
-                    "conditionalRendering": _shown_for(language.code),
-                    "layout": _object(content, "layout"),
-                },
-            }
-        )
-    spec["elements"] = elements
-    spec["layout"] = {"kind": "RowsLayout", "spec": {"rows": sections}}
-    spec["variables"] = [_language_variable(languages), *_objects(spec, "variables")]
+    spec["links"] = [*_objects(spec, "links"), *_language_links(base_name, languages)]
     return dashboard
 
 
-def _localize(source: _Object, language: _Language, index: int) -> _Object:
-    """Return the source's layout and elements in one language, its elements renamed apart."""
-    content = copy.deepcopy(_object(source, "spec"))
-    # Collected before anything changes: whether a field reference is translated depends on the
-    # English names the panel gives its fields.
-    for text in list(_texts_in_content(source={"spec": content})):
-        text.holder[text.key] = language.translate(text.source)
-
-    suffix = "" if language.code == _SOURCE_LANGUAGE_CODE else f"-{language.code}"
-    renamed: _Object = {}
-    for name, element in _object(content, "elements").items():
-        if not isinstance(element, dict):
-            raise TypeError(f"element {name!r} is {type(element).__name__}, not an object")
-        panel = _object(element, "spec")
-        panel_id = panel.get("id")
-        if isinstance(panel_id, int):
-            panel["id"] = panel_id + index * _PANEL_IDS_PER_LANGUAGE
-        renamed[name + suffix] = element
-    for reference in _element_references(_object(content, "layout")):
-        reference["name"] = f"{reference['name']}{suffix}"
-    return {"elements": renamed, "layout": _object(content, "layout")}
+def _dashboard_name(base_name: str, language: _Language) -> str:
+    return base_name if language.code == _SOURCE_LANGUAGE_CODE else f"{base_name}-{language.code}"
 
 
-def _shown_for(language_code: str) -> _Object:
-    condition: _Object = {"variable": _LANGUAGE_VARIABLE, "operator": "equals", "value": language_code}
-    return {
-        "kind": "ConditionalRenderingGroup",
-        "spec": {
-            "visibility": "show",
-            "condition": "and",
-            "items": [{"kind": "ConditionalRenderingVariable", "spec": condition}],
-        },
-    }
-
-
-def _language_variable(languages: list[_Language]) -> _Object:
-    options: list[_Json] = [
-        {"selected": language.code == _SOURCE_LANGUAGE_CODE, "text": language.name, "value": language.code}
+def _language_links(base_name: str, languages: list[_Language]) -> list[_Json]:
+    """Return a link to every language's dashboard, each named in its own language."""
+    return [
+        {
+            "title": language.name,
+            "type": "link",
+            "url": f"/d/{_dashboard_name(base_name, language)}",
+            "icon": "",
+            "tooltip": "",
+            "tags": [],
+            "asDropdown": False,
+            "targetBlank": False,
+            "includeVars": True,
+            "keepTime": True,
+        }
         for language in languages
     ]
-    return {
-        "kind": "CustomVariable",
-        "spec": {
-            "name": _LANGUAGE_VARIABLE,
-            "query": ",".join(f"{language.name} : {language.code}" for language in languages),
-            "current": {"text": _SOURCE_LANGUAGE_NAME, "value": _SOURCE_LANGUAGE_CODE},
-            "options": options,
-            "multi": False,
-            "includeAll": False,
-            "label": "Language",
-            "hide": "dontHide",
-            "skipUrlSync": False,
-            "allowCustomValue": False,
-        },
-    }
 
 
-def _element_references(layout: _Object) -> Iterator[_Object]:
-    layout_spec = _object(layout, "spec")
-    for item in _objects(layout_spec, "items"):
-        yield _object(_object(item, "spec"), "element")
-    for section in [*_objects(layout_spec, "rows"), *_objects(layout_spec, "tabs")]:
-        yield from _element_references(_object(_object(section, "spec"), "layout"))
-
-
-def _texts_in_content(source: _Object) -> Iterator[_Text]:
-    """Yield the texts of the rows and the panels — what the language variable switches."""
-    spec = _object(source, "spec")
+def _texts_in_dashboard(dashboard: _Object) -> Iterator[_Text]:
+    spec = _object(dashboard, "spec")
+    yield from _texts(spec, "title", "description")
+    for link in _objects(spec, "links"):
+        yield from _texts(link, "title")
+    for annotation in _objects(spec, "annotations"):
+        annotation_spec = _object(annotation, "spec")
+        # Grafana names its own annotation in the reader's language.
+        if not annotation_spec.get("builtIn"):
+            yield from _texts(annotation_spec, "name")
+    yield from _texts_in_variables(_objects(spec, "variables"))
     yield from _texts_in_layout(_object(spec, "layout"))
     for element in _object(spec, "elements").values():
         if not isinstance(element, dict):
@@ -192,11 +149,17 @@ def _texts_in_content(source: _Object) -> Iterator[_Text]:
         yield from _texts_in_panel(_object(element, "spec"))
 
 
+def _texts_in_variables(variables: list[_Object]) -> Iterator[_Text]:
+    for variable in variables:
+        yield from _texts(_object(variable, "spec"), "label", "description")
+
+
 def _texts_in_layout(layout: _Object) -> Iterator[_Text]:
     layout_spec = _object(layout, "spec")
     for section in [*_objects(layout_spec, "rows"), *_objects(layout_spec, "tabs")]:
         section_spec = _object(section, "spec")
         yield from _texts(section_spec, "title")
+        yield from _texts_in_variables(_objects(section_spec, "variables"))
         yield from _texts_in_layout(_object(section_spec, "layout"))
 
 
