@@ -3799,7 +3799,7 @@
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS ${codes:text} — total · by route",
+          "title": "RPS by status code — total · by route",
           "description": "The classes picked in `Status codes`: a thick line per class, its total — 2xx green · 3xx blue · 4xx dashed orange · 5xx red — and a thin one per route and code. With 2xx picked, 2xx sets the scale. Click a series for its traces.",
           "links": [],
           "data": {

@@ -72,7 +72,7 @@
   "RPS — total · by route": "RPS — всего · по маршрутам",
   "Requests per second per route; the white line is the total, the grey dashed one the total at the same time yesterday.": "Запросов в секунду на каждый маршрут; белая линия — всего, серый пунктир — всего в то же время вчера.",
   "Slow traces of this route": "Медленные трейсы этого маршрута",
-  "RPS ${codes:text} — total · by route": "RPS ${codes:text} — всего · по маршрутам",
+  "RPS by status code — total · by route": "RPS по кодам ответа — всего · по маршрутам",
   "The classes picked in `Status codes`: a thick line per class, its total — 2xx green · 3xx blue · 4xx dashed orange · 5xx red — and a thin one per route and code. With 2xx picked, 2xx sets the scale. Click a series for its traces.": "Классы, выбранные в `Коды ответа`: толстая линия на класс — его итог: 2xx зелёный · 3xx синий · 4xx оранжевый пунктир · 5xx красный, — и тонкая на каждый маршрут и код. Если выбран 2xx, масштаб задаёт он. Нажмите на серию, чтобы открыть её трейсы.",
   "{{class}}xx total": "{{class}}xx всего",
   "Traces with a code of this class": "Трейсы с кодом этого класса",
