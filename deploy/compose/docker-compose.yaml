@@ -101,7 +101,7 @@ services:
     environment:
       OBSERVATORY__SERVER__KIND: gunicorn
       OBSERVATORY__SERVER__HOST: 0.0.0.0
-      # API_WORKERS=8 just up: more workers for a heavier `just traffic`.
+      # API_WORKERS=8 just dc up: more workers for a heavier `just traffic`.
       OBSERVATORY__SERVER__WORKERS: ${API_WORKERS:-2}
       OBSERVATORY__LOG_LEVEL: info
       OBSERVATORY__OBS__FARO__COLLECTOR_URL: http://localhost:12347/collect

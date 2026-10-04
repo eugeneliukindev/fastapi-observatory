@@ -31,52 +31,44 @@ hooks = [
 repo = "local"
 hooks = [
   {
-    id = "fmt",
-    name = "fmt",
-    entry = "just fmt",
+    id = "ruff",
+    name = "ruff",
+    entry = "just lint ruff",
     language = "system",
     types = ["python"],
     pass_filenames = false
   },
   {
-    id = "lint",
-    name = "lint",
-    entry = "just lint",
-    language = "system",
-    types = ["python"],
-    pass_filenames = false
-  },
-  {
-    id = "lint-style",
-    name = "lint-style",
-    entry = "just lint-style",
+    id = "flake8",
+    name = "flake8",
+    entry = "just lint flake8",
     language = "system",
     files = "^src/",
     types = ["python"],
     pass_filenames = false
   },
   {
-    id = "lint-slots",
-    name = "lint-slots",
-    entry = "just lint-slots",
+    id = "slotscheck",
+    name = "slotscheck",
+    entry = "just lint slotscheck",
     language = "system",
     files = "^src/",
     types = ["python"],
     pass_filenames = false
   },
   {
-    id = "lint-spelling",
-    name = "lint-spelling",
-    entry = "just lint-spelling",
+    id = "spelling",
+    name = "spelling",
+    entry = "just lint spelling",
     language = "system",
     files = "^src/",
     types = ["python"],
     pass_filenames = false
   },
   {
-    id = "fmt-pyproject",
-    name = "fmt-pyproject",
-    entry = "just fmt-pyproject",
+    id = "pyproject",
+    name = "pyproject",
+    entry = "just lint pyproject",
     language = "system",
     files = '^pyproject\.toml$',
     pass_filenames = false
@@ -84,15 +76,15 @@ hooks = [
   {
     id = "dashboards",
     name = "dashboards",
-    entry = "just dashboards",
+    entry = "just lint dashboards",
     language = "system",
     files = '^(observability/grafana/source/|scripts/localize_dashboards\.py)',
     pass_filenames = false
   },
   {
-    id = "typecheck",
-    name = "typecheck",
-    entry = "just typecheck",
+    id = "mypy",
+    name = "mypy",
+    entry = "just lint mypy",
     language = "system",
     files = "^(src|scripts)/",
     types = ["python"],

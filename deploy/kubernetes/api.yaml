@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
         - name: api
-          # Built locally and imported into the cluster by `just k8s-up`.
+          # Built locally and imported into the cluster by `just k3d up`.
           image: observatory-api:dev
           imagePullPolicy: Never
           env:

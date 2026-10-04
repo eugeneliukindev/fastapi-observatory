@@ -1,4 +1,4 @@
-# The stack for Kubernetes: `just k8s-up` runs it in k3d. Configuration comes from the same files
+# The stack for Kubernetes: `just k3d up` runs it in k3d. Configuration comes from the same files
 # Compose mounts, so the two never drift apart; Kustomize reads them from outside this directory
 # only with `--load-restrictor LoadRestrictionsNone`.
 apiVersion: kustomize.config.k8s.io/v1beta1

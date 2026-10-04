@@ -31,7 +31,7 @@ Needs Docker and [just](https://just.systems); [uv](https://docs.astral.sh/uv/) 
 code.
 
 ```sh
-just up        # docker compose up --build -d
+just dc up     # docker compose up --build -d; just k3d up for Kubernetes
 just traffic   # RATE=10 DURATION=60 just traffic
 ```
 
@@ -39,7 +39,7 @@ Both ways to run it live in [`deploy/`](deploy):
 [`compose/docker-compose.yaml`](deploy/compose/docker-compose.yaml) and the Kubernetes manifests in
 [`kubernetes/`](deploy/kubernetes). The `just` recipes point Compose at its file; by hand it is
 `docker compose -f deploy/compose/docker-compose.yaml …`. The same stack runs in a local Kubernetes
-cluster with `just k8s-up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
+cluster with `just k3d up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
 
 | what | where |
 |---|---|
@@ -48,7 +48,7 @@ cluster with `just k8s-up` — see [Kubernetes](#%EF%B8%8F-kubernetes).
 | 🔀 Alloy: components, live debugging | http://localhost:12345 |
 
 > [!TIP]
-> Every button on the page is a trace that starts in the browser. `just down -v` wipes the data;
+> Every button on the page is a trace that starts in the browser. `just dc down -v` wipes the data;
 > `just run granian` runs the application outside Docker against the running stack.
 
 ![The application's page](docs/screenshots/00-page.png)
@@ -149,7 +149,7 @@ to the workers of one container or pod. Each title says what is measured, then h
 title, variables, rows, panels; pick one in the dashboard list or under All dashboards. Grafana translates its own interface, which follows the browser's language, but never
 what a dashboard says. So what it loads from [`dashboards/`](observability/grafana/dashboards) is
 built: edit the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary
-per language in [`source/i18n/`](observability/grafana/source/i18n), then `just dashboards`. It
+per language in [`source/i18n/`](observability/grafana/source/i18n), then `just lint dashboards`. It
 fails, naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or
 loses a `$variable` or `{{label}}`. A new language is a new dictionary.
 
@@ -481,9 +481,9 @@ requests.
 
 ## ☸️ Kubernetes
 
-`just k8s-up` runs the same stack in a local [k3d](https://k3d.io) cluster: it builds the image,
-imports it, applies [`deploy/kubernetes/`](deploy/kubernetes) and waits for the rollout; `just
-k8s-down` deletes the cluster. The ports are Compose's — 3000, 8000, 12345, 12347 — so stop one
+`just k3d up` runs the same stack in a local [k3d](https://k3d.io) cluster: it builds the image,
+imports it, applies [`deploy/kubernetes/`](deploy/kubernetes) and waits for the rollout; `just k3d
+down` deletes the cluster. The ports are Compose's — 3000, 8000, 12345, 12347 — so stop one
 before starting the other.
 
 Nothing is copied. Kustomize builds the ConfigMaps from the files Compose mounts, and the Services
@@ -506,16 +506,21 @@ dashboard does not know the platform either: it asks only for `service.name` and
 
 ## 🧰 Development
 
-| recipe | does |
+`just` is the command line: a command, then what it acts on. A value it does not know is an error
+that lists the ones it does; `just` alone lists the commands.
+
+| command | does |
 |---|---|
 | `just install` · `just hooks` | the venv · git hooks via prek |
-| `just check` | every check — what CI would run |
-| `just fmt` · `lint` · `lint-style` · `typecheck` | ruff, wemake-python-styleguide, mypy |
-| `just lint-slots` · `lint-spelling` · `fmt-pyproject` | slotscheck · codespell and typos · pyproject-fmt |
-| `just dashboards` | the dashboard Grafana loads, in every language, from `source/` |
+| `just lint` | every check — what CI would run |
+| `just lint ruff` · `flake8` · `mypy` | ruff format and check · wemake-python-styleguide · mypy |
+| `just lint slotscheck` · `spelling` · `pyproject` | slotscheck · codespell and typos · pyproject-fmt |
+| `just lint dashboards` | the dashboards Grafana loads, in every language, from `source/` |
+| `just dc up` · `down` · `ps` · `logs` | the stack in Compose; `just docker-compose …` is the same |
+| `just k3d up` · `down` · `ps` · `logs` | the stack in a k3d cluster |
+| `just dc logs api grafana` · `just k3d logs api` | the logs of chosen services only |
+| `just traffic` | requests at the running stack, either one |
 | `just run gunicorn` | the application outside Docker, against the running stack |
-| `just up` · `down` · `logs` · `ps` · `traffic` | the stack |
-| `just k8s-up` · `k8s-down` | the stack in a k3d cluster |
 
 ## 🧱 Stack
 
