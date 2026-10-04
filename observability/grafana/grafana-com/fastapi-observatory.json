@@ -550,7 +550,7 @@
         "type": "prometheus",
         "uid": "${metrics}"
       },
-      "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route to narrow the dashboard to it, or for its traces.",
+      "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P50, P95 and P99. A mean far below P95 means a long tail. Click a route to narrow the dashboard to it, or for its traces.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -799,6 +799,47 @@
                 "id": "custom.cellOptions",
                 "value": {
                   "type": "color-text"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "P50"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              },
+              {
+                "id": "custom.width",
+                "value": 85
+              },
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "color-text"
+                }
+              },
+              {
+                "id": "thresholds",
+                "value": {
+                  "mode": "absolute",
+                  "steps": [
+                    {
+                      "color": "green"
+                    },
+                    {
+                      "color": "orange",
+                      "value": 0.5
+                    },
+                    {
+                      "color": "red",
+                      "value": 1
+                    }
+                  ]
                 }
               }
             ]
@@ -1059,6 +1100,19 @@
           "legendFormat": "__auto",
           "range": false,
           "refId": "I"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${metrics}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.50, sum by (http_route, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "J"
         }
       ],
       "title": "Routes",
@@ -1090,13 +1144,14 @@
               "Trend #A": 1,
               "Value #B": 2,
               "Value #C": 6,
-              "Value #D": 8,
+              "Value #D": 9,
               "Value #E": 7,
-              "Value #F": 9,
+              "Value #F": 10,
               "Value #G": 5,
               "Value #H": 3,
               "Value #I": 4,
-              "http_route": 0
+              "http_route": 0,
+              "Value #J": 8
             },
             "renameByName": {
               "Trend #A": "Traffic",
@@ -1108,7 +1163,8 @@
               "Value #G": "4xx",
               "Value #H": "2xx",
               "Value #I": "3xx",
-              "http_route": "Route"
+              "http_route": "Route",
+              "Value #J": "P50"
             }
           }
         },

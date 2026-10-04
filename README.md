@@ -147,7 +147,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 
 | group | row | what |
 |---|---|---|
-| top | | RPS · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
+| top | | RPS · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P50, P95 and P99 |
 | Requests | Traffic | RPS by route, the total over them and the total yesterday |
 | | Status codes | RPS of the classes picked, a total per class and a line per route and code |
 | | Latency | the percentiles picked, of the service, yesterday and of each route · the heatmap |

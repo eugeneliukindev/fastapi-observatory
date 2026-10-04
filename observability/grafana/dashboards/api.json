@@ -573,7 +573,7 @@
         "spec": {
           "id": 56,
           "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route to narrow the dashboard to it, or for its traces.",
+          "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P50, P95 and P99. A mean far below P95 means a long tail. Click a route to narrow the dashboard to it, or for its traces.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -784,6 +784,29 @@
                     "refId": "I",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.50, sum by (http_route, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "J",
+                    "hidden": false
+                  }
                 }
               ],
               "transformations": [
@@ -827,8 +850,9 @@
                         "Value #G": 5,
                         "Value #C": 6,
                         "Value #E": 7,
-                        "Value #D": 8,
-                        "Value #F": 9
+                        "Value #D": 9,
+                        "Value #F": 10,
+                        "Value #J": 8
                       },
                       "renameByName": {
                         "Trend #A": "Traffic",
@@ -840,7 +864,8 @@
                         "Value #F": "P99",
                         "Value #G": "4xx",
                         "Value #H": "2xx",
-                        "Value #I": "3xx"
+                        "Value #I": "3xx",
+                        "Value #J": "P50"
                       }
                     }
                   }
@@ -1123,6 +1148,47 @@
                         "id": "custom.cellOptions",
                         "value": {
                           "type": "color-text"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "P50"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "s"
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 85
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 0.5
+                            },
+                            {
+                              "color": "red",
+                              "value": 1
+                            }
+                          ]
                         }
                       }
                     ]
