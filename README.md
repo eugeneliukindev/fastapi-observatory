@@ -241,9 +241,11 @@ flowchart LR
 | a log line, the browser's included | its trace · every line of its request | `trace_id` · `request_id` in structured metadata |
 | a browser line | every trace of that browser session | `session_id` → `{span.session.id="…"}` |
 | a request key from a header or a complaint | its trace | `{span.http.response.header.x_request_id="…"}` |
-| a route on a latency or traffic panel | its traces · its slow traces | panel link → TraceQL with the route and the `Slow trace` threshold |
-| a route on the 4xx / 5xx panels | its failed traces | panel link → TraceQL with the status |
-| an exception type | its log lines | panel link → LogQL with `error_type` |
+| a route in the Routes table | the whole dashboard for that route · its traces | `Route` set on the same dashboard · TraceQL with the route |
+| a route on the traffic or latency panel | its traces · its slow traces | panel link → TraceQL with the route and the `Slow trace` threshold |
+| a status class or a route with its code | the traces with that class · with that code on that route | panel link → TraceQL with the status code |
+| an exception on a route | its log lines and stacks · its traces | panel link → LogQL with `error_type` and `route` · TraceQL with `event.exception.type` |
+| an exception message | its log lines | panel link → LogQL with the message |
 | a span | its logs · its CPU profile · the rate and P95 of its operation | Tempo data source links |
 
 **① A log line** links its trace and every line of its request.
@@ -255,7 +257,7 @@ flowchart LR
 ![The log line and its trace](docs/screenshots/09-log-and-trace.png)
 
 **③ A span** links its logs, its profile and the metrics of its operation.
-**④ Its profile** is the CPU of exactly that request.
+**④ Its profile** is the CPU of exactly that request — here one of `/api/cpu`.
 
 > [!NOTE]
 > Span profiles label samples by thread. A request that holds the event loop, like `/api/cpu`,
@@ -527,7 +529,7 @@ that lists the ones it does; `just` alone lists the commands.
 | `just dc up` · `down` · `ps` · `logs` | the stack in Compose; `just docker-compose …` is the same |
 | `just k3d up` · `down` · `ps` · `logs` | the stack in a k3d cluster |
 | `just dc logs api grafana` · `just k3d logs api` | the logs of chosen services only |
-| `just traffic` | requests at the running stack, either one |
+| `just traffic` | requests at the running stack, either one: `RATE`, `DURATION`, and the mix — `CPU_PERCENT`, `REPORT_PERCENT`, `CPU_BELOW_MAX`; `API_WORKERS=8 just dc up` for a heavier one |
 | `just run gunicorn` | the application outside Docker, against the running stack |
 
 ## 🧱 Stack
