@@ -4069,7 +4069,7 @@
                       },
                       "spec": {
                         "limit": 50,
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\" && (\"all\" = \"$shown\" || (\"slow\" =~ \"$shown\" && duration > $slow) || (\"failed\" =~ \"$shown\" && status = error))}",
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\" && (\"all\" = \"$shown\" || (\"slow\" =~ \"$shown\" && duration > $slow) || (\"failed\" =~ \"$shown\" && status = error))} with(most_recent=true)",
                         "queryType": "traceql",
                         "tableType": "traces"
                       }
