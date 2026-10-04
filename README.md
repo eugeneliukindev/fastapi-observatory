@@ -130,7 +130,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 |---|---|---|
 | top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | Requests | Traffic | RPS by route, the total over them and the total yesterday |
-| | Status codes | RPS by code, coloured by class, and the 4xx and 5xx of each route |
+| | Status codes | RPS of the 4xx and 5xx of each route, and their totals |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
 | | Payload, collapsed | bytes per second · request and response size by route |
