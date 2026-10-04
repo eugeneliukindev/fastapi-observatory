@@ -146,8 +146,7 @@ to the workers of one container or pod. Each title says what is measured, then h
 `RPS — by route`, `P95 latency — by worker`.
 
 **In three languages.** English, Русский and 中文 are three dashboards, each translated whole —
-title, variables, rows, panels — and linked to one another at the top, keeping the time range and
-the variables. Grafana translates its own interface, which follows the browser's language, but never
+title, variables, rows, panels; pick one in the dashboard list or under All dashboards. Grafana translates its own interface, which follows the browser's language, but never
 what a dashboard says. So what it loads from [`dashboards/`](observability/grafana/dashboards) is
 built: edit the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary
 per language in [`source/i18n/`](observability/grafana/source/i18n), then `just dashboards`. It

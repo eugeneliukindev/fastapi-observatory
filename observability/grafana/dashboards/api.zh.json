@@ -5682,42 +5682,6 @@
         "targetBlank": false,
         "includeVars": false,
         "keepTime": true
-      },
-      {
-        "title": "English",
-        "type": "link",
-        "url": "/d/observatory-api",
-        "icon": "",
-        "tooltip": "",
-        "tags": [],
-        "asDropdown": false,
-        "targetBlank": false,
-        "includeVars": true,
-        "keepTime": true
-      },
-      {
-        "title": "Русский",
-        "type": "link",
-        "url": "/d/observatory-api-ru",
-        "icon": "",
-        "tooltip": "",
-        "tags": [],
-        "asDropdown": false,
-        "targetBlank": false,
-        "includeVars": true,
-        "keepTime": true
-      },
-      {
-        "title": "中文",
-        "type": "link",
-        "url": "/d/observatory-api-zh",
-        "icon": "",
-        "tooltip": "",
-        "tags": [],
-        "asDropdown": false,
-        "targetBlank": false,
-        "includeVars": true,
-        "keepTime": true
       }
     ],
     "liveNow": false,

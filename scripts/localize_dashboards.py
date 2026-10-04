@@ -18,7 +18,6 @@ _DICTIONARIES: Final = _GRAFANA / "source" / "i18n"
 _DASHBOARDS: Final = _GRAFANA / "dashboards"
 
 _SOURCE_LANGUAGE_CODE: Final = "en"
-_SOURCE_LANGUAGE_NAME: Final = "English"
 
 # A variable or a label stays as it is in every language: Grafana substitutes it.
 _PLACEHOLDER: Final = re.compile(r"\{\{[^}]*\}\}|\$\{[^}]*\}|\$\w+")
@@ -37,10 +36,9 @@ class _Text(NamedTuple):
 
 
 class _Language(NamedTuple):
-    """A language a dashboard speaks: its code, its own name for itself and its translation."""
+    """A language a dashboard speaks: its code and its translation."""
 
     code: str
-    name: str
     translate: Callable[[str], str]
 
 
@@ -48,17 +46,17 @@ def main() -> None:
     """Write a dashboard per language, or list what is wrong with the dictionaries."""
     source = _load(_SOURCE)
     sources = list(dict.fromkeys(text.source for text in _texts_in_dashboard(source)))
-    languages = [_Language(_SOURCE_LANGUAGE_CODE, _SOURCE_LANGUAGE_NAME, str)]
+    languages = [_Language(_SOURCE_LANGUAGE_CODE, str)]
     problems: list[str] = []
     for path in sorted(_DICTIONARIES.glob("*.json")):
-        name, texts = _load_dictionary(path)
+        texts = _load_dictionary(path)
         problems.extend(_find_problems(path.stem, texts, sources))
-        languages.append(_Language(path.stem, name, texts.__getitem__))
+        languages.append(_Language(path.stem, texts.__getitem__))
     if problems:
         sys.exit("\n".join(problems))
 
     for language in languages:
-        dashboard = _localize(source, language, languages)
+        dashboard = _localize(source, language)
         suffix = "" if language.code == _SOURCE_LANGUAGE_CODE else f".{language.code}"
         target = _DASHBOARDS / f"{_SOURCE.stem}{suffix}.json"
         target.write_text(json.dumps(dashboard, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -71,16 +69,12 @@ def _load(path: Path) -> _Object:
     return loaded
 
 
-def _load_dictionary(path: Path) -> tuple[str, dict[str, str]]:
-    dictionary = _load(path)
-    name = dictionary.get("name")
-    texts = _object(dictionary, "texts")
-    if not isinstance(name, str):
-        raise TypeError(f"{path}: `name`, the language's name for itself, is not a string")
+def _load_dictionary(path: Path) -> dict[str, str]:
+    texts = _load(path)
     not_strings = [source for source, translation in texts.items() if not isinstance(translation, str)]
     if not_strings:
         raise TypeError(f"{path}: translations that are not strings: {not_strings}")
-    return name, {source: str(translation) for source, translation in texts.items()}
+    return {source: str(translation) for source, translation in texts.items()}
 
 
 def _find_problems(language: str, texts: dict[str, str], sources: list[str]) -> Iterator[str]:
@@ -93,42 +87,17 @@ def _find_problems(language: str, texts: dict[str, str], sources: list[str]) -> 
     yield from (f"{language}: {source!r} is not on the dashboard" for source in texts.keys() - set(sources))
 
 
-def _localize(source: _Object, language: _Language, languages: list[_Language]) -> _Object:
+def _localize(source: _Object, language: _Language) -> _Object:
     dashboard = copy.deepcopy(source)
     # Collected before anything changes: whether a field reference is translated depends on the
     # English names the panel gives its fields.
     for text in list(_texts_in_dashboard(dashboard)):
         text.holder[text.key] = language.translate(text.source)
 
-    metadata = _object(dashboard, "metadata")
-    base_name = str(metadata["name"])
-    metadata["name"] = _dashboard_name(base_name, language)
-    spec = _object(dashboard, "spec")
-    spec["links"] = [*_objects(spec, "links"), *_language_links(base_name, languages)]
+    if language.code != _SOURCE_LANGUAGE_CODE:
+        metadata = _object(dashboard, "metadata")
+        metadata["name"] = f"{metadata['name']}-{language.code}"
     return dashboard
-
-
-def _dashboard_name(base_name: str, language: _Language) -> str:
-    return base_name if language.code == _SOURCE_LANGUAGE_CODE else f"{base_name}-{language.code}"
-
-
-def _language_links(base_name: str, languages: list[_Language]) -> list[_Json]:
-    """Return a link to every language's dashboard, each named in its own language."""
-    return [
-        {
-            "title": language.name,
-            "type": "link",
-            "url": f"/d/{_dashboard_name(base_name, language)}",
-            "icon": "",
-            "tooltip": "",
-            "tags": [],
-            "asDropdown": False,
-            "targetBlank": False,
-            "includeVars": True,
-            "keepTime": True,
-        }
-        for language in languages
-    ]
 
 
 def _texts_in_dashboard(dashboard: _Object) -> Iterator[_Text]:
