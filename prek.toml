@@ -74,19 +74,11 @@ hooks = [
     pass_filenames = false
   },
   {
-    id = "dashboards",
-    name = "dashboards",
-    entry = "just lint dashboards",
-    language = "system",
-    files = '^(observability/grafana/source/|scripts/localize_dashboards\.py)',
-    pass_filenames = false
-  },
-  {
     id = "mypy",
     name = "mypy",
     entry = "just lint mypy",
     language = "system",
-    files = "^(src|scripts)/",
+    files = "^src/",
     types = ["python"],
     pass_filenames = false
   }

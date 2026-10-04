@@ -150,13 +150,11 @@ Every route and every worker is drawn; the variables narrow them — `Route` to 
 to the workers of one container or pod. Each title says what is measured, then how it is cut:
 `RPS — total · by route`, `CPU — by worker, one core is 100%`.
 
-**In three languages.** English, Русский and 中文 are three dashboards, each translated whole —
-title, variables, rows, panels; pick one in the dashboard list or under All dashboards. Grafana translates its own interface, which follows the browser's language, but never
-what a dashboard says. So what it loads from [`dashboards/`](observability/grafana/dashboards) is
-built: edit the English [`source/api.json`](observability/grafana/source/api.json) and a dictionary
-per language in [`source/i18n/`](observability/grafana/source/i18n), then `just lint dashboards`. It
-fails, naming the string, when a dictionary lacks a text, keeps one the dashboard no longer has, or
-loses a `$variable` or `{{label}}`. A new language is a new dictionary.
+**In three languages.** English, Русский and 中文 are three dashboards in
+[`dashboards/`](observability/grafana/dashboards), each translated whole — title, variables, rows,
+panels; pick one in the dashboard list or under All dashboards. Grafana translates its own
+interface, which follows the browser's language, but never what a dashboard says: a change to one
+is a change to all three.
 
 Lines read the same on every panel. A total is thick, over a light fill, drawn above the rest and
 named `total` — white for the service, or the colour of its class: 2xx green, 3xx blue, 4xx orange,
@@ -525,7 +523,6 @@ that lists the ones it does; `just` alone lists the commands.
 | `just lint` | every check — what CI would run |
 | `just lint ruff` · `flake8` · `mypy` | ruff format and check · wemake-python-styleguide · mypy |
 | `just lint slotscheck` · `spelling` · `pyproject` | slotscheck · codespell and typos · pyproject-fmt |
-| `just lint dashboards` | the dashboards Grafana loads, in every language, from `source/` |
 | `just dc up` · `down` · `ps` · `logs` | the stack in Compose; `just docker-compose …` is the same |
 | `just k3d up` · `down` · `ps` · `logs` | the stack in a k3d cluster |
 | `just dc logs api grafana` · `just k3d logs api` | the logs of chosen services only |

@@ -21,8 +21,8 @@ hooks:
     uv run prek install
 
 [group("lint")]
-[doc("Lint and format: all, or one of ruff · flake8 · mypy · slotscheck · spelling · pyproject · dashboards")]
-[arg("tool", pattern="all|ruff|flake8|mypy|slotscheck|spelling|pyproject|dashboards", help="what to run; all by default")]
+[doc("Lint and format: all, or one of ruff · flake8 · mypy · slotscheck · spelling · pyproject")]
+[arg("tool", pattern="all|ruff|flake8|mypy|slotscheck|spelling|pyproject", help="what to run; all by default")]
 lint tool="all":
     @just _lint-{{ tool }}
 
@@ -54,7 +54,7 @@ run kind:
     OBSERVATORY__SERVER__KIND={{ kind }} uv run python src
 
 [private]
-_lint-all: _lint-ruff _lint-pyproject _lint-flake8 _lint-slotscheck _lint-spelling _lint-mypy _lint-dashboards
+_lint-all: _lint-ruff _lint-pyproject _lint-flake8 _lint-slotscheck _lint-spelling _lint-mypy
 
 [private]
 _lint-ruff:
@@ -68,7 +68,7 @@ _lint-flake8:
 
 [private]
 _lint-mypy:
-    uv run mypy src scripts
+    uv run mypy src
 
 # Slots work only when every ancestor declares them: skip one, and instances get a __dict__ again
 # while the memory saving disappears silently.
@@ -86,13 +86,6 @@ _lint-spelling:
 [private]
 _lint-pyproject:
     uv run pyproject-fmt pyproject.toml
-
-# Grafana has no translations for what a dashboard says: each language is a dashboard of its own,
-# built from observability/grafana/source/ — the English api.json and a dictionary per language.
-# It fails on a string a dictionary lacks.
-[private]
-_lint-dashboards:
-    uv run python scripts/localize_dashboards.py
 
 [private]
 _dc-up *services:
