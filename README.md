@@ -158,7 +158,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | the traces picked in Show, newest first |
-| | Logs | lines by level · the stream: time, level, status, duration, request and message in columns |
+| | Logs | of the levels picked: lines by level · the stream — time, level, status, duration, request and message in columns |
 
 Every route and every worker is drawn; the variables narrow them — `Route` to some routes, `Host`
 to the workers of one container or pod. Each title says what is measured, then how it is cut:
@@ -350,6 +350,8 @@ sequenceDiagram
 | `GET /api/report/{id}` | all of the above, the fetches in parallel |
 | `GET /api/posts/1000` | a 404 from the source |
 | `GET /api/fail?kind=…` | a 500 of the kind asked for — `runtime`, `invalid`, `lookup`, `timeout`, `permission`, each its own exception type: the exception on the span, the stack in the log |
+| `GET /api/posts/latest` · `GET /api/cpu?below=` past the limit | a 422: FastAPI refuses the parameter before the handler runs |
+| `DELETE /api/posts/{id}` | a 405: the route exists, the method does not |
 
 ## 💻 Servers
 
@@ -419,7 +421,7 @@ flowchart LR
 ```
 
 ```json
-{"ts":"2026-10-03T10:19:44.631+00:00","lvl":"INFO","msg":"HTTP request handled","logger":"observatory","caller":"middleware:_write:80","request_id":"7cefc9e7…","trace_id":"ef23e199…","span_id":"…","method":"GET","path":"/api/posts/3","route":"/api/posts/{post_id}","status":200,"duration_ms":297}
+{"ts":"2026-10-03T10:19:44.631+00:00","lvl":"INFO","msg":"HTTP request handled","logger":"observatory","caller":"middleware:_write:70","request_id":"7cefc9e7…","trace_id":"ef23e199…","span_id":"…","method":"GET","path":"/api/posts/3","route":"/api/posts/{post_id}","status":200,"duration_ms":297}
 ```
 
 | who writes | logger | level |
@@ -428,7 +430,8 @@ flowchart LR
 | Gunicorn · Uvicorn · Hypercorn · Granian | their own, formatted as JSON | `OBSERVATORY__LOG_LEVEL` |
 | libraries: httpx, OpenTelemetry, … | their own | the root's `WARNING` |
 
-An exception becomes `error_type`, `error_message`, `error_stack`. `route` is the matched template,
+The access line's level follows the status: `INFO`, `WARNING` for a 4xx, `ERROR` for a 5xx. An
+unhandled exception becomes `error_type`, `error_message`, `error_stack`. `route` is the matched template,
 the one the metrics carry as `http_route`, so a line and its metrics group alike. `AccessMiddleware`
 writes one line per response inside the request span and returns `x-request-id`, which the FastAPI
 instrumentation also records on the span; the servers' access logs are off.
