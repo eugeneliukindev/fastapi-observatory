@@ -44,7 +44,7 @@ k3d command *args:
 [group("stack")]
 [doc("Drive traffic at the app: RATE=10 DURATION=60 just traffic")]
 traffic:
-    ./scripts/traffic.sh
+    ./traffic.sh
 
 # Outside Docker, against a stack already running.
 [group("stack")]

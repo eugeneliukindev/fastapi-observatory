@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Drive traffic at the application so that dashboards and traces are not empty.
 #
-#   ./scripts/traffic.sh                 # 2 requests per second until stopped
-#   RATE=10 DURATION=60 ./scripts/traffic.sh
-#   BASE_URL=http://localhost:8000 ./scripts/traffic.sh
-#   RATE=200 CPU_PERCENT=3 REPORT_PERCENT=3 CPU_BELOW_MAX=100000 ./scripts/traffic.sh
-#   FAIL_PERCENT=30 INVALID_PERCENT=20 ./scripts/traffic.sh   # an incident
+#   ./traffic.sh                         # 2 requests per second until stopped
+#   RATE=10 DURATION=60 ./traffic.sh
+#   BASE_URL=http://localhost:8000 ./traffic.sh
+#   RATE=200 CPU_PERCENT=3 REPORT_PERCENT=3 CPU_BELOW_MAX=100000 ./traffic.sh
+#   FAIL_PERCENT=30 INVALID_PERCENT=20 ./traffic.sh   # an incident
 #
 # Handlers are picked by weight: mostly post reads, some reports, CPU work and new posts, now and
 # then a missing post (404), a request the API refuses (422, 405) and a deliberate failure (500)
