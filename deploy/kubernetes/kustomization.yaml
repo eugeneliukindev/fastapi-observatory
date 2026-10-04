@@ -41,3 +41,5 @@ configMapGenerator:
   - name: grafana-dashboards
     files:
       - ../../observability/grafana/dashboards/api.json
+      - ../../observability/grafana/dashboards/api.ru.json
+      - ../../observability/grafana/dashboards/api.zh.json
