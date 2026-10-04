@@ -116,13 +116,15 @@ flowchart LR
 
 **FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
 service, routes, method, host and thresholds are variables. A series on the route, status code
-and exception panels links to its traces or log lines — click it.
+and exception panels links to its traces or log lines — click it; a route in the Routes table
+narrows the whole dashboard to itself, as Grafana's own operations tables do.
 
 | where | variables |
 |---|---|
 | the top of the dashboard | Metrics · Logs · Traces · Profiles · Service · Routes matching · Route · Method · Host · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Status codes row | Status codes — the classes its panel draws, 4xx and 5xx at first |
 | the Profiling row | Profile type |
+| the Traces row | Show — slow or failed at first, slow, failed or all |
 
 The order is the order of an investigation: is the service fine, which requests suffer, is the
 promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
@@ -134,12 +136,12 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | | Status codes | RPS of the classes picked, a total per class and a line per route and code |
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 by route with exemplars, from the traces |
-| | Payload, collapsed | bytes per second · request and response size by route |
+| | Payload, collapsed | bytes per second · body size P95 by route, requests dashed and responses solid |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |
 | Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
-| Traces & logs | Traces | recent, slow and failed traces |
+| Traces & logs | Traces | the traces picked in Show, newest first |
 | | Logs | lines by level · the stream: time, level, status, duration, request and message in columns |
 
 Every route and every worker is drawn; the variables narrow them — `Route` to some routes, `Host`

@@ -573,7 +573,7 @@
         "spec": {
           "id": 56,
           "title": "路由",
-          "description": "所选时间范围内的每条路由：流量趋势、请求数、2xx、3xx、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可查看其追踪，或放大查看其 RPS 及具体数值。",
+          "description": "所选时间范围内的每条路由：流量趋势、请求数、2xx、3xx、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可将仪表板限定到该路由，或查看其追踪。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -893,13 +893,13 @@
                         "value": [
                           {
                             "targetBlank": false,
-                            "title": "该路由的追踪",
-                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                            "title": "在仪表板上查看该路由",
+                            "url": "/d/${__dashboard.uid}?${__url_time_range}&${metrics:queryparam}&${logs:queryparam}&${traces:queryparam}&${profiles:queryparam}&${service:queryparam}&${routes:queryparam}&${method:queryparam}&${host:queryparam}&${satisfied:queryparam}&${tolerated:queryparam}&${slow:queryparam}&var-route=${__value.raw:percentencode}"
                           },
                           {
                             "targetBlank": false,
-                            "title": "该路由的 RPS",
-                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${metrics:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${metrics:percentencode}%22%7D%2C%22expr%22%3A%22sum%28rate%28http_server_request_duration_seconds_count%7Bjob%3D~%5C%22${service:percentencode}%5C%22%2C%20http_route%3D%5C%22${__data.fields.Route:percentencode}%5C%22%7D%5B1m%5D%29%29%22%2C%22range%22%3Atrue%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                            "title": "该路由的追踪",
+                            "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22queryType%22%3A%22traceql%22%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__value.raw:percentencode}%5C%22%7D%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
                           }
                         ]
                       },
@@ -2370,174 +2370,6 @@
                     "fillOpacity": 15,
                     "gradientMode": "opacity",
                     "lineWidth": 2,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "request-size-p95-by-route": {
-        "kind": "Panel",
-        "spec": {
-          "id": 20,
-          "title": "请求大小 P95 — 按路由",
-          "description": "只统计带请求体的请求：这里是 `POST /api/posts`。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "{{http_request_method}} {{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true,
-                  "limit": 8,
-                  "enableFacetedFilter": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "bytes",
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 1,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    },
-                    "lineInterpolation": "smooth"
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "response-size-p95-by-route": {
-        "kind": "Panel",
-        "spec": {
-          "id": 21,
-          "title": "响应大小 P95 — 按路由",
-          "description": "",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
-                        "instant": false,
-                        "legendFormat": "{{http_request_method}} {{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "displayMode": "list",
-                  "placement": "bottom",
-                  "showLegend": true,
-                  "limit": 8,
-                  "enableFacetedFilter": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "bytes",
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 15,
-                    "gradientMode": "opacity",
-                    "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
@@ -4141,234 +3973,6 @@
           }
         }
       },
-      "recent-traces": {
-        "kind": "Panel",
-        "spec": {
-          "id": 28,
-          "title": "追踪 — 最近",
-          "description": "打开一条追踪：可以从 span 跳到它的日志行、剖析数据和所属操作的指标。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "tempo",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${traces}"
-                      },
-                      "spec": {
-                        "limit": 20,
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"}",
-                        "queryType": "traceql",
-                        "tableType": "traces"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "excludeByName": {
-                        "Service": true
-                      }
-                    }
-                  }
-                }
-              ],
-              "queryOptions": {
-                "timeFrom": "2m"
-              }
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "table",
-            "version": "",
-            "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": true,
-                    "displayName": "Start time"
-                  }
-                ]
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "custom": {
-                    "align": "auto"
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Trace ID"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 270
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Start time"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 205
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Duration"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 90
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "slow-and-failed": {
-        "kind": "Panel",
-        "spec": {
-          "id": 29,
-          "title": "追踪 — 慢的和失败的",
-          "description": "比 `慢追踪` 阈值更慢，或已失败。",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "tempo",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${traces}"
-                      },
-                      "spec": {
-                        "limit": 20,
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\" && (duration > $slow || status = error)}",
-                        "queryType": "traceql",
-                        "tableType": "traces"
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [
-                {
-                  "kind": "Transformation",
-                  "group": "organize",
-                  "spec": {
-                    "options": {
-                      "excludeByName": {
-                        "Service": true
-                      }
-                    }
-                  }
-                }
-              ],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "table",
-            "version": "",
-            "spec": {
-              "options": {
-                "cellHeight": "sm",
-                "showHeader": true,
-                "sortBy": [
-                  {
-                    "desc": true,
-                    "displayName": "Start time"
-                  }
-                ]
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "custom": {
-                    "align": "auto"
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Trace ID"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 270
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Start time"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 205
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byName",
-                      "options": "Duration"
-                    },
-                    "properties": [
-                      {
-                        "id": "custom.width",
-                        "value": 90
-                      }
-                    ]
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
       "lines-by-level": {
         "kind": "Panel",
         "spec": {
@@ -4825,6 +4429,248 @@
             }
           }
         }
+      },
+      "body-size-p95-request-response-by-route": {
+        "kind": "Panel",
+        "spec": {
+          "id": 20,
+          "title": "消息体大小 P95 — 请求 · 响应，按路由",
+          "description": "每条路由消息体大小的第 95 百分位：虚线为请求（只统计带消息体的请求，这里是 `POST /api/posts`），实线为响应。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "请求 {{http_request_method}} {{http_route}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "响应 {{http_request_method}} {{http_route}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true,
+                  "limit": 8,
+                  "enableFacetedFilter": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "bytes",
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisSoftMin": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 15,
+                    "gradientMode": "opacity",
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "lineInterpolation": "smooth"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byFrameRefID",
+                      "options": "A"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            10,
+                            6
+                          ]
+                        }
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 0
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "traces": {
+        "kind": "Panel",
+        "spec": {
+          "id": 29,
+          "title": "追踪 — ${shown:text}",
+          "description": "在 `显示` 中选择的追踪：慢于 `慢追踪` 阈值的、失败的、两者之一，或全部，最新的在前。打开一条追踪：可以从 span 跳到它的日志行、剖析数据和所属操作的指标。",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "tempo",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${traces}"
+                      },
+                      "spec": {
+                        "limit": 50,
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\" && (\"all\" = \"$shown\" || (\"slow\" =~ \"$shown\" && duration > $slow) || (\"failed\" =~ \"$shown\" && status = error))}",
+                        "queryType": "traceql",
+                        "tableType": "traces"
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [
+                {
+                  "kind": "Transformation",
+                  "group": "organize",
+                  "spec": {
+                    "options": {
+                      "excludeByName": {
+                        "Service": true
+                      }
+                    }
+                  }
+                }
+              ],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "table",
+            "version": "",
+            "spec": {
+              "options": {
+                "cellHeight": "sm",
+                "showHeader": true,
+                "sortBy": [
+                  {
+                    "desc": true,
+                    "displayName": "Start time"
+                  }
+                ]
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "align": "auto"
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Trace ID"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 270
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Start time"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 205
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "Duration"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.width",
+                        "value": 90
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
       }
     },
     "layout": {
@@ -5155,7 +5001,7 @@
                                 "spec": {
                                   "x": 0,
                                   "y": 0,
-                                  "width": 8,
+                                  "width": 12,
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
@@ -5166,26 +5012,13 @@
                               {
                                 "kind": "GridLayoutItem",
                                 "spec": {
-                                  "x": 8,
+                                  "x": 12,
                                   "y": 0,
-                                  "width": 8,
+                                  "width": 12,
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "request-size-p95-by-route"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 16,
-                                  "y": 0,
-                                  "width": 8,
-                                  "height": 8,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "response-size-p95-by-route"
+                                    "name": "body-size-p95-request-response-by-route"
                                   }
                                 }
                               }
@@ -5522,30 +5355,59 @@
                                 "spec": {
                                   "x": 0,
                                   "y": 0,
-                                  "width": 12,
-                                  "height": 10,
+                                  "width": 24,
+                                  "height": 12,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "recent-traces"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 12,
-                                  "y": 0,
-                                  "width": 12,
-                                  "height": 10,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "slow-and-failed"
+                                    "name": "traces"
                                   }
                                 }
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "shown",
+                              "query": "慢或失败 : slow|failed,慢 : slow,失败 : failed,全部 : all",
+                              "current": {
+                                "text": "慢或失败",
+                                "value": "slow|failed"
+                              },
+                              "options": [
+                                {
+                                  "selected": true,
+                                  "text": "慢或失败",
+                                  "value": "slow|failed"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "慢",
+                                  "value": "slow"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "失败",
+                                  "value": "failed"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "全部",
+                                  "value": "all"
+                                }
+                              ],
+                              "multi": false,
+                              "includeAll": false,
+                              "label": "显示",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "表格列出哪些追踪。",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
                       }
                     },
                     {
