@@ -96,29 +96,37 @@ flowchart LR
 ## 📊 Dashboard
 
 **FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
-service, routes, method, thresholds and the language are variables. A series on the route, status
-code and exception panels links to its traces or log lines — click it.
+service, routes, method, host, thresholds and the language are variables. A series on the route,
+status code and exception panels links to its traces or log lines — click it.
+
+| where | variables |
+|---|---|
+| the top line — what you look at | Language · Service · Routes matching · Route · Method · Host |
+| the controls menu, `+7` — wiring and thresholds | Metrics · Logs · Traces · Profiles · Apdex satisfied · Apdex tolerated · Slow trace |
+| the Profiling row | Profile type |
 
 The order is the order of an investigation: is the service fine, which requests suffer, why, and
 the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
 
 | group | row | what |
 |---|---|---|
-| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · latency heatmap · routes with their trend, requests, 5xx, mean, P95 and P99 |
+| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 4xx, 5xx, mean, P95 and P99 |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days · availability against the objective · budget left over time · burn rate over 5 m, 1 h, 6 h and 1 d |
-| Requests | Traffic | RPS total, against the same hour yesterday · by route |
-| | Status codes | every route and code on one graph, coloured by class, errors thicker · RPS by code · 5xx ratio by route over time |
+| Requests | Traffic | RPS total, against the same hour yesterday · the 8 busiest routes |
+| | Status codes | RPS by code, coloured by class · errors of the 8 routes failing most, by code · 5xx ratio of the routes with 5xx |
 | | Exceptions | by type and route · each message with its type, route and count — from the log |
-| | Latency | P50 · P95 · P99, P95 against yesterday · P95 by route with exemplars, from the traces |
-| | Payload, collapsed | bytes per second · request and response size |
-| Runtime | Workers | request share against an even split · P95 · in flight, stacked · CPU against one core · involuntary context switches · lifetimes · workers replaced |
-| | Process, collapsed | memory · threads · open files · GC per worker |
+| | Latency | P50 · P95 · P99, P95 against yesterday · the heatmap · P95 of the 8 slowest routes with exemplars, from the traces |
+| | Payload, collapsed | bytes per second · request and response size of the 8 busiest routes |
+| Runtime | Workers | request share of the busiest and the idlest worker against an even split · P95, in flight, CPU against one core and involuntary context switches of the top 5 workers beside all or the median · worker starts · workers replaced |
+| | Process, collapsed | memory · threads · open files of the top 5 workers and the median · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | recent, slow and failed traces |
 | | Logs | lines by level · the stream |
 
-Every number has one place: a route's mean and percentiles are columns of the routes table, in
-flight is one stack by worker, CPU over time is the workers' panel and not the profile's.
+A graph never draws every route or every worker: at fifty routes or forty workers it would be a
+tangle. It draws the few that matter over the whole range — picked with `topk(…) @ end()`, so the
+lines do not change from step to step — and the table and the variables reach the rest: every route
+is a row of the routes table, and `Host` narrows the workers to one container or pod.
 
 **In three languages.** The `Language` variable switches between English, Русский and 中文.
 Grafana translates its own interface but never what a dashboard says, so the dashboard holds the

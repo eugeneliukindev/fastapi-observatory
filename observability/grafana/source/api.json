@@ -567,108 +567,12 @@
           }
         }
       },
-      "latency-distribution": {
-        "kind": "Panel",
-        "spec": {
-          "id": 55,
-          "title": "Latency distribution",
-          "description": "How many requests finished in each duration bucket over time: the darker the cell, the more requests. The tail shows above the P95 line it summarises.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
-                        "format": "heatmap",
-                        "instant": false,
-                        "legendFormat": "{{le}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {
-                "maxDataPoints": 80
-              }
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "heatmap",
-            "version": "",
-            "spec": {
-              "options": {
-                "calculate": false,
-                "cellGap": 1,
-                "color": {
-                  "exponent": 0.5,
-                  "fill": "dark-orange",
-                  "mode": "scheme",
-                  "reverse": false,
-                  "scale": "exponential",
-                  "scheme": "Oranges",
-                  "steps": 64
-                },
-                "exemplars": {
-                  "color": "rgba(255,0,255,0.7)"
-                },
-                "filterValues": {
-                  "le": 1e-09
-                },
-                "legend": {
-                  "show": true
-                },
-                "rowsFrame": {
-                  "layout": "le"
-                },
-                "showValue": "never",
-                "tooltip": {
-                  "mode": "single",
-                  "showColorScale": false,
-                  "yHistogram": true
-                },
-                "yAxis": {
-                  "axisPlacement": "left",
-                  "reverse": false,
-                  "unit": "s"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "custom": {
-                    "scaleDistribution": {
-                      "type": "linear"
-                    }
-                  }
-                },
-                "overrides": []
-              }
-            }
-          }
-        }
-      },
       "routes": {
         "kind": "Panel",
         "spec": {
           "id": 56,
           "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces.",
+          "description": "Every route over the selected range: its traffic trend, requests, share of 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -810,6 +714,29 @@
                     "refId": "F",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "G",
+                    "hidden": false
+                  }
                 }
               ],
               "transformations": [
@@ -844,10 +771,11 @@
                         "http_route": 0,
                         "Trend #A": 1,
                         "Value #B": 2,
-                        "Value #C": 3,
-                        "Value #E": 4,
-                        "Value #D": 5,
-                        "Value #F": 6
+                        "Value #G": 3,
+                        "Value #C": 4,
+                        "Value #E": 5,
+                        "Value #D": 6,
+                        "Value #F": 7
                       },
                       "renameByName": {
                         "Trend #A": "Traffic",
@@ -856,7 +784,8 @@
                         "Value #D": "P95",
                         "http_route": "Route",
                         "Value #E": "Mean",
-                        "Value #F": "P99"
+                        "Value #F": "P99",
+                        "Value #G": "4xx"
                       }
                     }
                   }
@@ -920,7 +849,7 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 170
+                        "value": 230
                       }
                     ]
                   },
@@ -946,10 +875,6 @@
                           "fixedColor": "blue",
                           "mode": "fixed"
                         }
-                      },
-                      {
-                        "id": "custom.width",
-                        "value": 140
                       }
                     ]
                   },
@@ -969,7 +894,49 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 75
+                        "value": 90
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "4xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "mode": "gradient",
+                          "type": "color-background"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 0.05
+                            }
+                          ]
+                        }
                       }
                     ]
                   },
@@ -989,7 +956,7 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 70
+                        "value": 80
                       },
                       {
                         "id": "custom.cellOptions",
@@ -1031,7 +998,7 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 70
+                        "value": 85
                       },
                       {
                         "id": "custom.cellOptions",
@@ -1072,7 +1039,7 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 70
+                        "value": 85
                       },
                       {
                         "id": "custom.cellOptions",
@@ -1113,7 +1080,7 @@
                       },
                       {
                         "id": "custom.width",
-                        "value": 70
+                        "value": 85
                       },
                       {
                         "id": "custom.cellOptions",
@@ -2035,8 +2002,8 @@
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — by route",
-          "description": "Requests per second per route.",
+          "title": "RPS — top 8 routes",
+          "description": "Requests per second of the 8 busiest routes over the range. Every route is in the Routes table.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2054,7 +2021,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
+                        "expr": "sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -2126,198 +2093,6 @@
                   }
                 },
                 "overrides": []
-              }
-            }
-          }
-        }
-      },
-      "responses-by-route-and-status-code": {
-        "kind": "Panel",
-        "spec": {
-          "id": 23,
-          "title": "Responses by route and status code",
-          "description": "One series per route and status code, coloured by class: 2xx green · 3xx blue · 4xx orange · 5xx red; errors are drawn thicker. Click a series for the traces of that route with that code.",
-          "links": [],
-          "data": {
-            "kind": "QueryGroup",
-            "spec": {
-              "queries": [
-                {
-                  "kind": "PanelQuery",
-                  "spec": {
-                    "query": {
-                      "kind": "DataQuery",
-                      "group": "prometheus",
-                      "version": "v0",
-                      "datasource": {
-                        "name": "${metrics}"
-                      },
-                      "spec": {
-                        "editorMode": "code",
-                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
-                        "instant": false,
-                        "legendFormat": "{{http_response_status_code}} {{http_route}}",
-                        "range": true
-                      }
-                    },
-                    "refId": "A",
-                    "hidden": false
-                  }
-                }
-              ],
-              "transformations": [],
-              "queryOptions": {}
-            }
-          },
-          "vizConfig": {
-            "kind": "VizConfig",
-            "group": "timeseries",
-            "version": "",
-            "spec": {
-              "options": {
-                "legend": {
-                  "calcs": [
-                    "mean",
-                    "max",
-                    "lastNotNull"
-                  ],
-                  "displayMode": "table",
-                  "placement": "bottom",
-                  "showLegend": true,
-                  "sortBy": "Max",
-                  "sortDesc": true
-                },
-                "tooltip": {
-                  "mode": "multi",
-                  "sort": "desc"
-                }
-              },
-              "fieldConfig": {
-                "defaults": {
-                  "unit": "reqps",
-                  "min": 0,
-                  "color": {
-                    "mode": "palette-classic"
-                  },
-                  "links": [
-                    {
-                      "targetBlank": false,
-                      "title": "Traces of this route with this code",
-                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20span.http.response.status_code%20%3D%20${__field.labels.http_response_status_code}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
-                    }
-                  ],
-                  "custom": {
-                    "axisSoftMin": 0,
-                    "drawStyle": "line",
-                    "fillOpacity": 0,
-                    "gradientMode": "none",
-                    "lineWidth": 1,
-                    "showPoints": "never",
-                    "spanNulls": false,
-                    "stacking": {
-                      "group": "A",
-                      "mode": "none"
-                    }
-                  }
-                },
-                "overrides": [
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "2.. .*"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "green"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "3.. .*"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "blue"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 1
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            4,
-                            4
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "4.. .*"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "orange"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 2
-                      },
-                      {
-                        "id": "custom.lineStyle",
-                        "value": {
-                          "fill": "dash",
-                          "dash": [
-                            10,
-                            6
-                          ]
-                        }
-                      }
-                    ]
-                  },
-                  {
-                    "matcher": {
-                      "id": "byRegexp",
-                      "options": "5.. .*"
-                    },
-                    "properties": [
-                      {
-                        "id": "color",
-                        "value": {
-                          "mode": "fixed",
-                          "fixedColor": "red"
-                        }
-                      },
-                      {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      }
-                    ]
-                  }
-                ]
               }
             }
           }
@@ -2465,12 +2240,12 @@
           }
         }
       },
-      "5xx-ratio-by-route": {
+      "errors-by-route-and-code": {
         "kind": "Panel",
         "spec": {
-          "id": 65,
-          "title": "5xx ratio by route",
-          "description": "Share of server errors per route over time. Orange above 1% · red above 5%.",
+          "id": 23,
+          "title": "Errors by route and code — top 8 routes",
+          "description": "Client and server errors of the 8 routes that failed most over the range, one series per code: 4xx dashed orange, 5xx red. Click a series for the traces of that route with that code.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -2488,7 +2263,151 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "(sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
+                        "expr": "sum by (http_route, http_response_status_code) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__rate_interval])) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"4..|5..\"}[$__range] @ end())))",
+                        "instant": false,
+                        "legendFormat": "{{http_response_status_code}} {{http_route}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {}
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "timeseries",
+            "version": "",
+            "spec": {
+              "options": {
+                "legend": {
+                  "calcs": [
+                    "mean",
+                    "max",
+                    "lastNotNull"
+                  ],
+                  "displayMode": "table",
+                  "placement": "bottom",
+                  "showLegend": true,
+                  "sortBy": "Max",
+                  "sortDesc": true
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "min": 0,
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "links": [
+                    {
+                      "targetBlank": false,
+                      "title": "Traces of this route with this code",
+                      "url": "/explore?schemaVersion=1&orgId=1&panes=%7B%22a%22%3A%7B%22datasource%22%3A%22${traces:percentencode}%22%2C%22queries%22%3A%5B%7B%22refId%22%3A%22A%22%2C%22datasource%22%3A%7B%22uid%22%3A%22${traces:percentencode}%22%7D%2C%22query%22%3A%22%7Bresource.service.name%3D%5C%22${service:percentencode}%5C%22%20%26%26%20kind%3Dserver%20%26%26%20span.http.route%3D%5C%22${__field.labels.http_route:percentencode}%5C%22%20%26%26%20span.http.response.status_code%20%3D%20${__field.labels.http_response_status_code}%7D%22%2C%22queryType%22%3A%22traceql%22%7D%5D%2C%22range%22%3A%7B%22from%22%3A%22${__from}%22%2C%22to%22%3A%22${__to}%22%7D%7D%7D"
+                    }
+                  ],
+                  "custom": {
+                    "axisSoftMin": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    }
+                  }
+                },
+                "overrides": [
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "4.. .*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "orange"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 2
+                      },
+                      {
+                        "id": "custom.lineStyle",
+                        "value": {
+                          "fill": "dash",
+                          "dash": [
+                            10,
+                            6
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "5.. .*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "red"
+                        }
+                      },
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "5xx-ratio-by-route": {
+        "kind": "Panel",
+        "spec": {
+          "id": 65,
+          "title": "5xx ratio by route — routes with 5xx",
+          "description": "Share of server errors over time, for the 8 routes with the most 5xx over the range; a route without any is not drawn. Orange above 1% · red above 5%.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "((sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__rate_interval])) or sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) * 0) / sum by (http_route) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) (topk(8, sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"5..\"}[$__range] @ end()))) > 0)",
                         "instant": false,
                         "legendFormat": "{{http_route}}",
                         "range": true
@@ -3040,12 +2959,108 @@
           }
         }
       },
+      "latency-distribution": {
+        "kind": "Panel",
+        "spec": {
+          "id": 55,
+          "title": "Latency distribution",
+          "description": "How many requests finished in each duration bucket over time: the darker the cell, the more requests. The tail shows above the P95 line it summarises.",
+          "links": [],
+          "data": {
+            "kind": "QueryGroup",
+            "spec": {
+              "queries": [
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))",
+                        "format": "heatmap",
+                        "instant": false,
+                        "legendFormat": "{{le}}",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                }
+              ],
+              "transformations": [],
+              "queryOptions": {
+                "maxDataPoints": 80
+              }
+            }
+          },
+          "vizConfig": {
+            "kind": "VizConfig",
+            "group": "heatmap",
+            "version": "",
+            "spec": {
+              "options": {
+                "calculate": false,
+                "cellGap": 1,
+                "color": {
+                  "exponent": 0.5,
+                  "fill": "dark-orange",
+                  "mode": "scheme",
+                  "reverse": false,
+                  "scale": "exponential",
+                  "scheme": "Oranges",
+                  "steps": 64
+                },
+                "exemplars": {
+                  "color": "rgba(255,0,255,0.7)"
+                },
+                "filterValues": {
+                  "le": 1e-09
+                },
+                "legend": {
+                  "show": true
+                },
+                "rowsFrame": {
+                  "layout": "le"
+                },
+                "showValue": "never",
+                "tooltip": {
+                  "mode": "single",
+                  "showColorScale": false,
+                  "yHistogram": true
+                },
+                "yAxis": {
+                  "axisPlacement": "left",
+                  "reverse": false,
+                  "unit": "s"
+                }
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "custom": {
+                    "scaleDistribution": {
+                      "type": "linear"
+                    }
+                  }
+                },
+                "overrides": []
+              }
+            }
+          }
+        }
+      },
       "p95-by-route-with-exemplars": {
         "kind": "Panel",
         "spec": {
           "id": 27,
-          "title": "P95 by route — with exemplars",
-          "description": "TraceQL metrics from Tempo: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
+          "title": "P95 by route — slowest 8, with exemplars",
+          "description": "TraceQL metrics from Tempo for the 8 slowest routes at each moment: every dot is an exemplar — a real request; click it to open its trace. Computed from the spans, so it can differ a little from the histogram percentiles beside it.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3064,7 +3079,7 @@
                       "spec": {
                         "exemplars": 20,
                         "metricsQueryType": "range",
-                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route)",
+                        "query": "{resource.service.name=\"$service\" && kind=server && span.http.request.method=~\"${method:pipe}\" && span.http.route=~\"${route:pipe}\"} | quantile_over_time(duration, .95) by (span.http.route) | topk(8)",
                         "queryType": "traceql",
                         "step": "1m"
                       }
@@ -3239,8 +3254,8 @@
         "kind": "Panel",
         "spec": {
           "id": 20,
-          "title": "Request size — P95 by route",
-          "description": "Only requests with a body are measured: here, `POST /api/posts`.",
+          "title": "Request size — P95, top 8 routes",
+          "description": "Only requests with a body are measured: here, `POST /api/posts`. The 8 busiest such routes over the range.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3258,7 +3273,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_request_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_request_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -3320,8 +3335,8 @@
         "kind": "Panel",
         "spec": {
           "id": 21,
-          "title": "Response size — P95 by route",
-          "description": "",
+          "title": "Response size — P95, top 8 routes",
+          "description": "The 8 busiest routes over the range.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3339,7 +3354,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "histogram_quantile(0.95, sum by (http_request_method, http_route, le) (rate(http_server_response_body_size_bytes_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (http_route) topk(8, sum by (http_route) (increase(http_server_response_body_size_bytes_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{http_request_method}} {{http_route}}",
                         "range": true
@@ -3401,8 +3416,8 @@
         "kind": "Panel",
         "spec": {
           "id": 70,
-          "title": "Request share by worker",
-          "description": "Each worker's share of the requests. The dashed line is an even split: a worker far from it is starved or overloaded.",
+          "title": "Request share — busiest and idlest worker",
+          "description": "The largest and the smallest share of the requests any one worker took. Both on the dashed even split means balance; far apart means one worker is starved or overloaded.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3420,9 +3435,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "max(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
                         "instant": false,
-                        "legendFormat": "{{instance}}",
+                        "legendFormat": "busiest worker",
                         "range": true
                       }
                     },
@@ -3442,13 +3457,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "1 / scalar(count(count by (instance) (process_thread_count{job=~\"$service\"})))",
+                        "expr": "1 / scalar(count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})))",
                         "instant": false,
                         "legendFormat": "even split",
                         "range": true
                       }
                     },
                     "refId": "B",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "min(sum by (instance) (rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])) / scalar(sum(rate(http_server_request_duration_seconds_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))))",
+                        "instant": false,
+                        "legendFormat": "idlest worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "C",
                     "hidden": false
                   }
                 }
@@ -3546,8 +3583,8 @@
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 by worker",
-          "description": "95th percentile of request duration per worker: one worker slower than the rest is hidden in the total.",
+          "title": "P95 — slowest 5 workers",
+          "description": "95th percentile of request duration of the 5 slowest workers over the range, and of all of them together: one worker slower than the rest is hidden in the total.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3565,13 +3602,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))) and on (instance) topk(5, histogram_quantile(0.95, sum by (instance, le) (increase(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range] @ end()))))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "all workers",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -3634,8 +3693,8 @@
         "kind": "Panel",
         "spec": {
           "id": 72,
-          "title": "In flight by worker",
-          "description": "Requests being handled right now, stacked by worker: the top is the total, expected ≈ RPS × mean duration (Little's law). The OpenTelemetry gauge has no route label.",
+          "title": "In flight — all workers and the busiest 5",
+          "description": "Requests being handled right now: all workers together, expected ≈ RPS × mean duration (Little's law), and the 5 workers with the highest peak. The OpenTelemetry gauge has no route label.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3653,13 +3712,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\"})",
+                        "expr": "sum(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"})",
+                        "instant": false,
+                        "legendFormat": "all workers",
+                        "range": true
+                      }
+                    },
+                    "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "sum by (instance) (http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, sum by (instance) (max_over_time(http_server_active_requests{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
-                    "refId": "A",
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -3702,14 +3783,14 @@
                   "custom": {
                     "axisSoftMin": 0,
                     "drawStyle": "line",
-                    "fillOpacity": 40,
+                    "fillOpacity": 10,
                     "gradientMode": "opacity",
                     "lineWidth": 1,
                     "showPoints": "never",
                     "spanNulls": false,
                     "stacking": {
                       "group": "A",
-                      "mode": "normal"
+                      "mode": "none"
                     }
                   }
                 },
@@ -3723,8 +3804,8 @@
         "kind": "Panel",
         "spec": {
           "id": 73,
-          "title": "CPU by worker — one core is 100%",
-          "description": "CPU time per second of each worker. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
+          "title": "CPU — busiest 5 workers, one core is 100%",
+          "description": "CPU time per second of the 5 busiest workers over the range, and of the median one. The GIL holds a Python worker to about one core: orange from 80%, red at 100% — saturated however idle the host is.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3742,13 +3823,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\"}[$__rate_interval]))",
+                        "expr": "sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile(0.5, sum by (instance) (rate(process_cpu_time_seconds_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "median worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -3832,8 +3935,8 @@
         "kind": "Panel",
         "spec": {
           "id": 74,
-          "title": "Involuntary context switches by worker",
-          "description": "How often the kernel takes the CPU away from a worker mid-work. A rise means workers compete for the CPU.",
+          "title": "Involuntary context switches — top 5 workers",
+          "description": "How often the kernel takes the CPU away from a worker mid-work, for the 5 workers preempted most and the median one. A rise means workers compete for the CPU.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3851,13 +3954,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", type=\"involuntary\"}[$__rate_interval]))",
+                        "expr": "sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])) and on (instance) topk(5, sum by (instance) (increase(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile(0.5, sum by (instance) (rate(process_context_switches_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", type=\"involuntary\"}[$__rate_interval])))",
+                        "instant": false,
+                        "legendFormat": "median worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -3916,12 +4041,12 @@
           }
         }
       },
-      "worker-lifetimes": {
+      "worker-starts": {
         "kind": "Panel",
         "spec": {
           "id": 75,
-          "title": "Worker lifetimes",
-          "description": "When each worker was alive. A bar that ends is a worker gone; a new one starting is its replacement.",
+          "title": "Worker starts",
+          "description": "Workers that appeared in each minute: a deploy, a crash or a recycle. A steady trickle with no deploy behind it is a worker dying.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -3939,9 +4064,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_thread_count{job=~\"$service\"})",
+                        "expr": "count(count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) unless count by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"} offset 1m))",
                         "instant": false,
-                        "legendFormat": "{{instance}}",
+                        "legendFormat": "started",
                         "range": true
                       }
                     },
@@ -3951,57 +4076,42 @@
                 }
               ],
               "transformations": [],
-              "queryOptions": {}
+              "queryOptions": {
+                "interval": "1m"
+              }
             }
           },
           "vizConfig": {
             "kind": "VizConfig",
-            "group": "state-timeline",
+            "group": "timeseries",
             "version": "",
             "spec": {
               "options": {
-                "alignValue": "left",
                 "legend": {
-                  "showLegend": false
+                  "showLegend": false,
+                  "displayMode": "list",
+                  "placement": "bottom"
                 },
-                "mergeValues": true,
-                "rowHeight": 0.8,
-                "showValue": "never",
                 "tooltip": {
-                  "mode": "single"
+                  "mode": "single",
+                  "sort": "none"
                 }
               },
               "fieldConfig": {
                 "defaults": {
-                  "mappings": [
-                    {
-                      "type": "range",
-                      "options": {
-                        "from": 0,
-                        "to": 1000000000,
-                        "result": {
-                          "text": "alive",
-                          "color": "green",
-                          "index": 0
-                        }
-                      }
-                    }
-                  ],
-                  "thresholds": {
-                    "mode": "absolute",
-                    "steps": [
-                      {
-                        "value": null,
-                        "color": "green"
-                      }
-                    ]
-                  },
+                  "unit": "short",
+                  "decimals": 0,
+                  "min": 0,
                   "color": {
-                    "mode": "thresholds"
+                    "mode": "fixed",
+                    "fixedColor": "blue"
                   },
                   "custom": {
+                    "drawStyle": "bars",
                     "fillOpacity": 80,
-                    "lineWidth": 0
+                    "lineWidth": 1,
+                    "showPoints": "never",
+                    "barAlignment": 0
                   }
                 },
                 "overrides": []
@@ -4015,7 +4125,7 @@
         "spec": {
           "id": 76,
           "title": "Workers replaced",
-          "description": "Workers seen over the range minus workers alive now: each one is a restart or a recycle.",
+          "description": "Workers seen over the range minus the ones that reported in the last minute: each is a crash, a recycle, or a container or pod replaced.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4033,7 +4143,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\"}[$__range]))) - count(count by (instance) (process_thread_count{job=~\"$service\"}))",
+                        "expr": "clamp_min(count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range]))) - (count(count by (instance) (last_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[1m]))) or vector(0)), 0)",
                         "instant": true,
                         "legendFormat": "replaced",
                         "range": false
@@ -4102,8 +4212,8 @@
         "kind": "Panel",
         "spec": {
           "id": 40,
-          "title": "Memory — by worker",
-          "description": "Resident memory of each worker process. A line that only climbs is a leak.",
+          "title": "Memory — largest 5 workers",
+          "description": "Resident memory of the 5 largest workers over the range, and of the median one. A line that only climbs is a leak.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4121,13 +4231,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\"})",
+                        "expr": "max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile(0.5, max by (instance) (process_memory_usage_bytes{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
+                        "instant": false,
+                        "legendFormat": "median worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4183,8 +4315,8 @@
         "kind": "Panel",
         "spec": {
           "id": 41,
-          "title": "Threads — by worker",
-          "description": "Threads of each worker: the event loop, the exporters, gRPC and the profiler.",
+          "title": "Threads — top 5 workers",
+          "description": "Threads of the 5 workers with the most, and of the median one: the event loop, the exporters, gRPC and the profiler.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4202,13 +4334,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_thread_count{job=~\"$service\"})",
+                        "expr": "max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile(0.5, max by (instance) (process_thread_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
+                        "instant": false,
+                        "legendFormat": "median worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4265,8 +4419,8 @@
         "kind": "Panel",
         "spec": {
           "id": 42,
-          "title": "Open file descriptors — by worker",
-          "description": "Sockets and files each worker holds open.",
+          "title": "Open file descriptors — top 5 workers",
+          "description": "Sockets and files held open by the 5 workers with the most, and by the median one.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4284,13 +4438,35 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\"})",
+                        "expr": "max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}) and on (instance) topk(5, max by (instance) (max_over_time(process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__range] @ end())))",
                         "instant": false,
                         "legendFormat": "{{instance}}",
                         "range": true
                       }
                     },
                     "refId": "A",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "quantile(0.5, max by (instance) (process_open_file_descriptor_count{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}))",
+                        "instant": false,
+                        "legendFormat": "median worker",
+                        "range": true
+                      }
+                    },
+                    "refId": "B",
                     "hidden": false
                   }
                 }
@@ -4366,7 +4542,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "sum by (generation) (rate(cpython_gc_collections_total{job=~\"$service\"}[$__rate_interval]))",
+                        "expr": "sum by (generation) (rate(cpython_gc_collections_total{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\"}[$__rate_interval]))",
                         "instant": false,
                         "legendFormat": "generation {{generation}}",
                         "range": true
@@ -5017,20 +5193,7 @@
                       "spec": {
                         "x": 0,
                         "y": 6,
-                        "width": 12,
-                        "height": 9,
-                        "element": {
-                          "kind": "ElementReference",
-                          "name": "latency-distribution"
-                        }
-                      }
-                    },
-                    {
-                      "kind": "GridLayoutItem",
-                      "spec": {
-                        "x": 12,
-                        "y": 6,
-                        "width": 12,
+                        "width": 24,
                         "height": 9,
                         "element": {
                           "kind": "ElementReference",
@@ -5198,21 +5361,8 @@
                                 "spec": {
                                   "x": 0,
                                   "y": 0,
-                                  "width": 24,
-                                  "height": 11,
-                                  "element": {
-                                    "kind": "ElementReference",
-                                    "name": "responses-by-route-and-status-code"
-                                  }
-                                }
-                              },
-                              {
-                                "kind": "GridLayoutItem",
-                                "spec": {
-                                  "x": 0,
-                                  "y": 11,
-                                  "width": 8,
-                                  "height": 7,
+                                  "width": 12,
+                                  "height": 9,
                                   "element": {
                                     "kind": "ElementReference",
                                     "name": "rps-by-status-code"
@@ -5222,10 +5372,23 @@
                               {
                                 "kind": "GridLayoutItem",
                                 "spec": {
-                                  "x": 8,
-                                  "y": 11,
-                                  "width": 16,
-                                  "height": 7,
+                                  "x": 12,
+                                  "y": 0,
+                                  "width": 12,
+                                  "height": 9,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "errors-by-route-and-code"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 9,
+                                  "width": 24,
+                                  "height": 5,
                                   "element": {
                                     "kind": "ElementReference",
                                     "name": "5xx-ratio-by-route"
@@ -5305,6 +5468,19 @@
                                   "x": 12,
                                   "y": 0,
                                   "width": 12,
+                                  "height": 9,
+                                  "element": {
+                                    "kind": "ElementReference",
+                                    "name": "latency-distribution"
+                                  }
+                                }
+                              },
+                              {
+                                "kind": "GridLayoutItem",
+                                "spec": {
+                                  "x": 0,
+                                  "y": 9,
+                                  "width": 24,
                                   "height": 9,
                                   "element": {
                                     "kind": "ElementReference",
@@ -5467,7 +5643,7 @@
                                   "height": 6,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "worker-lifetimes"
+                                    "name": "worker-starts"
                                   }
                                 }
                               },
@@ -5579,7 +5755,42 @@
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "QueryVariable",
+                            "spec": {
+                              "name": "profile_type",
+                              "current": {
+                                "text": "process_cpu - cpu",
+                                "value": "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
+                              },
+                              "label": "Profile type",
+                              "hide": "dontHide",
+                              "refresh": "onTimeRangeChanged",
+                              "skipUrlSync": false,
+                              "query": {
+                                "kind": "DataQuery",
+                                "group": "grafana-pyroscope-datasource",
+                                "version": "v0",
+                                "datasource": {
+                                  "name": "${profiles}"
+                                },
+                                "spec": {
+                                  "refId": "profile_type",
+                                  "type": "profileType"
+                                }
+                              },
+                              "regex": "",
+                              "sort": "alphabeticalAsc",
+                              "definition": "profileType",
+                              "options": [],
+                              "multi": false,
+                              "includeAll": false,
+                              "allowCustomValue": true
+                            }
+                          }
+                        ]
                       }
                     }
                   ]
@@ -5727,86 +5938,6 @@
     "title": "FastAPI: traffic, latency, errors, traces, logs, profile",
     "variables": [
       {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "metrics",
-          "pluginId": "prometheus",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "victoriametrics",
-            "value": "victoriametrics"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Metrics",
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "logs",
-          "pluginId": "loki",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "loki",
-            "value": "loki"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Logs",
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "traces",
-          "pluginId": "tempo",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "tempo",
-            "value": "tempo"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Traces",
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
-        "kind": "DatasourceVariable",
-        "spec": {
-          "name": "profiles",
-          "pluginId": "grafana-pyroscope-datasource",
-          "refresh": "onDashboardLoad",
-          "regex": "",
-          "current": {
-            "text": "pyroscope",
-            "value": "pyroscope"
-          },
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "label": "Profiles",
-          "hide": "dontHide",
-          "skipUrlSync": false,
-          "allowCustomValue": true
-        }
-      },
-      {
         "kind": "QueryVariable",
         "spec": {
           "name": "service",
@@ -5925,6 +6056,122 @@
         }
       },
       {
+        "kind": "QueryVariable",
+        "spec": {
+          "name": "host",
+          "current": {
+            "text": "All",
+            "value": "$__all"
+          },
+          "label": "Host",
+          "hide": "dontHide",
+          "refresh": "onTimeRangeChanged",
+          "skipUrlSync": false,
+          "query": {
+            "kind": "DataQuery",
+            "group": "prometheus",
+            "version": "v0",
+            "datasource": {
+              "name": "${metrics}"
+            },
+            "spec": {
+              "qryType": 1,
+              "query": "label_values(target_info{job=~\"$service\"}, host_name)",
+              "refId": "method"
+            }
+          },
+          "regex": "",
+          "sort": "alphabeticalAsc",
+          "definition": "label_values(target_info{job=~\"$service\"}, host_name)",
+          "options": [],
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*",
+          "allowCustomValue": true,
+          "description": "A container in Compose, a pod in Kubernetes: the workers panels show the hosts picked here."
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "metrics",
+          "pluginId": "prometheus",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "victoriametrics",
+            "value": "victoriametrics"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Metrics",
+          "hide": "inControlsMenu",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "logs",
+          "pluginId": "loki",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "loki",
+            "value": "loki"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Logs",
+          "hide": "inControlsMenu",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "traces",
+          "pluginId": "tempo",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "tempo",
+            "value": "tempo"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Traces",
+          "hide": "inControlsMenu",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
+        "kind": "DatasourceVariable",
+        "spec": {
+          "name": "profiles",
+          "pluginId": "grafana-pyroscope-datasource",
+          "refresh": "onDashboardLoad",
+          "regex": "",
+          "current": {
+            "text": "pyroscope",
+            "value": "pyroscope"
+          },
+          "options": [],
+          "multi": false,
+          "includeAll": false,
+          "label": "Profiles",
+          "hide": "inControlsMenu",
+          "skipUrlSync": false,
+          "allowCustomValue": true
+        }
+      },
+      {
         "kind": "CustomVariable",
         "spec": {
           "name": "satisfied",
@@ -5958,7 +6205,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex: satisfied",
-          "hide": "dontHide",
+          "hide": "inControlsMenu",
           "skipUrlSync": false,
           "description": "Seconds; a bound of the duration histogram.",
           "allowCustomValue": true
@@ -5998,7 +6245,7 @@
           "multi": false,
           "includeAll": false,
           "label": "Apdex: tolerated",
-          "hide": "dontHide",
+          "hide": "inControlsMenu",
           "skipUrlSync": false,
           "description": "Seconds; a bound of the duration histogram.",
           "allowCustomValue": true
@@ -6014,42 +6261,9 @@
           },
           "query": "500ms",
           "label": "Slow trace",
-          "hide": "dontHide",
+          "hide": "inControlsMenu",
           "skipUrlSync": false,
           "description": "A TraceQL duration: traces longer than this are listed as slow."
-        }
-      },
-      {
-        "kind": "QueryVariable",
-        "spec": {
-          "name": "profile_type",
-          "current": {
-            "text": "process_cpu - cpu",
-            "value": "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
-          },
-          "label": "Profile type",
-          "hide": "dontHide",
-          "refresh": "onTimeRangeChanged",
-          "skipUrlSync": false,
-          "query": {
-            "kind": "DataQuery",
-            "group": "grafana-pyroscope-datasource",
-            "version": "v0",
-            "datasource": {
-              "name": "${profiles}"
-            },
-            "spec": {
-              "refId": "profile_type",
-              "type": "profileType"
-            }
-          },
-          "regex": "",
-          "sort": "alphabeticalAsc",
-          "definition": "profileType",
-          "options": [],
-          "multi": false,
-          "includeAll": false,
-          "allowCustomValue": true
         }
       },
       {
