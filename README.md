@@ -112,6 +112,11 @@ flowchart LR
 > collector being killed. Tempo derives span metrics and Alloy the service graph, both written to
 > VictoriaMetrics.
 
+Alloy draws its own pipeline at http://localhost:12345, with the live rate on every edge: what
+comes in, which stage it passes, where it goes.
+
+![Alloy's pipeline](docs/screenshots/20-alloy-pipeline.png)
+
 ## 📊 Dashboard
 
 **FastAPI: traffic, latency, errors, traces, logs, profile** — nothing hardcoded: data sources,
@@ -127,6 +132,14 @@ narrows the whole dashboard to itself, as Grafana's own operations tables do.
 | the Workers row | Percentiles — the same, for the workers' latency |
 | the Profiling row | Profile type |
 | the Traces row | Show — slow or failed at first, slow, failed or all |
+
+A row's picker reshapes its panel and nothing else: every status class at once, every percentile
+of the service and of each route.
+
+<p>
+<img src="docs/screenshots/25-status-codes-all.png" width="49%" alt="RPS of every status class, in total and by route">
+<img src="docs/screenshots/26-latency-percentiles.png" width="49%" alt="P50, P95 and P99, in total and by route">
+</p>
 
 The order is the order of an investigation: is the service fine, which requests suffer, is the
 promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schema, the one with rows inside rows.
@@ -150,11 +163,17 @@ Every route and every worker is drawn; the variables narrow them — `Route` to 
 to the workers of one container or pod. Each title says what is measured, then how it is cut:
 `RPS — total · by route`, `CPU — by worker, one core is 100%`.
 
+A click on `/api/report/{post_id}` in Routes, and the dashboard is about that route alone:
+
+![The dashboard narrowed to one route](docs/screenshots/27-dashboard-route.png)
+
 **In three languages.** English, Русский and 中文 are three dashboards in
 [`dashboards/`](observability/grafana/dashboards), each translated whole — title, variables, rows,
 panels; pick one in the dashboard list or under All dashboards. Grafana translates its own
 interface, which follows the browser's language, but never what a dashboard says: a change to one
 is a change to all three.
+
+![The dashboard in Russian](docs/screenshots/28-dashboard-ru.png)
 
 Lines read the same on every panel. A total is thick, over a light fill, drawn above the rest and
 named `total` — white for the service, or the colour of its class: 2xx green, 3xx blue, 4xx orange,
@@ -246,6 +265,11 @@ flowchart LR
 | an exception message | its log lines | panel link → LogQL with the message |
 | a span | its logs · its CPU profile · the rate and P95 of its operation | Tempo data source links |
 
+A series carries its links: a click on a bar of `/api/fail` offers the lines and the traces of
+that exception on that route.
+
+![The links of a series](docs/screenshots/24-panel-links.png)
+
 **① A log line** links its trace and every line of its request.
 
 ![A log line and its links](docs/screenshots/08-log-to-trace.png)
@@ -272,6 +296,18 @@ server spans.
 <p>
 <img src="docs/screenshots/14-slow-traces.png" width="62%" alt="The slow traces of a route, from the latency panel">
 <img src="docs/screenshots/13-service-graph.png" width="36%" alt="The service graph">
+</p>
+
+**⑦ The rate and P95 of a span's operation** open beside the trace, from span metrics.
+
+![The P95 of a span's operation](docs/screenshots/23-span-metrics.png)
+
+**⑧ An exception's line** holds its type, message and the whole stack. **⑨ A browser error**
+arrives through Faro with the session it happened in, and the session links every trace of it.
+
+<p>
+<img src="docs/screenshots/22-exception-log.png" width="54%" alt="The log line of an exception, with its stack">
+<img src="docs/screenshots/21-browser-error.png" width="44%" alt="A browser error and its session">
 </p>
 
 A click on **Report on post 3** is one trace — the browser, the API, the cache, JSONPlaceholder,
