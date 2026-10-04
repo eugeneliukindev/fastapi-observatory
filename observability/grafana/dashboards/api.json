@@ -5095,7 +5095,7 @@
         "spec": {
           "id": 32,
           "title": "Log lines — stream",
-          "description": "Expand a line: `trace_id` leads to the trace, `request_id` to every line of the request.",
+          "description": "Time, level, status, duration, request and message, each in its column. Open a line for all its fields: `trace_id` leads to the trace, `request_id` to every line of the request.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5113,7 +5113,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{service_name=\"$service\"} | json | line_format \"{{.logger}} · {{.msg}}{{if .path}} · {{.method}} {{.path}}{{if .query}}?{{.query}}{{end}} → {{.status}} in {{.duration_ms}} ms{{end}}{{if .error_type}} · {{.error_type}}: {{.error_message}}{{end}}\"",
+                        "expr": "{service_name=\"$service\"} | json | label_format request=`{{if .path}}{{.method}} {{.path}}{{if .query}}?{{.query}}{{end}}{{end}}`, took=`{{if .duration_ms}}{{.duration_ms}} ms{{end}}` | line_format \"{{.msg}}{{if .error_type}} — {{.error_type}}: {{.error_message}}{{end}}\"",
                         "queryType": "range"
                       }
                     },
@@ -5132,12 +5132,29 @@
             "version": "",
             "spec": {
               "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": false,
                 "showTime": true,
+                "timestampResolution": "ms",
+                "showLevel": true,
+                "displayedFields": [
+                  "status",
+                  "took",
+                  "request",
+                  "___LOG_LINE_BODY___"
+                ],
+                "unwrappedColumns": true,
+                "wrapLogMessage": false,
+                "prettifyLogMessage": false,
+                "syntaxHighlighting": true,
+                "fontSize": "default",
+                "enableLogDetails": true,
+                "detailsMode": "sidebar",
+                "showFieldSelector": false,
+                "showControls": true,
+                "allowDownload": true,
+                "enableInfiniteScrolling": true,
+                "dedupStrategy": "none",
                 "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "showLabels": false
               },
               "fieldConfig": {
                 "defaults": {},
@@ -10209,7 +10226,7 @@
         "spec": {
           "id": 1032,
           "title": "Строки лога — поток",
-          "description": "Раскройте строку: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса.",
+          "description": "Время, уровень, статус, длительность, запрос и сообщение — каждое в своей колонке. Откройте строку, чтобы увидеть все её поля: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -10227,7 +10244,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{service_name=\"$service\"} | json | line_format \"{{.logger}} · {{.msg}}{{if .path}} · {{.method}} {{.path}}{{if .query}}?{{.query}}{{end}} → {{.status}} in {{.duration_ms}} ms{{end}}{{if .error_type}} · {{.error_type}}: {{.error_message}}{{end}}\"",
+                        "expr": "{service_name=\"$service\"} | json | label_format request=`{{if .path}}{{.method}} {{.path}}{{if .query}}?{{.query}}{{end}}{{end}}`, took=`{{if .duration_ms}}{{.duration_ms}} ms{{end}}` | line_format \"{{.msg}}{{if .error_type}} — {{.error_type}}: {{.error_message}}{{end}}\"",
                         "queryType": "range"
                       }
                     },
@@ -10246,12 +10263,29 @@
             "version": "",
             "spec": {
               "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": false,
                 "showTime": true,
+                "timestampResolution": "ms",
+                "showLevel": true,
+                "displayedFields": [
+                  "status",
+                  "took",
+                  "request",
+                  "___LOG_LINE_BODY___"
+                ],
+                "unwrappedColumns": true,
+                "wrapLogMessage": false,
+                "prettifyLogMessage": false,
+                "syntaxHighlighting": true,
+                "fontSize": "default",
+                "enableLogDetails": true,
+                "detailsMode": "sidebar",
+                "showFieldSelector": false,
+                "showControls": true,
+                "allowDownload": true,
+                "enableInfiniteScrolling": true,
+                "dedupStrategy": "none",
                 "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "showLabels": false
               },
               "fieldConfig": {
                 "defaults": {},
@@ -15323,7 +15357,7 @@
         "spec": {
           "id": 2032,
           "title": "日志行 — 日志流",
-          "description": "展开一行：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。",
+          "description": "时间、级别、状态码、耗时、请求和消息各占一列。打开一行可查看其全部字段：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -15341,7 +15375,7 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "{service_name=\"$service\"} | json | line_format \"{{.logger}} · {{.msg}}{{if .path}} · {{.method}} {{.path}}{{if .query}}?{{.query}}{{end}} → {{.status}} in {{.duration_ms}} ms{{end}}{{if .error_type}} · {{.error_type}}: {{.error_message}}{{end}}\"",
+                        "expr": "{service_name=\"$service\"} | json | label_format request=`{{if .path}}{{.method}} {{.path}}{{if .query}}?{{.query}}{{end}}{{end}}`, took=`{{if .duration_ms}}{{.duration_ms}} ms{{end}}` | line_format \"{{.msg}}{{if .error_type}} — {{.error_type}}: {{.error_message}}{{end}}\"",
                         "queryType": "range"
                       }
                     },
@@ -15360,12 +15394,29 @@
             "version": "",
             "spec": {
               "options": {
-                "dedupStrategy": "none",
-                "enableLogDetails": true,
-                "prettifyLogMessage": false,
                 "showTime": true,
+                "timestampResolution": "ms",
+                "showLevel": true,
+                "displayedFields": [
+                  "status",
+                  "took",
+                  "request",
+                  "___LOG_LINE_BODY___"
+                ],
+                "unwrappedColumns": true,
+                "wrapLogMessage": false,
+                "prettifyLogMessage": false,
+                "syntaxHighlighting": true,
+                "fontSize": "default",
+                "enableLogDetails": true,
+                "detailsMode": "sidebar",
+                "showFieldSelector": false,
+                "showControls": true,
+                "allowDownload": true,
+                "enableInfiniteScrolling": true,
+                "dedupStrategy": "none",
                 "sortOrder": "Descending",
-                "wrapLogMessage": true
+                "showLabels": false
               },
               "fieldConfig": {
                 "defaults": {},

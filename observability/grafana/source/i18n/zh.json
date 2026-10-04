@@ -135,6 +135,6 @@
     "Slower than the `Slow trace` threshold, or failed.": "比 `慢追踪` 阈值更慢，或已失败。",
     "Log lines — by level": "日志行 — 按级别",
     "Log lines — stream": "日志行 — 日志流",
-    "Expand a line: `trace_id` leads to the trace, `request_id` to every line of the request.": "展开一行：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。"
+    "Time, level, status, duration, request and message, each in its column. Open a line for all its fields: `trace_id` leads to the trace, `request_id` to every line of the request.": "时间、级别、状态码、耗时、请求和消息各占一列。打开一行可查看其全部字段：`trace_id` 指向追踪，`request_id` 指向该请求的所有日志行。"
   }
 }

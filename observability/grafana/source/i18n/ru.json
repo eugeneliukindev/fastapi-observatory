@@ -135,6 +135,6 @@
     "Slower than the `Slow trace` threshold, or failed.": "Медленнее порога `Медленный трейс` или завершились ошибкой.",
     "Log lines — by level": "Строки лога — по уровням",
     "Log lines — stream": "Строки лога — поток",
-    "Expand a line: `trace_id` leads to the trace, `request_id` to every line of the request.": "Раскройте строку: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса."
+    "Time, level, status, duration, request and message, each in its column. Open a line for all its fields: `trace_id` leads to the trace, `request_id` to every line of the request.": "Время, уровень, статус, длительность, запрос и сообщение — каждое в своей колонке. Откройте строку, чтобы увидеть все её поля: `trace_id` ведёт к трейсу, `request_id` — ко всем строкам этого запроса."
   }
 }

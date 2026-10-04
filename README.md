@@ -136,7 +136,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | recent, slow and failed traces |
-| | Logs | lines by level · the stream |
+| | Logs | lines by level · the stream: time, level, status, duration, request and message in columns |
 
 Every route and every worker is drawn; the variables narrow them — `Route` to some routes, `Host`
 to the workers of one container or pod. Each title says what is measured, then how it is cut:
