@@ -22,6 +22,9 @@ _SOURCE_LANGUAGE_CODE: Final = "en"
 # A variable or a label stays as it is in every language: Grafana substitutes it.
 _PLACEHOLDER: Final = re.compile(r"\{\{[^}]*\}\}|\$\{[^}]*\}|\$\w+")
 _GRAFANA_KEYWORDS: Final = frozenset({"__auto"})
+# A custom variable lists its options as `text : value`, comma separated; Grafana rebuilds the
+# options from this list, so a translated text has to be written back into it.
+_OPTION_SEPARATOR: Final = " : "
 
 type _Json = dict[str, _Json] | list[_Json] | str | int | float | bool | None
 type _Object = dict[str, _Json]
@@ -94,6 +97,10 @@ def _localize(source: _Object, language: _Language) -> _Object:
     for text in list(_texts_in_dashboard(dashboard)):
         text.holder[text.key] = language.translate(text.source)
 
+    for variable in _variables_with_texts(dashboard):
+        options = _objects(variable, "options")
+        variable["query"] = ",".join(f"{option['text']}{_OPTION_SEPARATOR}{option['value']}" for option in options)
+
     if language.code != _SOURCE_LANGUAGE_CODE:
         metadata = _object(dashboard, "metadata")
         metadata["name"] = f"{metadata['name']}-{language.code}"
@@ -110,7 +117,12 @@ def _texts_in_dashboard(dashboard: _Object) -> Iterator[_Text]:
         # Grafana names its own annotation in the reader's language.
         if not annotation_spec.get("builtIn"):
             yield from _texts(annotation_spec, "name")
-    yield from _texts_in_variables(_objects(spec, "variables"))
+    for variable in _variables(dashboard):
+        yield from _texts(variable, "label", "description")
+    for variable in _variables_with_texts(dashboard):
+        for option in _objects(variable, "options"):
+            yield from _texts(option, "text")
+        yield from _texts(_object(variable, "current"), "text")
     yield from _texts_in_layout(_object(spec, "layout"))
     for element in _object(spec, "elements").values():
         if not isinstance(element, dict):
@@ -118,18 +130,38 @@ def _texts_in_dashboard(dashboard: _Object) -> Iterator[_Text]:
         yield from _texts_in_panel(_object(element, "spec"))
 
 
-def _texts_in_variables(variables: list[_Object]) -> Iterator[_Text]:
-    for variable in variables:
-        yield from _texts(_object(variable, "spec"), "label", "description")
+def _variables(dashboard: _Object) -> Iterator[_Object]:
+    """Yield the spec of every variable: the dashboard's, and those of its rows and tabs."""
+    spec = _object(dashboard, "spec")
+    yield from (_object(variable, "spec") for variable in _objects(spec, "variables"))
+    yield from _variables_in_layout(_object(spec, "layout"))
+
+
+def _variables_in_layout(layout: _Object) -> Iterator[_Object]:
+    for section in _sections(layout):
+        section_spec = _object(section, "spec")
+        yield from (_object(variable, "spec") for variable in _objects(section_spec, "variables"))
+        yield from _variables_in_layout(_object(section_spec, "layout"))
+
+
+def _variables_with_texts(dashboard: _Object) -> Iterator[_Object]:
+    """Yield the custom variables whose options carry a text apart from the value."""
+    for variable in _variables(dashboard):
+        query = variable.get("query")
+        if isinstance(query, str) and _OPTION_SEPARATOR in query:
+            yield variable
 
 
 def _texts_in_layout(layout: _Object) -> Iterator[_Text]:
-    layout_spec = _object(layout, "spec")
-    for section in [*_objects(layout_spec, "rows"), *_objects(layout_spec, "tabs")]:
+    for section in _sections(layout):
         section_spec = _object(section, "spec")
         yield from _texts(section_spec, "title")
-        yield from _texts_in_variables(_objects(section_spec, "variables"))
         yield from _texts_in_layout(_object(section_spec, "layout"))
+
+
+def _sections(layout: _Object) -> list[_Object]:
+    layout_spec = _object(layout, "spec")
+    return [*_objects(layout_spec, "rows"), *_objects(layout_spec, "tabs")]
 
 
 def _texts_in_panel(panel: _Object) -> Iterator[_Text]:
