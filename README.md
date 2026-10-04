@@ -110,7 +110,7 @@ the evidence. Groups nest — a dashboard in the v2 schema, the one with rows in
 
 | group | row | what |
 |---|---|---|
-| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 4xx, 5xx, mean, P95 and P99 |
+| top | | throughput · 5xx ratio · P95 now, with sparklines · Apdex · instances · workers · every route with its trend, requests, 2xx, 3xx, 4xx, 5xx, mean, P95 and P99 |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days · availability against the objective · budget left over time · burn rate over 5 m, 1 h, 6 h and 1 d |
 | Requests | Traffic | RPS total, against the same hour yesterday · by route |
 | | Status codes | RPS by code, coloured by class · errors by route and code · 5xx ratio by route over time |

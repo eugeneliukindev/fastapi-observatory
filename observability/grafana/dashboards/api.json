@@ -572,7 +572,7 @@
         "spec": {
           "id": 56,
           "title": "Routes",
-          "description": "Every route over the selected range: its traffic trend, requests, share of 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces or its RPS, large and with values.",
+          "description": "Every route over the selected range: its traffic trend, requests, share of 2xx, 3xx, 4xx and 5xx, mean duration, P95 and P99. A mean far below P95 means a long tail. Click a route for its traces or its RPS, large and with values.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -737,6 +737,52 @@
                     "refId": "G",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"2..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "H",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"3..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "I",
+                    "hidden": false
+                  }
                 }
               ],
               "transformations": [
@@ -771,11 +817,13 @@
                         "http_route": 0,
                         "Trend #A": 1,
                         "Value #B": 2,
-                        "Value #G": 3,
-                        "Value #C": 4,
-                        "Value #E": 5,
-                        "Value #D": 6,
-                        "Value #F": 7
+                        "Value #H": 3,
+                        "Value #I": 4,
+                        "Value #G": 5,
+                        "Value #C": 6,
+                        "Value #E": 7,
+                        "Value #D": 8,
+                        "Value #F": 9
                       },
                       "renameByName": {
                         "Trend #A": "Traffic",
@@ -785,7 +833,9 @@
                         "http_route": "Route",
                         "Value #E": "Mean",
                         "Value #F": "P99",
-                        "Value #G": "4xx"
+                        "Value #G": "4xx",
+                        "Value #H": "2xx",
+                        "Value #I": "3xx"
                       }
                     }
                   }
@@ -900,6 +950,71 @@
                       {
                         "id": "custom.width",
                         "value": 90
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "2xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "red"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 0.9
+                            },
+                            {
+                              "color": "green",
+                              "value": 0.99
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "3xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
                       }
                     ]
                   },
@@ -5485,7 +5600,7 @@
         "spec": {
           "id": 1056,
           "title": "Маршруты",
-          "description": "Каждый маршрут за выбранный период: динамика трафика, число запросов, доли 4xx и 5xx, средняя длительность, P95 и P99. Среднее сильно ниже P95 — значит, длинный хвост. Нажмите на маршрут, чтобы открыть его трейсы или его RPS — крупно и со значениями.",
+          "description": "Каждый маршрут за выбранный период: динамика трафика, число запросов, доли 2xx, 3xx, 4xx и 5xx, средняя длительность, P95 и P99. Среднее сильно ниже P95 — значит, длинный хвост. Нажмите на маршрут, чтобы открыть его трейсы или его RPS — крупно и со значениями.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -5650,6 +5765,52 @@
                     "refId": "G",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"2..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "H",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"3..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "I",
+                    "hidden": false
+                  }
                 }
               ],
               "transformations": [
@@ -5684,11 +5845,13 @@
                         "http_route": 0,
                         "Trend #A": 1,
                         "Value #B": 2,
-                        "Value #G": 3,
-                        "Value #C": 4,
-                        "Value #E": 5,
-                        "Value #D": 6,
-                        "Value #F": 7
+                        "Value #H": 3,
+                        "Value #I": 4,
+                        "Value #G": 5,
+                        "Value #C": 6,
+                        "Value #E": 7,
+                        "Value #D": 8,
+                        "Value #F": 9
                       },
                       "renameByName": {
                         "Trend #A": "Трафик",
@@ -5698,7 +5861,9 @@
                         "http_route": "Маршрут",
                         "Value #E": "Среднее",
                         "Value #F": "P99",
-                        "Value #G": "4xx"
+                        "Value #G": "4xx",
+                        "Value #H": "2xx",
+                        "Value #I": "3xx"
                       }
                     }
                   }
@@ -5813,6 +5978,71 @@
                       {
                         "id": "custom.width",
                         "value": 90
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "2xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "red"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 0.9
+                            },
+                            {
+                              "color": "green",
+                              "value": 0.99
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "3xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
                       }
                     ]
                   },
@@ -10398,7 +10628,7 @@
         "spec": {
           "id": 2056,
           "title": "路由",
-          "description": "所选时间范围内的每条路由：流量趋势、请求数、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可查看其追踪，或放大查看其 RPS 及具体数值。",
+          "description": "所选时间范围内的每条路由：流量趋势、请求数、2xx、3xx、4xx 和 5xx 占比、平均耗时、P95 和 P99。平均值远低于 P95 说明存在长尾。点击路由可查看其追踪，或放大查看其 RPS 及具体数值。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -10563,6 +10793,52 @@
                     "refId": "G",
                     "hidden": false
                   }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"2..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "H",
+                    "hidden": false
+                  }
+                },
+                {
+                  "kind": "PanelQuery",
+                  "spec": {
+                    "query": {
+                      "kind": "DataQuery",
+                      "group": "prometheus",
+                      "version": "v0",
+                      "datasource": {
+                        "name": "${metrics}"
+                      },
+                      "spec": {
+                        "editorMode": "code",
+                        "expr": "(sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\", http_response_status_code=~\"3..\"}[$__range])) or sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range])) * 0) / sum by (http_route) (increase(http_server_request_duration_seconds_count{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__range]))",
+                        "format": "table",
+                        "instant": true,
+                        "legendFormat": "__auto",
+                        "range": false
+                      }
+                    },
+                    "refId": "I",
+                    "hidden": false
+                  }
                 }
               ],
               "transformations": [
@@ -10597,11 +10873,13 @@
                         "http_route": 0,
                         "Trend #A": 1,
                         "Value #B": 2,
-                        "Value #G": 3,
-                        "Value #C": 4,
-                        "Value #E": 5,
-                        "Value #D": 6,
-                        "Value #F": 7
+                        "Value #H": 3,
+                        "Value #I": 4,
+                        "Value #G": 5,
+                        "Value #C": 6,
+                        "Value #E": 7,
+                        "Value #D": 8,
+                        "Value #F": 9
                       },
                       "renameByName": {
                         "Trend #A": "流量",
@@ -10611,7 +10889,9 @@
                         "http_route": "路由",
                         "Value #E": "平均",
                         "Value #F": "P99",
-                        "Value #G": "4xx"
+                        "Value #G": "4xx",
+                        "Value #H": "2xx",
+                        "Value #I": "3xx"
                       }
                     }
                   }
@@ -10726,6 +11006,71 @@
                       {
                         "id": "custom.width",
                         "value": 90
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "2xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
+                      },
+                      {
+                        "id": "custom.cellOptions",
+                        "value": {
+                          "type": "color-text"
+                        }
+                      },
+                      {
+                        "id": "thresholds",
+                        "value": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "red"
+                            },
+                            {
+                              "color": "orange",
+                              "value": 0.9
+                            },
+                            {
+                              "color": "green",
+                              "value": 0.99
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byName",
+                      "options": "3xx"
+                    },
+                    "properties": [
+                      {
+                        "id": "unit",
+                        "value": "percentunit"
+                      },
+                      {
+                        "id": "decimals",
+                        "value": 1
+                      },
+                      {
+                        "id": "custom.width",
+                        "value": 80
                       }
                     ]
                   },
