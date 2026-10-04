@@ -124,6 +124,7 @@ narrows the whole dashboard to itself, as Grafana's own operations tables do.
 | the top of the dashboard | Metrics · Logs · Traces · Profiles · Service · Routes matching · Route · Method · Host · Apdex satisfied · Apdex tolerated · Slow trace |
 | the Status codes row | Status codes — the classes its panel draws, 4xx and 5xx at first |
 | the Latency row | Percentiles — P50, P95 and P99, P95 at first |
+| the Workers row | Percentiles — the same, for the workers' latency |
 | the Profiling row | Profile type |
 | the Traces row | Show — slow or failed at first, slow, failed or all |
 
@@ -139,7 +140,7 @@ promise kept, why, and the evidence. Groups nest — a dashboard in the v2 schem
 | | Exceptions | by route and type · each message with its type, route and count — from the log |
 | | Payload, collapsed | bytes per second · body size P95 by route, requests dashed and responses solid |
 | SLO | | error budget left · burn rate over 1 h and 6 h · requests fast enough — all over 7 days, with sparklines · availability against the objective |
-| Runtime | Workers | request share against an even split · P95, beside all workers · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
+| Runtime | Workers | request share against an even split · the percentiles picked, under their total · in flight, stacked · CPU against one core · involuntary context switches · worker starts |
 | | Process, collapsed | memory · threads · open files per worker · GC |
 | | Profiling, collapsed | flame graph |
 | Traces & logs | Traces | the traces picked in Show, newest first |

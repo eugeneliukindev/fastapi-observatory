@@ -4184,7 +4184,7 @@
                         "editorMode": "code",
                         "expr": "label_map(histogram_quantiles(\"phi\", ${quantiles:csv}, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "{{phi}} {{http_route}}",
+                        "legendFormat": "{{phi}} · {{http_route}}",
                         "range": true
                       }
                     },
@@ -4328,7 +4328,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p50 [^/].*"
+                      "options": "p50 [^·].*"
                     },
                     "properties": [
                       {
@@ -4343,7 +4343,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p95 [^/].*"
+                      "options": "p95 [^·].*"
                     },
                     "properties": [
                       {
@@ -4358,7 +4358,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p99 [^/].*"
+                      "options": "p99 [^·].*"
                     },
                     "properties": [
                       {
@@ -4440,12 +4440,12 @@
           }
         }
       },
-      "p95-latency-total-and-by-worker": {
+      "latency-total-and-by-worker": {
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 延迟 — 总计 · 按工作进程",
-          "description": "每个工作进程请求耗时的第 95 百分位，白线为总计：比其他进程慢的那个工作进程在总计中看不出来。",
+          "title": "延迟 ${worker_quantiles:text} — 总计 · 按工作进程",
+          "description": "在 `百分位` 中选择的百分位，按工作进程绘制，粗线为总计——P50 蓝色，P95 白色，P99 紫色：比其他进程慢的那个工作进程在总计中看不出来。",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4463,9 +4463,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${worker_quantiles:csv}, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "{{instance}}",
+                        "legendFormat": "{{phi}} · {{instance}}",
                         "range": true
                       }
                     },
@@ -4485,9 +4485,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${worker_quantiles:csv}, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "p95 总计",
+                        "legendFormat": "{{phi}} 总计",
                         "range": true
                       }
                     },
@@ -4570,8 +4570,39 @@
                 "overrides": [
                   {
                     "matcher": {
-                      "id": "byName",
-                      "options": "p95 总计"
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p50 [^·]*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "blue"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p95 [^·]*"
                     },
                     "properties": [
                       {
@@ -4580,14 +4611,21 @@
                           "mode": "fixed",
                           "fixedColor": "text"
                         }
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p99 [^·]*"
+                    },
+                    "properties": [
                       {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "purple"
+                        }
                       }
                     ]
                   }
@@ -5091,7 +5129,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-latency-total-and-by-worker"
+                                    "name": "latency-total-and-by-worker"
                                   }
                                 }
                               },
@@ -5149,7 +5187,48 @@
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "worker_quantiles",
+                              "query": "P50 : 0.5,P95 : 0.95,P99 : 0.99",
+                              "current": {
+                                "text": [
+                                  "P95"
+                                ],
+                                "value": [
+                                  "0.95"
+                                ]
+                              },
+                              "options": [
+                                {
+                                  "selected": false,
+                                  "text": "P50",
+                                  "value": "0.5"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "P95",
+                                  "value": "0.95"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "P99",
+                                  "value": "0.99"
+                                }
+                              ],
+                              "multi": true,
+                              "includeAll": false,
+                              "label": "百分位",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "下方面板绘制的百分位。",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
                       }
                     },
                     {

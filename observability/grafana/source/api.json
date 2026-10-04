@@ -4184,7 +4184,7 @@
                         "editorMode": "code",
                         "expr": "label_map(histogram_quantiles(\"phi\", ${quantiles:csv}, sum by (le, http_route) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "{{phi}} {{http_route}}",
+                        "legendFormat": "{{phi}} · {{http_route}}",
                         "range": true
                       }
                     },
@@ -4328,7 +4328,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p50 [^/].*"
+                      "options": "p50 [^·].*"
                     },
                     "properties": [
                       {
@@ -4343,7 +4343,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p95 [^/].*"
+                      "options": "p95 [^·].*"
                     },
                     "properties": [
                       {
@@ -4358,7 +4358,7 @@
                   {
                     "matcher": {
                       "id": "byRegexp",
-                      "options": "p99 [^/].*"
+                      "options": "p99 [^·].*"
                     },
                     "properties": [
                       {
@@ -4440,12 +4440,12 @@
           }
         }
       },
-      "p95-latency-total-and-by-worker": {
+      "latency-total-and-by-worker": {
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 latency — total · by worker",
-          "description": "95th percentile of request duration per worker, under the white total: one worker slower than the rest is hidden in the total.",
+          "title": "Latency ${worker_quantiles:text} — total · by worker",
+          "description": "The percentiles picked in `Percentiles`, per worker under a thick total — P50 blue, P95 white, P99 purple: one worker slower than the rest is hidden in the total.",
           "links": [],
           "data": {
             "kind": "QueryGroup",
@@ -4463,9 +4463,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${worker_quantiles:csv}, sum by (instance, le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "{{instance}}",
+                        "legendFormat": "{{phi}} · {{instance}}",
                         "range": true
                       }
                     },
@@ -4485,9 +4485,9 @@
                       },
                       "spec": {
                         "editorMode": "code",
-                        "expr": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval])))",
+                        "expr": "label_map(histogram_quantiles(\"phi\", ${worker_quantiles:csv}, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=~\"$service\", instance=~\"(${host:regex})-[0-9]+\", http_request_method=~\"$method\", http_route=~\"$route\"}[$__rate_interval]))), \"phi\", \"0.5\", \"p50\", \"0.95\", \"p95\", \"0.99\", \"p99\")",
                         "instant": false,
-                        "legendFormat": "p95 total",
+                        "legendFormat": "{{phi}} total",
                         "range": true
                       }
                     },
@@ -4570,8 +4570,39 @@
                 "overrides": [
                   {
                     "matcher": {
-                      "id": "byName",
-                      "options": "p95 total"
+                      "id": "byFrameRefID",
+                      "options": "B"
+                    },
+                    "properties": [
+                      {
+                        "id": "custom.lineWidth",
+                        "value": 3
+                      },
+                      {
+                        "id": "custom.fillOpacity",
+                        "value": 10
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p50 [^·]*"
+                    },
+                    "properties": [
+                      {
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "blue"
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p95 [^·]*"
                     },
                     "properties": [
                       {
@@ -4580,14 +4611,21 @@
                           "mode": "fixed",
                           "fixedColor": "text"
                         }
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "matcher": {
+                      "id": "byRegexp",
+                      "options": "p99 [^·]*"
+                    },
+                    "properties": [
                       {
-                        "id": "custom.lineWidth",
-                        "value": 3
-                      },
-                      {
-                        "id": "custom.fillOpacity",
-                        "value": 10
+                        "id": "color",
+                        "value": {
+                          "mode": "fixed",
+                          "fixedColor": "purple"
+                        }
                       }
                     ]
                   }
@@ -5091,7 +5129,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-latency-total-and-by-worker"
+                                    "name": "latency-total-and-by-worker"
                                   }
                                 }
                               },
@@ -5149,7 +5187,48 @@
                               }
                             ]
                           }
-                        }
+                        },
+                        "variables": [
+                          {
+                            "kind": "CustomVariable",
+                            "spec": {
+                              "name": "worker_quantiles",
+                              "query": "P50 : 0.5,P95 : 0.95,P99 : 0.99",
+                              "current": {
+                                "text": [
+                                  "P95"
+                                ],
+                                "value": [
+                                  "0.95"
+                                ]
+                              },
+                              "options": [
+                                {
+                                  "selected": false,
+                                  "text": "P50",
+                                  "value": "0.5"
+                                },
+                                {
+                                  "selected": true,
+                                  "text": "P95",
+                                  "value": "0.95"
+                                },
+                                {
+                                  "selected": false,
+                                  "text": "P99",
+                                  "value": "0.99"
+                                }
+                              ],
+                              "multi": true,
+                              "includeAll": false,
+                              "label": "Percentiles",
+                              "hide": "dontHide",
+                              "skipUrlSync": false,
+                              "description": "The percentiles the panel below draws.",
+                              "allowCustomValue": false
+                            }
+                          }
+                        ]
                       }
                     },
                     {
