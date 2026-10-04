@@ -1252,11 +1252,11 @@
           }
         }
       },
-      "rps-by-route": {
+      "rps-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — by route",
+          "title": "RPS — total · by route",
           "description": "Requests per second per route; the white line is the total, the grey dashed one the total at the same time yesterday.",
           "links": [],
           "data": {
@@ -3222,11 +3222,11 @@
           }
         }
       },
-      "p95-by-worker": {
+      "p95-latency-all-workers-and-by-worker": {
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 latency — by worker",
+          "title": "P95 latency — all workers · by worker",
           "description": "95th percentile of request duration per worker: one worker slower than the rest is hidden in the total.",
           "links": [],
           "data": {
@@ -4602,11 +4602,11 @@
           }
         }
       },
-      "errors-by-route-and-code": {
+      "rps-4xx-5xx-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS — errors by route and code",
+          "title": "RPS 4xx · 5xx — total · by route",
           "description": "4xx and 5xx of every route, a thin line per code — 4xx dashed orange, 5xx red; the thick lines are their totals. Click a series for its traces.",
           "links": [],
           "data": {
@@ -5006,7 +5006,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "rps-by-route"
+                                    "name": "rps-total-and-by-route"
                                   }
                                 }
                               }
@@ -5018,7 +5018,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Status codes",
+                        "title": "Error responses",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5033,7 +5033,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "errors-by-route-and-code"
+                                    "name": "rps-4xx-5xx-total-and-by-route"
                                   }
                                 }
                               }
@@ -5299,7 +5299,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-by-worker"
+                                    "name": "p95-latency-all-workers-and-by-worker"
                                   }
                                 }
                               },

@@ -1252,11 +1252,11 @@
           }
         }
       },
-      "rps-by-route": {
+      "rps-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — по маршрутам",
+          "title": "RPS — всего · по маршрутам",
           "description": "Запросов в секунду на каждый маршрут; белая линия — всего, серый пунктир — всего в то же время вчера.",
           "links": [],
           "data": {
@@ -3222,11 +3222,11 @@
           }
         }
       },
-      "p95-by-worker": {
+      "p95-latency-all-workers-and-by-worker": {
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "Задержка P95 — по воркерам",
+          "title": "Задержка P95 — все воркеры · по воркерам",
           "description": "95-й перцентиль длительности запроса на каждом воркере: один воркер медленнее остальных не виден в общей цифре.",
           "links": [],
           "data": {
@@ -4602,11 +4602,11 @@
           }
         }
       },
-      "errors-by-route-and-code": {
+      "rps-4xx-5xx-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS — ошибки по маршрутам и кодам",
+          "title": "RPS 4xx · 5xx — всего · по маршрутам",
           "description": "4xx и 5xx каждого маршрута, тонкая линия на код — 4xx оранжевым пунктиром, 5xx красным; толстые линии — их итоги. Нажмите на серию, чтобы открыть её трейсы.",
           "links": [],
           "data": {
@@ -5006,7 +5006,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "rps-by-route"
+                                    "name": "rps-total-and-by-route"
                                   }
                                 }
                               }
@@ -5018,7 +5018,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "Коды ответа",
+                        "title": "Ответы с ошибкой",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5033,7 +5033,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "errors-by-route-and-code"
+                                    "name": "rps-4xx-5xx-total-and-by-route"
                                   }
                                 }
                               }
@@ -5299,7 +5299,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-by-worker"
+                                    "name": "p95-latency-all-workers-and-by-worker"
                                   }
                                 }
                               },

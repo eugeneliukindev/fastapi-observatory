@@ -1252,11 +1252,11 @@
           }
         }
       },
-      "rps-by-route": {
+      "rps-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 7,
-          "title": "RPS — 按路由",
+          "title": "RPS — 总计 · 按路由",
           "description": "每条路由的每秒请求数；白线是总计，灰色虚线是昨天同一时间的总计。",
           "links": [],
           "data": {
@@ -3222,11 +3222,11 @@
           }
         }
       },
-      "p95-by-worker": {
+      "p95-latency-all-workers-and-by-worker": {
         "kind": "Panel",
         "spec": {
           "id": 71,
-          "title": "P95 延迟 — 按工作进程",
+          "title": "P95 延迟 — 全部工作进程 · 按工作进程",
           "description": "每个工作进程请求耗时的第 95 百分位：某个工作进程比其他的慢，在总体数值里是看不出来的。",
           "links": [],
           "data": {
@@ -4602,11 +4602,11 @@
           }
         }
       },
-      "errors-by-route-and-code": {
+      "rps-4xx-5xx-total-and-by-route": {
         "kind": "Panel",
         "spec": {
           "id": 8,
-          "title": "RPS — 按路由和状态码的错误",
+          "title": "RPS 4xx · 5xx — 总计 · 按路由",
           "description": "每条路由的 4xx 和 5xx，每个状态码一条细线——4xx 为橙色虚线，5xx 为红色；粗线是它们的总计。点击序列查看其追踪。",
           "links": [],
           "data": {
@@ -5006,7 +5006,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "rps-by-route"
+                                    "name": "rps-total-and-by-route"
                                   }
                                 }
                               }
@@ -5018,7 +5018,7 @@
                     {
                       "kind": "RowsLayoutRow",
                       "spec": {
-                        "title": "状态码",
+                        "title": "错误响应",
                         "collapse": false,
                         "layout": {
                           "kind": "GridLayout",
@@ -5033,7 +5033,7 @@
                                   "height": 10,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "errors-by-route-and-code"
+                                    "name": "rps-4xx-5xx-total-and-by-route"
                                   }
                                 }
                               }
@@ -5299,7 +5299,7 @@
                                   "height": 8,
                                   "element": {
                                     "kind": "ElementReference",
-                                    "name": "p95-by-worker"
+                                    "name": "p95-latency-all-workers-and-by-worker"
                                   }
                                 }
                               },
